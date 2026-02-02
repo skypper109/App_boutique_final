@@ -1,0 +1,145 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { DataService } from '../../services/data.service';
+import { Env } from '../../services/env';
+import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
+import { ToastrService } from 'ngx-toastr';
+import { CfaPipe } from '../../pipes/cfa.pipe';
+
+@Component({
+    selector: 'app-boutique-list',
+    standalone: true,
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, NgxSpinnerModule, RouterLink, CfaPipe],
+    templateUrl: './boutique-list.component.html',
+    styleUrl: './boutique-list.component.scss'
+})
+export class BoutiqueListComponent implements OnInit {
+
+    boutiques: any[] = [];
+    boutiqueForm: FormGroup;
+    isEdit = false;
+    currentId: any;
+    showModal = false;
+    activeBoutiqueId: string | null = null;
+    globalReports: any[] = [];
+
+    constructor(
+        private data: DataService,
+        private fb: FormBuilder,
+        private spinner: NgxSpinnerService,
+        private toast: ToastrService,
+        private router: Router
+    ) {
+        this.boutiqueForm = this.fb.group({
+            nom: ['', Validators.required],
+            adresse: [''],
+            telephone: [''],
+            email: ['', Validators.email]
+        });
+    }
+
+    ngOnInit(): void {
+        this.fetchBoutiques();
+        this.fetchGlobalReports();
+        this.activeBoutiqueId = localStorage.getItem('boutique_id');
+    }
+
+    fetchGlobalReports() {
+        this.data.getAll(Env.API_URL + '/boutiques-reports').subscribe({
+            next: (res: any) => {
+                this.globalReports = res;
+            },
+            error: (err) => console.error(err)
+        });
+    }
+
+    get totalRevenue(): number {
+        return this.globalReports.reduce((acc, rep) => acc + (rep.revenue || 0), 0);
+    }
+
+    get totalPersonnel(): number {
+        return this.globalReports.reduce((acc, rep) => acc + (rep.users_count || 0), 0);
+    }
+
+    fetchBoutiques() {
+        this.spinner.show();
+        this.data.getAll(Env.BOUTIQUES).subscribe(
+            (res: any) => {
+                this.boutiques = res;
+                this.spinner.hide();
+            },
+            (error) => {
+                console.error(error);
+                this.spinner.hide();
+                this.toast.error("Impossible de charger les boutiques", "Erreur");
+            }
+        );
+    }
+
+    openAddModal() {
+        this.isEdit = false;
+        this.currentId = null;
+        this.boutiqueForm.reset();
+        this.showModal = true;
+    }
+
+    openEditModal(boutique: any) {
+        this.isEdit = true;
+        this.currentId = boutique.id;
+        this.boutiqueForm.patchValue(boutique);
+        this.showModal = true;
+    }
+
+    closeModal() {
+        this.showModal = false;
+    }
+
+    onSubmit() {
+        if (this.boutiqueForm.invalid) return;
+
+        this.spinner.show();
+        const action = this.isEdit
+            ? this.data.updateCat(Env.BOUTIQUES, this.currentId, this.boutiqueForm.value)
+            : this.data.add(Env.BOUTIQUES, this.boutiqueForm.value);
+
+        action.subscribe(
+            () => {
+                this.toast.success(this.isEdit ? "Boutique mise à jour" : "Boutique ajoutée avec succès", "Succès");
+                this.fetchBoutiques();
+                this.closeModal();
+            },
+            (error) => {
+                this.toast.error("Erreur lors de l'enregistrement", "Erreur");
+                this.spinner.hide();
+            }
+        );
+    }
+
+    onDelete(id: any) {
+        if (confirm("Voulez-vous vraiment supprimer cette boutique ?")) {
+            this.spinner.show();
+            this.data.delete(Env.BOUTIQUES, id).subscribe(
+                () => {
+                    this.toast.success("Boutique supprimée", "Succès");
+                    this.fetchBoutiques();
+                },
+                (error) => {
+                    this.toast.error("Erreur lors de la suppression", "Erreur");
+                    this.spinner.hide();
+                }
+            );
+        }
+    }
+
+    onSwitch(boutique: any) {
+        localStorage.setItem('boutique_id', boutique.id);
+        localStorage.setItem('boutique_nom', boutique.nom);
+        this.toast.success(`Direction : ${boutique.nom}`, "Accès Boutique");
+        this.router.navigate(['/accueil']).then(() => {
+            window.location.reload(); // Reload to ensure all components refetch with new ID
+        });
+    }
+
+}

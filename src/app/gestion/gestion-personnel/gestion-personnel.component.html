@@ -1,0 +1,114 @@
+
+<ngx-spinner bdColor="rgba(0,0,0,0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true">
+  <p class="text-white mt-4 font-medium italic text-sm">Gestion des comptes utilisateurs...</p>
+</ngx-spinner>
+
+<div class="space-y-8 animate-fade-in mb-12">
+  
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div>
+      <h1 class="text-2xl font-black text-secondary-900 tracking-tight">Gestion du Personnel</h1>
+      <nav class="flex mt-1 text-sm text-secondary-500 font-medium font-outfit">
+        <a [routerLink]="['/accueil']" class="hover:text-primary-600 transition-colors">Accueil</a>
+        <span class="mx-2 text-secondary-300">/</span>
+        <span class="text-secondary-900 font-bold tracking-tight">Administration</span>
+        <span class="mx-2 text-secondary-300">/</span>
+        <span class="text-secondary-400 font-bold uppercase tracking-widest text-[10px]">Utilisateurs</span>
+      </nav>
+    </div>
+    
+    <div *ngIf="isAdmin" class="flex items-center gap-3">
+      <a [routerLink]="['/users/new']" 
+         class="px-5 py-3 bg-secondary-900 border border-secondary-800 text-white hover:bg-black rounded-2xl shadow-elegant-dark font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 group flex items-center">
+        <i class="bi bi-person-plus mr-2.5 text-primary-400 group-hover:scale-110 transition-transform"></i>
+        Nouveau Personnel
+      </a>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="bg-white rounded-[2.5rem] shadow-elegant border border-secondary-100 overflow-hidden">
+    <div class="px-8 py-6 border-b border-secondary-50 bg-white flex items-center justify-between">
+      <div>
+        <h3 class="text-lg font-bold text-secondary-900 tracking-tight">Comptes Enregistrés</h3>
+        <p class="text-xs text-secondary-500 mt-1 font-medium">Liste des utilisateurs ayant accès à la plateforme</p>
+      </div>
+      <span class="px-3 py-1 bg-secondary-100 text-secondary-600 rounded-lg text-[10px] font-black uppercase tracking-widest">{{ users.length }} Total</span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left whitespace-nowrap">
+        <thead>
+          <tr class="bg-secondary-50/50">
+            <th class="px-8 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-widest">Utilisateur</th>
+            <th class="px-4 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-widest text-center">Rôle</th>
+            <th class="px-4 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-widest text-center">Statut</th>
+            <th class="px-8 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-widest text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-secondary-50">
+          <tr *ngFor="let u of users" class="hover:bg-primary-50/10 transition-colors group">
+            @if ((isAdmin) || (isGestionnaire && u.role == "vendeur")) {
+              <td class="px-8 py-6">
+                <div class="flex items-center space-x-4">
+                  <div class="w-10 h-10 rounded-xl bg-secondary-50 border border-secondary-100 flex items-center justify-center text-secondary-400 group-hover:bg-white group-hover:text-primary-600 transition-all shadow-sm">
+                      <i class="bi bi-person text-xl"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm font-black text-secondary-900">{{ u.name }}</p>
+                    <p class="text-[10px] text-secondary-400 font-bold lowercase tracking-tight">{{ u.email }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-6 text-center">
+                <span class="px-2.5 py-1 border rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm" [ngClass]="getRoleBadgeClass(u.role)">
+                  {{ u.role }}
+                </span>
+              </td>
+              <td class="px-4 py-6 text-center">
+                <button (click)="onToggleStatus(u.id)" 
+                        class="inline-flex items-center space-x-1.5 text-[10px] font-black uppercase transition-all px-3 py-1 rounded-full border group-hover:scale-105"
+                        [ngClass]="u.is_active ? 'text-green-600 bg-green-50 border-green-100' : 'text-red-500 bg-red-50 border-red-100'">
+                  <span class="w-1.5 h-1.5 rounded-full" [ngClass]="u.is_active ? 'bg-green-500 animate-pulse' : 'bg-red-400'"></span>
+                  <span>{{ u.is_active ? 'Actif' : 'Désactivé' }}</span>
+                </button>
+              </td>
+              <td class="px-8 py-6 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <!-- Toggle Status / Block -->
+                  <button (click)="onToggleStatus(u.id)" 
+                    [ngClass]="u.is_active ? 'bg-orange-50 text-orange-600 border-orange-100 hover:bg-orange-600 hover:text-white' : 'bg-green-50 text-green-600 border-green-100 hover:bg-green-600 hover:text-white'"
+                    class="inline-flex items-center px-3 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all shadow-sm">
+                    <i class="bi mr-1.5" [ngClass]="u.is_active ? 'bi-lock' : 'bi-unlock'"></i>
+                    {{ u.is_active ? 'Bloquer' : 'Activer' }}
+                  </button>
+
+                  <a [routerLink]="['/users/new', u.id]" 
+                    class="inline-flex items-center justify-center w-9 h-9 text-primary-600 bg-primary-50 hover:bg-primary-600 hover:text-white rounded-xl transition-all shadow-sm border border-primary-100/50" title="Modifier">
+                    <i class="bi bi-pencil-square"></i>
+                  </a>
+                  
+                  <button (click)="onDelete(u.id)"
+                    class="inline-flex items-center justify-center w-9 h-9 text-red-600 bg-red-50 hover:bg-red-600 hover:text-white rounded-xl transition-all shadow-sm border border-red-100/50" title="Supprimer">
+                    <i class="bi bi-trash3"></i>
+                  </button>
+                </div>
+              </td>
+            }
+          </tr>
+        </tbody>
+      </table>
+      
+      <!-- Empty State -->
+      <div *ngIf="!users.length" class="py-24 text-center">
+        <div class="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4 text-secondary-300">
+          <i class="bi bi-people text-3xl"></i>
+        </div>
+        <p class="text-secondary-400 font-bold italic">Aucun utilisateur enregistré pour le moment.</p>
+        <button (click)="fetchUsers()" class="mt-4 text-primary-600 font-black text-xs uppercase tracking-widest hover:underline">Rafraîchir la liste</button>
+      </div>
+    </div>
+  </div>
+
+</div>

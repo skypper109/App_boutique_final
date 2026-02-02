@@ -1,0 +1,140 @@
+
+<ngx-spinner bdColor="rgba(0,0,0,0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true">
+  <p class="text-white mt-4 font-medium italic text-sm">Traitement des informations du compte...</p>
+</ngx-spinner>
+
+<div class="max-w-4xl mx-auto space-y-8 animate-fade-in mb-12">
+  
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div>
+      <h1 class="text-2xl font-black text-secondary-900 tracking-tight">{{ isEdit ? 'Modifier le Compte' : 'Nouveau Personnel' }}</h1>
+      <nav class="flex mt-1 text-sm text-secondary-500 font-medium font-outfit">
+        <a [routerLink]="['/accueil']" class="hover:text-primary-600 transition-colors">Accueil</a>
+        <span class="mx-2 text-secondary-300">/</span>
+        <a [routerLink]="['/users/list']" class="hover:text-primary-600 transition-colors">Personnel</a>
+        <span class="mx-2 text-secondary-300">/</span>
+        <span class="text-secondary-400 font-bold uppercase tracking-widest text-[10px]">{{ isEdit ? 'Edition' : 'Création' }}</span>
+      </nav>
+    </div>
+    
+    <div class="flex items-center gap-3">
+      <a [routerLink]="['/users/list']" 
+         class="px-5 py-3 bg-white border border-secondary-200 text-secondary-600 hover:bg-secondary-50 rounded-2xl shadow-sm font-black text-xs uppercase tracking-widest transition-all transform active:scale-95 flex items-center">
+        <i class="bi bi-arrow-left mr-2.5"></i>
+        Retour à la liste
+      </a>
+    </div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="bg-white rounded-[2.5rem] p-10 shadow-elegant border border-secondary-100 flex flex-col md:flex-row gap-12">
+    
+    <!-- Left Side: Illustration info -->
+    <div class="w-full md:w-1/3 space-y-8">
+      <div class="w-24 h-24 rounded-[2rem] bg-primary-50 flex items-center justify-center text-primary-600 shadow-elegant-sm border border-primary-100">
+        <i class="bi" [ngClass]="isEdit ? 'bi-person-gear' : 'bi-person-plus-fill'" class="text-4xl"></i>
+      </div>
+      <div>
+        <h4 class="text-lg font-black text-secondary-900 mb-2">Informations de Sécurité</h4>
+        <p class="text-xs text-secondary-500 leading-relaxed italic">
+          {{ isEdit ? 'Modifiez les informations d\'accès ou changez le rôle de l\'utilisateur. Laissez le mot de passe vide si vous ne souhaitez pas le changer.' : 'Créez un nouveau compte pour votre personnel. Assurez-vous d\'attribuer le bon rôle pour restreindre l\'accès aux modules sensibles.' }}
+        </p>
+      </div>
+      
+      <div class="p-6 bg-secondary-900 rounded-3xl text-white shadow-elegant-dark">
+         <p class="text-[11px] font-bold uppercase tracking-widest text-primary-400 mb-3">Roles disponibles</p>
+         <ul class="space-y-2">
+           <li class="flex items-center text-[10px] text-secondary-400"><i class="bi bi-check2-circle mr-2 text-primary-500"></i> Admin: Accès Total</li>
+           <li class="flex items-center text-[10px] text-secondary-400"><i class="bi bi-check2-circle mr-2 text-primary-500"></i> Vendeur: POS & Catalogue</li>
+           <li class="flex items-center text-[10px] text-secondary-400"><i class="bi bi-check2-circle mr-2 text-primary-500"></i> Comptable: Finance & Stock</li>
+         </ul>
+      </div>
+    </div>
+
+    <!-- Right Side: The Form -->
+    <div class="flex-1">
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        
+        <div class="grid grid-cols-1 gap-6">
+          <div class="space-y-2">
+            <label class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] ml-1">Nom Complet</label>
+            <div class="relative group">
+              <input type="text" formControlName="name" placeholder="Votre nom et prenom "
+                class="w-full pl-12 pr-4 py-4 bg-secondary-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:bg-white transition-all text-sm font-bold text-secondary-700">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-secondary-400 group-focus-within:text-primary-500 transition-colors">
+                <i class="bi bi-person"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] ml-1">Adresse Email</label>
+            <div class="relative group">
+              <input type="email" formControlName="email" placeholder="exemple@gmail.com"
+                class="w-full pl-12 pr-4 py-4 bg-secondary-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:bg-white transition-all text-sm font-bold text-secondary-700">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-secondary-400 group-focus-within:text-primary-500 transition-colors">
+                <i class="bi bi-envelope"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] ml-1">Rôle de l'utilisateur</label>
+            <div class="relative group">
+              <select formControlName="role"
+                class="w-full pl-12 pr-4 py-4 bg-secondary-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:bg-white transition-all text-sm font-bold text-secondary-700 appearance-none">
+                <option *ngFor="let r of roles" [value]="r.value">{{ r.label }}</option>
+              </select>
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-secondary-400 group-focus-within:text-primary-500 transition-colors">
+                <i class="bi bi-shield-lock"></i>
+              </div>
+              <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-secondary-400">
+                <i class="bi bi-chevron-down text-xs"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] ml-1">Boutique d'affectation</label>
+            <div class="relative group">
+              <select formControlName="boutique_id"
+                class="w-full pl-12 pr-4 py-4 bg-secondary-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:bg-white transition-all text-sm font-bold text-secondary-700 appearance-none">
+                <option value="" disabled selected>Choisir une boutique</option>
+                <option *ngFor="let b of boutiques" [value]="b.id">{{ b.nom }}</option>
+              </select>
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-secondary-400 group-focus-within:text-primary-500 transition-colors">
+                <i class="bi bi-shop"></i>
+              </div>
+              <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-secondary-400">
+                <i class="bi bi-chevron-down text-xs"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] ml-1">Mot de passe {{ isEdit ? '(Optionnel)' : '' }}</label>
+            <div class="relative group">
+              <input type="password" formControlName="password" placeholder="••••••••"
+                class="w-full pl-12 pr-4 py-4 bg-secondary-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:bg-white transition-all text-sm font-bold text-secondary-700">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-secondary-400 group-focus-within:text-primary-500 transition-colors">
+                <i class="bi bi-key"></i>
+              </div>
+            </div>
+            <p *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched" class="text-[10px] text-red-500 font-bold ml-1 italic mt-1">Le mot de passe doit contenir au moins 6 caractères.</p>
+          </div>
+        </div>
+
+        <div class="pt-6 border-t border-secondary-50">
+          <button type="submit" [disabled]="userForm.invalid"
+                 class="w-full py-5 bg-secondary-900 border border-secondary-800 hover:bg-black disabled:bg-secondary-100 disabled:text-secondary-400 text-white rounded-[2rem] text-xs font-black uppercase tracking-[0.2em] shadow-elegant-dark transition-all transform active:scale-95 flex items-center justify-center group h-16">
+            <i class="bi bi-check2-circle mr-3 text-lg text-primary-400 group-hover:scale-110 transition-transform"></i>
+            {{ isEdit ? 'Sauvegarder les modifications' : 'Créer le compte utilisateur' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
