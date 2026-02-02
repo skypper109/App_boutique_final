@@ -1,0 +1,266 @@
+
+<ngx-spinner bdColor="rgba(15, 23, 42, 0.9)" size="medium" color="#38bdf8" type="square-loader" [fullScreen]="true">
+  <p class="text-white mt-4 font-black tracking-widest uppercase text-[10px]">Extraction des registres...</p>
+</ngx-spinner>
+
+<div class="max-w-[1600px] mx-auto space-y-10 animate-fade-in pb-20 px-4">
+  
+  <!-- Page Header Expert -->
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mt-4">
+    <div class="space-y-2">
+      <div class="inline-flex items-center px-3 py-1 bg-primary-50 rounded-full border border-primary-100 mb-2">
+        <span class="w-1.5 h-1.5 bg-primary-500 rounded-full animate-pulse mr-2"></span>
+        <span class="text-[10px] font-black text-primary-700 uppercase tracking-widest">Archive Transactionnelle</span>
+      </div>
+      <h1 class="text-4xl font-black text-secondary-900 tracking-tight leading-none">Journal des Ventes</h1>
+      <p class="text-secondary-500 font-medium max-w-xl">Consultation historique et audit des transactions financières.</p>
+    </div>
+    
+    <div class="flex flex-wrap items-center gap-4">
+      <a [routerLink]="['../new']" 
+         class="h-14 px-8 bg-secondary-900 text-white rounded-2xl shadow-2xl font-black text-[10px] uppercase tracking-widest transition-all transform hover:-translate-y-1 hover:bg-black flex items-center group">
+        <i class="bi bi-cart-plus mr-3 text-lg text-primary-400 group-hover:scale-110 transition-transform"></i>
+        Nouvelle Transaction
+      </a>
+    </div>
+  </div>
+
+  <!-- Advanced Filtering Hub -->
+  <div class="bg-white rounded-[2.5rem] p-8 shadow-elegant border border-secondary-100 space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
+      <!-- Search -->
+      <div class="lg:col-span-4 relative group">
+        <label class="block text-[9px] font-black text-secondary-400 uppercase tracking-[0.2em] mb-2 px-1">Recherche Globale</label>
+        <div class="relative">
+          <input type="text" [(ngModel)]="searchTerm" (input)="applyAdvancedFilters()"
+            placeholder="ID, Client, Vendeur ou Produit..."
+            class="w-full pl-11 pr-4 py-3.5 bg-secondary-50 border-none rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:bg-white transition-all text-sm font-bold text-secondary-700">
+          <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-secondary-400"></i>
+        </div>
+      </div>
+
+      <!-- Date Range -->
+      <div class="lg:col-span-5">
+        <label class="block text-[9px] font-black text-secondary-400 uppercase tracking-[0.2em] mb-2 px-1">Période d'Audit</label>
+        <div class="flex items-center gap-3">
+          <div class="relative flex-1">
+            <input type="date" [(ngModel)]="startDate" (change)="applyAdvancedFilters()"
+              class="w-full px-4 py-3.5 bg-secondary-50 border-none rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:bg-white transition-all text-sm font-bold text-secondary-700">
+          </div>
+          <span class="text-secondary-300 font-black">→</span>
+          <div class="relative flex-1">
+            <input type="date" [(ngModel)]="endDate" (change)="applyAdvancedFilters()"
+              class="w-full px-4 py-3.5 bg-secondary-50 border-none rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:bg-white transition-all text-sm font-bold text-secondary-700">
+          </div>
+        </div>
+      </div>
+
+      <!-- Legacy Date Nav -->
+      <div class="lg:col-span-3 flex items-center gap-2 bg-secondary-50 p-1.5 rounded-2xl border border-secondary-100 shadow-inner">
+        <select [(ngModel)]="annee" (change)="getVentesByYear($any($event.target).value)"
+          class="flex-1 bg-transparent border-none text-[10px] font-black text-secondary-600 appearance-none cursor-pointer text-center">
+          <option *ngFor="let y of years" [value]="y.annee">{{ y.annee }}</option>
+        </select>
+        <div class="w-px h-6 bg-secondary-200"></div>
+        <button (click)="loadInitialData()" class="px-3 py-2 text-secondary-400 hover:text-primary-500 transition-colors">
+          <i class="bi bi-arrow-clockwise text-lg"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transaction Surface -->
+  <div class="bg-white rounded-[3rem] shadow-elegant border border-secondary-100 overflow-hidden relative">
+    <div class="overflow-x-auto ledger-surface relative z-10">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-secondary-50/30">
+            <th class="pl-10 pr-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50">Référence / Date</th>
+            <th class="px-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50">Articles Vendus</th>
+            <th class="px-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50 text-right">Montant Global</th>
+            <th class="px-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50 text-center">Status</th>
+            <th class="pr-10 pl-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-secondary-50">
+          <!-- We now use the advanced filtered list -->
+          <tr *ngFor="let v of filteredVentes" class="group hover:bg-primary-50/20 transition-all duration-300">
+            <!-- ID & Date -->
+            <td class="pl-10 pr-4 py-8">
+              <div class="flex items-center gap-5">
+                <div class="w-1.5 h-12 bg-primary-500 rounded-full"></div>
+                <div class="flex flex-col">
+                  <span class="text-sm font-black text-secondary-900 leading-none mb-1">
+                    #{{ v.id | number:'4.0' }} • {{ v.date_vente | date:'dd MMM yyyy' }}
+                  </span>
+                  <span class="text-[9px] font-bold text-secondary-400 uppercase tracking-widest italic">{{ v.user.name }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Articles -->
+            <td class="px-4 py-8 text-center">
+              <span class="px-4 py-2 bg-secondary-900 text-white rounded-xl text-[10px] font-black">
+                {{ (v.detail_ventes?.length || 0) }} ARTICLES
+              </span>
+            </td>
+
+            <!-- Amount -->
+            <td class="px-4 py-8 text-right">
+              <span class="text-lg font-black text-secondary-900 tracking-tightest">
+                {{ v.montant_total | number:'1.0' }} <small class="text-[10px] text-secondary-400 uppercase">F</small>
+              </span>
+            </td>
+
+            <!-- Status -->
+            <td class="px-4 py-8 text-center uppercase">
+              <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-green-50 text-green-700 rounded-full">
+                <span class="w-1 h-1 rounded-full bg-green-500 animate-pulse"></span>
+                <span class="text-[9px] font-black tracking-widest">{{ v.statut || 'VALIDÉ' }}</span>
+              </div>
+            </td>
+
+            <!-- Actions -->
+            <td class="pr-10 pl-4 py-8">
+              <div class="flex items-center justify-center gap-2">
+                <button (click)="retourVente(v.id)" class="w-10 h-10 flex items-center justify-center bg-white border border-secondary-100 rounded-xl text-orange-500 hover:bg-orange-500 hover:text-white transition-all shadow-sm">
+                  <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+                <button (click)="deleteVente(v.id)" class="w-10 h-10 flex items-center justify-center bg-white border border-secondary-100 rounded-xl text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <!-- Empty Ledger State -->
+      <div *ngIf="!ventes.length" class="py-48 text-center relative overflow-hidden">
+        <div class="relative z-10">
+          <div class="w-24 h-24 bg-secondary-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 text-secondary-200 border border-secondary-100 rotate-6 shadow-inner">
+            <i class="bi bi-clock-history text-5xl"></i>
+          </div>
+          <h3 class="text-2xl font-black text-secondary-900 tracking-tight">Aucun enregistrement historique</h3>
+          <p class="text-secondary-400 font-bold italic mt-2">Commencez à traiter des transactions pour alimenter le registre.</p>
+          <button [routerLink]="['../new']" class="mt-8 px-8 py-4 bg-secondary-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all">
+            Lancer une Vente
+          </button>
+        </div>
+        <!-- Background Icon Decor -->
+        <i class="bi bi-receipt absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[15rem] text-secondary-50/50 -z-0"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Advanced Return Modal (Audit Version) -->
+  <div *ngIf="isModalVisible" class="fixed inset-0 z-[100] flex items-center justify-center p-4 lg:p-12 overflow-hidden">
+    <!-- Premium Backdrop -->
+    <div (click)="closeModal()" class="absolute inset-0 bg-secondary-950/80 backdrop-blur-xl animate-fade-in transition-all"></div>
+    
+    <!-- Modal Architecture -->
+    <div class="relative bg-white rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.25)] w-full max-w-5xl overflow-hidden animate-scale-in flex flex-col max-h-[90vh]">
+       <!-- Modal Header Design -->
+       <div class="px-12 py-12 border-b border-secondary-50 flex items-center justify-between bg-gradient-to-br from-white to-secondary-50/30 relative">
+         <div class="flex items-center gap-6">
+           <div class="w-20 h-20 bg-orange-50 rounded-[2.5rem] flex items-center justify-center text-orange-600 shadow-inner">
+             <i class="bi bi-arrow-return-left text-4xl"></i>
+           </div>
+           <div>
+             <h3 class="text-3xl font-black text-secondary-900 tracking-tight">Correction Transactionnelle</h3>
+             <p class="text-xs text-secondary-500 font-bold uppercase tracking-widest mt-1.5 italic">Réintégration des articles et ajustements de stock</p>
+           </div>
+         </div>
+         <button (click)="closeModal()" class="w-14 h-14 rounded-3xl bg-secondary-100 flex items-center justify-center text-secondary-500 hover:bg-secondary-900 hover:text-white transition-all transform active:scale-90">
+            <i class="bi bi-x-lg text-xl"></i>
+         </button>
+         <!-- Ledger Label Decoration -->
+         <div class="absolute top-10 right-32 opacity-10 pointer-events-none select-none">
+           <span class="text-[5rem] font-black text-secondary-900 tracking-tighter">RETOUR</span>
+         </div>
+       </div>
+
+       <!-- Modal Audit Body -->
+       <div class="flex-1 overflow-y-auto px-12 py-10 custom-scrollbar space-y-6">
+         <div class="grid grid-cols-1 gap-4">
+           <div *ngFor="let item of produitsVente" class="bg-secondary-50/30 rounded-[2rem] p-8 border border-secondary-100 flex flex-col md:flex-row items-center justify-between group hover:border-orange-500/30 hover:bg-white transition-all duration-500 shadow-sm hover:shadow-xl">
+             <div class="flex items-center gap-8 w-full md:w-auto mb-6 md:mb-0">
+               <div class="w-16 h-16 rounded-3xl bg-white border border-secondary-100 flex items-center justify-center text-secondary-900 font-black shrink-0 shadow-sm overflow-hidden group-hover:scale-110 transition-transform">
+                 <img *ngIf="item.produit?.image" [src]="item.produit?.image" class="w-full h-full object-cover">
+                 <span *ngIf="!item.produit?.image" class="text-xl italic">{{ (item.produit?.nom || 'A').substring(0, 1) | uppercase }}</span>
+               </div>
+               <div class="space-y-1">
+                  <p class="text-lg font-black text-secondary-900 tracking-tight">{{ item.produit?.nom }}</p>
+                  <p class="text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] italic">Val. Originale : {{ item.prix_unitaire | number:'1.0' }} CFA</p>
+               </div>
+             </div>
+
+             <div class="flex items-center gap-10 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-secondary-100 pt-6 md:pt-0">
+               <div class="text-right space-y-2">
+                 <p class="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-1">Réviser Quantité</p>
+                 <div class="flex items-center gap-4 bg-white px-2 py-2 rounded-2xl border border-secondary-200 focus-within:ring-4 focus-within:ring-primary-500/10 focus-within:border-primary-500 transition-all">
+                   <input type="number" [value]="item.quantite" (input)="updateQuantity(item, $event)"
+                          class="w-24 bg-transparent border-none text-center font-black text-secondary-900 text-lg outline-none">
+                   <span class="text-[9px] font-black text-secondary-300 uppercase tracking-widest pr-4 border-l border-secondary-50 pl-4">Lot(s)</span>
+                 </div>
+               </div>
+               <button (click)="onDelete(item.id)" class="w-14 h-14 rounded-3xl bg-white border border-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm hover:scale-105 transform">
+                 <i class="bi bi-trash-fill text-xl"></i>
+               </button>
+             </div>
+           </div>
+         </div>
+       </div>
+
+       <!-- Modal Footer Recap -->
+       <div class="px-12 py-10 bg-secondary-900 text-white relative flex flex-col sm:flex-row items-center justify-between gap-10">
+         <div class="flex items-center gap-8 relative z-10">
+            <div class="space-y-1">
+              <p class="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] italic">Valeur de l'Avoir Ré-émis</p>
+              <div class="flex items-baseline gap-2">
+                <span class="text-4xl font-black tracking-tightest text-primary-400">{{ montantTotal | number:'1.0' }}</span>
+                <span class="text-xs font-black text-white/60 uppercase">FCFA</span>
+              </div>
+            </div>
+            <div class="w-px h-12 bg-white/10 hidden lg:block"></div>
+            <p class="text-[10px] text-white/30 hidden lg:block max-w-[200px] italic">L'envoi de cette correction mettra à jour instantanément les stocks physiques et les balances comptables.</p>
+         </div>
+         
+         <div class="flex items-center gap-4 w-full sm:w-auto relative z-10">
+           <button (click)="closeModal()" class="h-14 px-8 text-xs font-black text-white/60 hover:text-white uppercase tracking-widest transition-all">Interrompre</button>
+           <button (click)="onUpdateProd()" class="h-16 px-12 bg-primary-600 text-white rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.2em] shadow-[0_20px_50px_rgba(2,132,199,0.3)] hover:bg-primary-500 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center min-w-[240px] border border-primary-400/20">
+             <i class="bi bi-shield-check mr-3 text-lg"></i>
+             Valider Rectification
+           </button>
+         </div>
+         
+         <!-- Background Abstract -->
+         <div class="absolute inset-0 bg-gradient-to-r from-primary-500/10 to-transparent pointer-events-none opacity-40"></div>
+       </div>
+  </div>
+
+  <!-- Global Confirmation Modal (High-End Overlays) -->
+  <div *ngIf="isConfirmModalVisible" class="fixed inset-0 z-[150] flex items-center justify-center p-6">
+    <div (click)="closeConfirm()" class="absolute inset-0 bg-secondary-950/60 backdrop-blur-md animate-fade-in"></div>
+    <div class="relative bg-white rounded-[3rem] shadow-2xl w-full max-w-md overflow-hidden animate-scale-in border border-secondary-100">
+      <div class="p-10 text-center space-y-6">
+        <div class="w-20 h-20 bg-red-50 rounded-[2.5rem] flex items-center justify-center text-red-500 mx-auto shadow-inner">
+          <i class="bi bi-exclamation-triangle-fill text-3xl"></i>
+        </div>
+        <div class="space-y-2">
+          <h3 class="text-2xl font-black text-secondary-900 tracking-tight">{{ confirmConfig.title }}</h3>
+          <p class="text-secondary-500 font-medium leading-relaxed">{{ confirmConfig.message }}</p>
+        </div>
+        <div class="flex items-center gap-4 pt-4">
+          <button (click)="closeConfirm()" class="flex-1 h-16 rounded-2xl text-[10px] font-black uppercase tracking-widest text-secondary-400 hover:text-secondary-900 hover:bg-secondary-50 transition-all">
+            Interrompre
+          </button>
+          <button (click)="executeConfirm()" class="flex-1 h-16 bg-red-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-red-500/30 hover:bg-red-700 transition-all transform active:scale-95">
+            Confirmer Action
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

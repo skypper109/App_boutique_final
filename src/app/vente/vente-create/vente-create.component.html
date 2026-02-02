@@ -1,0 +1,293 @@
+
+<ngx-spinner bdColor="rgba(15, 23, 42, 0.9)" size="medium" color="#38bdf8" type="ball-scale-multiple" [fullScreen]="true">
+  <p class="text-white mt-4 font-black tracking-widest uppercase text-[10px]">Traitement flux transactionnel...</p>
+</ngx-spinner>
+
+<div class="max-w-[1700px] mx-auto px-4 lg:px-6 pb-20">
+  
+  <!-- Senior POS Controller -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-8 py-10 animate-fade-in">
+    <div class="space-y-1">
+      <div class="inline-flex items-center px-3 py-1 bg-primary-50 rounded-full border border-primary-100 mb-1">
+        <span class="w-1.5 h-1.5 bg-primary-500 rounded-full animate-pulse mr-2"></span>
+        <span class="text-[9px] font-black text-primary-700 uppercase tracking-widest">Poste de Vente Haute-Performance</span>
+      </div>
+      <h1 class="text-4xl font-black text-secondary-900 tracking-tight leading-none">Saisie Transactionnelle</h1>
+      <p class="text-xs text-secondary-500 font-medium">Sélection tabulaire rapide et gestion dynamique des stocks</p>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <div class="relative w-full md:w-96 group">
+        <input type="text" (input)="applyFilter($event)" 
+          placeholder="Référence, Nom ou Catégorie..."
+          class="w-full pl-12 pr-4 py-4 bg-white border border-secondary-100 rounded-2xl shadow-elegant focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 focus:bg-white transition-all text-sm font-bold text-secondary-700">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-secondary-400">
+          <i class="bi bi-search text-lg"></i>
+        </div>
+      </div>
+
+      <!-- Basket Trigger Badge -->
+      <button (click)="toggleCart()" 
+        class="h-14 px-6 bg-secondary-900 text-white rounded-2xl shadow-2xl flex items-center gap-4 group relative overflow-hidden transition-all hover:bg-black active:scale-95">
+        <div class="absolute inset-0 bg-gradient-to-r from-primary-500/10 to-transparent"></div>
+        <i class="bi bi-cart3 text-xl text-primary-400 group-hover:scale-110 transition-transform"></i>
+        <span class="text-[10px] font-black uppercase tracking-widest relative z-10">Ouvrir Panier</span>
+        <span *ngIf="produitsVente.length" class="flex items-center justify-center min-w-[24px] h-6 bg-primary-500 text-white rounded-lg text-[10px] font-black animate-bounce relative z-10 shadow-lg">
+          {{ produitsVente.length }}
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Professional Selection Table -->
+  <div class="bg-white rounded-[3rem] shadow-elegant border border-secondary-100 overflow-hidden relative min-h-[600px]">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-secondary-50/50">
+            <th class="pl-10 pr-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50">Identité Produit</th>
+            <th class="px-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50">Catégorie</th>
+            <th class="px-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50 text-center">Stock Physique</th>
+            <th class="px-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50 text-right">Tarification Unitaire</th>
+            <th class="pr-10 pl-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50 text-center">Engagement</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-secondary-50">
+          <tr *ngFor="let p of produits" 
+            [ngClass]="{'bg-green-50/50 border-l-4 border-l-green-500': isInCart(p.id)}"
+            class="group hover:bg-primary-50/10 transition-all duration-300">
+            <td class="pl-10 pr-4 py-6">
+              <div class="flex items-center gap-6">
+                <!-- Mini Visual -->
+                <div class="w-14 h-14 bg-secondary-50 rounded-2xl flex items-center justify-center overflow-hidden border border-secondary-100 shadow-sm shrink-0 group-hover:scale-110 transition-transform">
+                  <img *ngIf="p.image" [src]="p.image" class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0">
+                  <i *ngIf="!p.image" class="bi bi-box-seam text-2xl text-secondary-200"></i>
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-sm font-black text-secondary-900 group-hover:text-primary-600 transition-colors leading-none mb-1">{{ p.nom }}</span>
+                  <span class="text-[10px] text-secondary-400 font-medium italic truncate max-w-[200px]">{{ p.description || 'N/A' }}</span>
+                </div>
+              </div>
+            </td>
+            <td class="px-4 py-6">
+              <span class="px-3 py-1 bg-secondary-100 text-secondary-500 text-[9px] font-black rounded-full border border-secondary-200 uppercase tracking-widest">
+                {{ p.categorie.nom }}
+              </span>
+            </td>
+            <td class="px-4 py-6 text-center">
+              <div class="inline-flex flex-col items-center">
+                 <span class="text-sm font-black" [ngClass]="p.stock.quantite > 10 ? 'text-green-600' : (p.stock.quantite > 0 ? 'text-orange-500' : 'text-red-500')">
+                   {{ p.stock.quantite }}
+                 </span>
+                 <span class="text-[8px] font-black text-secondary-400 uppercase tracking-widest">Restant</span>
+              </div>
+            </td>
+            <td class="px-4 py-6 text-right">
+              <span class="text-lg font-black text-secondary-900 tracking-tighter">
+                {{ p.stock.prix_vente | number:'1.0' }} <small class="text-[10px] font-bold text-secondary-400 uppercase">F</small>
+              </span>
+            </td>
+            <td class="pr-10 pl-4 py-6 text-center">
+              <button (click)="onStock(p)" [disabled]="p.stock.quantite <= 0"
+                class="px-5 py-2.5 bg-white border border-secondary-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-secondary-900 shadow-sm hover:bg-primary-500 hover:text-white hover:border-primary-400 hover:shadow-lg hover:shadow-primary-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95">
+                <i class="bi bi-plus-lg mr-2"></i> Sélectionner
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- No Results -->
+      <div *ngIf="!produits.length" class="py-40 text-center opacity-40">
+        <i class="bi bi-search text-6xl text-secondary-200 block mb-4"></i>
+        <p class="text-secondary-400 font-black italic tracking-widest uppercase text-xs">Aucune correspondance transactionnelle</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Advanced Modal Basket (Overlay Architecture) -->
+  <div *ngIf="isCartModalVisible" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <!-- Blurry Backdrop -->
+    <div (click)="toggleCart()" class="absolute inset-0 bg-secondary-950/60 backdrop-blur-2xl animate-fade-in transition-all"></div>
+    
+    <!-- Modal Card (Two-Column Layout) -->
+    <div class="relative w-full max-w-[1200px] bg-secondary-900 h-full md:h-[85vh] md:rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col md:flex-row animate-scale-in border border-white/10">
+      
+      <!-- LEFT COLUMN: Form & Logic (45%) -->
+      <div class="w-full md:w-[45%] flex flex-col bg-black/40 border-r border-white/5 p-8 md:p-12 overflow-y-auto custom-scrollbar-dark">
+        <div class="flex items-center gap-4 mb-10">
+          <div class="w-12 h-12 bg-primary-500/20 rounded-2xl flex items-center justify-center text-primary-400">
+            <i class="bi bi-person-fill-check text-2xl"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-black text-white tracking-tight">Finalisation</h3>
+            <p class="text-[10px] text-secondary-500 font-bold uppercase tracking-widest italic">Informations client & paiement</p>
+          </div>
+        </div>
+
+        <form [formGroup]="factureInformation" class="space-y-6">
+          <!-- Client Name -->
+          <div class="space-y-2">
+            <label class="text-[10px] font-black text-secondary-400 uppercase tracking-widest ml-4">Nom du Client</label>
+            <div class="relative group">
+              <input type="text" formControlName="client_nom" placeholder="Ex: Jean Dupont..."
+                class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all placeholder:text-secondary-700 outline-none">
+              <i class="bi bi-person absolute right-4 top-1/2 -translate-y-1/2 text-secondary-600"></i>
+            </div>
+          </div>
+
+          <!-- Phone & Address -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="text-[10px] font-black text-secondary-400 uppercase tracking-widest ml-4">Téléphone</label>
+              <div class="relative">
+                <input type="text" formControlName="numero" placeholder="77 00 00 00"
+                  class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all placeholder:text-secondary-700 outline-none">
+              </div>
+            </div>
+            <div class="space-y-2">
+              <label class="text-[10px] font-black text-secondary-400 uppercase tracking-widest ml-4">Adresse</label>
+              <div class="relative">
+                <input type="text" formControlName="adresse" placeholder="Bamako, Missira"
+                  class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all placeholder:text-secondary-700 outline-none">
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Type -->
+          <div class="space-y-2">
+            <label class="text-[10px] font-black text-secondary-400 uppercase tracking-widest ml-4">Méthode de Paiement</label>
+            <div class="relative">
+              <select [(ngModel)]="typePaiement" [ngModelOptions]="{standalone: true}"
+                class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-black uppercase text-white outline-none appearance-none cursor-pointer focus:border-primary-500 transition-all">
+                <option value="contant" class="bg-secondary-900 border-none">Cash / Comptant</option>
+                <option value="credit" class="bg-secondary-900 border-none">Vente à Crédit</option>
+              </select>
+              <i class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-primary-500"></i>
+            </div>
+          </div>
+
+          <!-- Conditional Inputs -->
+          <div class="animate-fade-in">
+            <div *ngIf="typePaiement === 'credit'" class="space-y-2">
+              <label class="text-[10px] font-black text-green-500 uppercase tracking-widest ml-4">Acompte / Avance (Optionnel)</label>
+              <input type="number" [(ngModel)]="montantAvance" [ngModelOptions]="{standalone: true}" placeholder="0 FCFA"
+                class="w-full bg-green-500/5 border border-green-500/20 rounded-2xl px-6 py-4 text-lg font-black text-green-400 outline-none focus:border-green-500 transition-all">
+            </div>
+            <div *ngIf="typePaiement === 'contant'" class="space-y-2">
+              <label class="text-[10px] font-black text-primary-500 uppercase tracking-widest ml-4">Réduction / Remise</label>
+              <input type="number" [(ngModel)]="reduction" [ngModelOptions]="{standalone: true}" (input)="calculateTotal()" placeholder="0 FCFA"
+                class="w-full bg-primary-500/5 border border-primary-500/20 rounded-2xl px-6 py-4 text-lg font-black text-primary-400 outline-none focus:border-primary-500 transition-all">
+            </div>
+          </div>
+        </form>
+
+        <!-- Summary & Action -->
+        <div class="mt-auto pt-10 space-y-8">
+          <div class="p-8 bg-white/5 rounded-[2.5rem] border border-white/5 relative overflow-hidden group">
+            <div class="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
+            <span class="relative z-10 block text-[10px] font-black text-secondary-500 uppercase tracking-[0.3em] mb-4">Net à percevoir</span>
+            <div class="relative z-10 flex items-baseline gap-4">
+              <span class="text-6xl font-black text-white tracking-tighter">{{ (reduit ? montantInter : montantTotal) | number:'1.0' }}</span>
+              <span class="text-xs font-black text-primary-500">FCFA</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4">
+            <button (click)="onVente(true)" [disabled]="!produitsVente.length"
+              class="h-20 bg-primary-600 hover:bg-primary-500 text-white rounded-3xl text-sm font-black uppercase tracking-[0.2em] shadow-[0_20px_50px_rgba(2,132,199,0.3)] transition-all transform active:scale-95 flex items-center justify-center gap-4">
+              <i class="bi bi-lightning-charge-fill text-xl"></i> Valider la Transaction
+            </button>
+            <button (click)="onProforma()" [disabled]="!produitsVente.length"
+              class="h-16 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-white/10 flex items-center justify-center gap-3">
+              <i class="bi bi-file-earmark-text text-lg"></i> Générer Devis / Pro-forma
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Products (55%) -->
+      <div class="w-full md:w-[55%] flex flex-col h-full bg-secondary-900/40">
+        <!-- Close button for mobile/tablet better positioning -->
+        <button (click)="toggleCart()" class="absolute top-8 right-8 w-14 h-14 md:w-16 md:h-16 rounded-3xl bg-white/5 flex items-center justify-center text-secondary-500 hover:bg-white/10 hover:text-white transition-all transform active:scale-90 shadow-lg z-50">
+          <i class="bi bi-x-lg text-2xl"></i>
+        </button>
+
+        <!-- Cart Header -->
+        <div class="px-10 py-12">
+          <h2 class="text-4xl font-black text-white tracking-tightest">Panier <span class="text-primary-500">.</span></h2>
+          <p class="text-xs text-secondary-500 font-bold uppercase tracking-[0.3em] mt-2 italic">{{ produitsVente.length }} Articles en attente</p>
+        </div>
+
+        <!-- Scrollable Items List -->
+        <div class="flex-1 overflow-y-auto px-10 pb-10 custom-scrollbar-dark space-y-6">
+          <div *ngFor="let item of produitsVente" class="bg-white/[0.03] border border-white/5 rounded-[2.5rem] p-6 md:p-8 flex items-center gap-8 group hover:bg-white/5 transition-all relative overflow-hidden">
+            <!-- Product Avatar/Image -->
+            <div class="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-secondary-800 flex items-center justify-center shrink-0 border border-white/5 relative overflow-hidden shadow-2xl">
+              <img *ngIf="item.produits.image" [src]="item.produits.image" class="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-500">
+              <i *ngIf="!item.produits.image" class="bi bi-box-seam text-4xl text-secondary-600"></i>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+            </div>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-start mb-4">
+                <div class="space-y-1">
+                  <p class="text-lg font-black text-white leading-tight truncate pr-4">{{ item.produits.nom }}</p>
+                  <p class="text-[10px] text-secondary-500 font-black uppercase tracking-widest italic leading-none">{{ item.prix | number:'1.0' }} <small>FCFA / unité</small></p>
+                </div>
+                <button (click)="onDelete(item.produits)" class="w-10 h-10 flex items-center justify-center text-secondary-600 hover:text-red-400 transition-colors">
+                  <i class="bi bi-trash-fill text-lg"></i>
+                </button>
+              </div>
+              
+              <div class="flex items-center justify-between mt-6">
+                <div class="flex items-center gap-2 bg-black/60 rounded-2xl p-1.5 border border-white/10">
+                  <button (click)="onRemove(item.produits)" class="w-10 h-10 flex items-center justify-center text-secondary-400 hover:text-white hover:bg-white/10 rounded-xl transition-all"><i class="bi bi-dash-lg"></i></button>
+                  <span class="text-sm font-black min-w-[45px] text-center text-white">{{ item.quantite }}</span>
+                  <button (click)="onAdd(item.produits)" class="w-10 h-10 flex items-center justify-center text-secondary-400 hover:text-white hover:bg-white/10 rounded-xl transition-all"><i class="bi bi-plus-lg"></i></button>
+                </div>
+                <div class="text-right">
+                   <p class="text-2xl font-black text-primary-400 tracking-tighter">{{ item.prix * item.quantite | number:'1.0' }} <small class="text-[10px]">F</small></p>
+                   <p class="text-[8px] font-black text-secondary-500 uppercase tracking-widest">Sous-total</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Selection Dot -->
+            <div class="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div class="w-2 h-2 bg-primary-500 rounded-full animate-ping"></div>
+            </div>
+          </div>
+          
+          <!-- Empty Cart State -->
+          <div *ngIf="!produitsVente.length" class="h-64 flex flex-col items-center justify-center opacity-10">
+            <i class="bi bi-cart-x text-8xl text-white mb-6"></i>
+            <p class="text-white font-black italic text-xs tracking-[0.5em] uppercase text-center">Architecturer un panier<br><span class="text-[8px]">votre sélection apparaîtra ici</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Confirm Overlay -->
+  <div *ngIf="isConfirmModalVisible" class="fixed inset-0 z-[150] flex items-center justify-center p-6">
+    <div (click)="closeConfirm()" class="absolute inset-0 bg-secondary-950/60 backdrop-blur-md animate-fade-in"></div>
+    <div class="relative bg-white rounded-[3rem] shadow-2xl w-full max-w-md overflow-hidden animate-scale-in border border-secondary-100 p-10 text-center space-y-6">
+      <div class="w-20 h-20 bg-primary-50 rounded-[2.5rem] flex items-center justify-center text-primary-600 mx-auto shadow-inner">
+        <i class="bi bi-check-circle-fill text-3xl"></i>
+      </div>
+      <div class="space-y-2">
+        <h3 class="text-2xl font-black text-secondary-900 tracking-tight">{{ confirmConfig.title }}</h3>
+        <p class="text-secondary-500 font-medium leading-relaxed">{{ confirmConfig.message }}</p>
+      </div>
+      <div class="flex items-center gap-4 pt-4">
+        <button (click)="closeConfirm()" class="flex-1 h-16 rounded-2xl text-[10px] font-black uppercase tracking-widest text-secondary-400 hover:text-secondary-900 transition-all">
+          Plus Tard
+        </button>
+        <button (click)="executeConfirm()" class="flex-1 h-16 bg-secondary-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl hover:bg-black transition-all transform active:scale-95">
+          Générer Facture
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
