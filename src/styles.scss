@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+  @apply bg-secondary-50 text-secondary-900 font-sans;
+  margin: 0;
+}
+
+a {
+  @apply no-underline cursor-pointer transition-colors duration-200;
+}
+
+/* Custom scrollbar for an elegant look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-secondary-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-secondary-300 rounded-full hover:bg-secondary-400;
+}
+
+/* Print Styles */
+@media print {
+  .d-print-none {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  /* Remove shadows and borders for cleaner print */
+  .shadow-elegant,
+  .shadow-elegant-lg,
+  .shadow-elegant-dark {
+    box-shadow: none !important;
+  }
+
+  /* Ensure proper page breaks */
+  .print-page-break {
+    page-break-after: always;
+  }
+
+  /* Optimize colors for print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+/* Utility class for hiding elements during print */
+.d-print-none {
+  @media print {
+    display: none !important;
+  }
+}
