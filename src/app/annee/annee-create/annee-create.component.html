@@ -1,0 +1,120 @@
+
+<ngx-spinner bdColor="rgba(0,0,0,0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true">
+  <p class="text-white mt-4 font-medium italic text-sm">Chargement des périodes...</p>
+</ngx-spinner>
+
+<div class="max-w-4xl mx-auto space-y-8 animate-fade-in mb-12">
+  
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div>
+      <h1 class="text-2xl font-black text-secondary-900 tracking-tight">Gestion des Périodes</h1>
+      <nav class="flex mt-1 text-sm text-secondary-500 font-medium font-outfit">
+        <a [routerLink]="['/accueil']" class="hover:text-primary-600 transition-colors">Accueil</a>
+        <span class="mx-2 text-secondary-300">/</span>
+        <span class="text-secondary-900 font-bold tracking-tight">Configuration</span>
+        <span class="mx-2 text-secondary-300">/</span>
+        <span class="text-secondary-400 font-bold uppercase tracking-widest text-[10px]">Années</span>
+      </nav>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    
+    <!-- Left: Add New Year Form -->
+    <div class="space-y-6">
+      <div class="bg-white rounded-[2.5rem] p-10 shadow-elegant border border-secondary-100 group relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-32 h-32 bg-primary-100/30 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        
+        <div class="flex items-center space-x-4 mb-8">
+          <div class="w-12 h-12 bg-secondary-900 rounded-2xl flex items-center justify-center text-white shadow-elegant-dark">
+            <i class="bi bi-calendar-plus text-xl"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-black text-secondary-900">Nouvelle Année</h3>
+            <p class="text-xs text-secondary-400 font-medium italic">Initialiser un nouvel exercice</p>
+          </div>
+        </div>
+
+        <form (ngSubmit)="onSubmit()" class="space-y-6">
+          <div class="space-y-2">
+            <label class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] ml-1">Année d'exercice</label>
+            <div class="relative group">
+              <input type="number" [(ngModel)]="newYear" name="newYear" placeholder="Ex: 2024"
+                class="w-full pl-12 pr-4 py-4 bg-secondary-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:bg-white transition-all text-sm font-black text-secondary-700">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-secondary-400 group-focus-within:text-primary-500 transition-colors">
+                <i class="bi bi-calendar3"></i>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" 
+                 class="w-full py-4.5 bg-primary-600 hover:bg-primary-700 text-white rounded-3xl text-sm font-black uppercase tracking-[0.2em] shadow-elegant-primary transition-all transform active:scale-95 flex items-center justify-center h-14">
+            <i class="bi bi-plus-circle mr-3"></i>
+            Activer l'année
+          </button>
+        </form>
+      </div>
+
+      <!-- Info Box -->
+      <div class="bg-secondary-50 rounded-3xl p-6 border border-secondary-100">
+        <div class="flex items-start space-x-4">
+          <i class="bi bi-info-circle text-primary-500 text-xl mt-1"></i>
+          <p class="text-xs text-secondary-500 font-medium italic leading-relaxed">
+            L'ajout d'une année permet d'organiser vos ventes, inventaires et analyses financières par périodes temporelles distinctes pour un suivi optimal.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Existing Eras List -->
+    <div class="bg-white rounded-[2.5rem] p-10 shadow-elegant border border-secondary-100">
+      <div class="flex items-center justify-between mb-8">
+        <h3 class="text-lg font-black text-secondary-900">Périodes Actives</h3>
+        <span class="px-3 py-1 bg-secondary-100 text-secondary-600 rounded-lg text-[10px] font-black uppercase tracking-widest">{{ years.length }} Total</span>
+      </div>
+
+      <!-- List Container -->
+      <div class="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+        <div *ngFor="let y of years" class="flex items-center justify-between p-4 bg-secondary-50 rounded-2xl border border-secondary-100 hover:border-primary-500/20 hover:bg-white transition-all group">
+          <div class="flex items-center space-x-4">
+            <div class="w-10 h-10 bg-white rounded-xl shadow-sm border border-secondary-100 flex items-center justify-center text-sm font-black text-secondary-900"
+                 [class.text-primary-600]="y.is_active" [class.border-primary-200]="y.is_active">
+              {{ y.annee}}
+            </div>
+            <div>
+              <p class="text-sm font-black text-secondary-900">Exercice {{ y.annee }}</p>
+              <div class="flex items-center space-x-2">
+                <span *ngIf="y.is_active" class="px-2 py-0.5 bg-green-50 text-green-600 rounded text-[8px] font-black uppercase tracking-widest italic border border-green-100">Actif</span>
+                <span *ngIf="!y.is_active" class="px-2 py-0.5 bg-secondary-200 text-secondary-500 rounded text-[8px] font-black uppercase tracking-widest italic">Clôturé</span>
+                <p class="text-[9px] text-secondary-400 font-bold">Initialisé le {{ y.created_at | date:'dd/MM/yy' }}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex items-center space-x-2">
+            <button (click)="toggleStatus(y)" 
+                    class="w-8 h-8 rounded-lg flex items-center justify-center transition-all bg-white border border-secondary-200"
+                    [class.text-amber-500]="y.is_active" [class.hover:bg-amber-50]="y.is_active"
+                    [class.text-green-500]="!y.is_active" [class.hover:bg-green-50]="!y.is_active"
+                    [title]="y.is_active ? 'Clôturer' : 'Réactiver'">
+              <i class="bi" [class.bi-lock]="y.is_active" [class.bi-unlock]="!y.is_active"></i>
+            </button>
+            <button (click)="deleteYear(y)" 
+                    class="w-8 h-8 rounded-lg bg-white border border-secondary-200 text-red-400 hover:bg-red-50 hover:text-red-600 flex items-center justify-center transition-all"
+                    title="Supprimer">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!years.length" class="py-12 text-center opacity-30 italic text-sm">
+          <i class="bi bi-calendar-x text-4xl mb-3 block"></i>
+          <p>Aucune période enregistrée</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
