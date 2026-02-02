@@ -1,0 +1,76 @@
+<ngx-spinner bdColor="rgba(0,0,0,0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true">
+  <p class="text-white mt-4 font-medium italic text-sm tracking-wide">Chargement des crédits...</p>
+</ngx-spinner>
+
+<div class="p-8 animate-fade-in">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 bg-white p-8 rounded-[2rem] shadow-elegant border border-secondary-100">
+    <div>
+      <h1 class="text-2xl font-black text-secondary-900 tracking-tight">Gestion des Ventes à Crédit</h1>
+      <p class="text-xs text-secondary-500 mt-1 font-medium italic">Liste de toutes les ventes impayées ou partiellement payées</p>
+    </div>
+    
+    <div class="flex gap-4">
+      <a routerLink="/credits/debtors" class="px-6 py-3 bg-primary-50 text-primary-600 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-primary-100 transition-all flex items-center gap-2">
+        <i class="bi bi-people-fill"></i>
+        Liste des Débiteurs
+      </a>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-[2rem] shadow-elegant border border-secondary-100 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-secondary-50/50">
+            <th class="px-6 py-5 text-[10px] font-black text-secondary-500 uppercase tracking-widest border-b border-secondary-100">Date</th>
+            <th class="px-6 py-5 text-[10px] font-black text-secondary-500 uppercase tracking-widest border-b border-secondary-100">Client</th>
+            <th class="px-6 py-5 text-[10px] font-black text-secondary-500 uppercase tracking-widest border-b border-secondary-100 text-right">Total</th>
+            <th class="px-6 py-5 text-[10px] font-black text-secondary-500 uppercase tracking-widest border-b border-secondary-100 text-right">Avance</th>
+            <th class="px-6 py-5 text-[10px] font-black text-secondary-500 uppercase tracking-widest border-b border-secondary-100 text-right">Reste</th>
+            <th class="px-6 py-5 text-[10px] font-black text-secondary-500 uppercase tracking-widest border-b border-secondary-100 text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-secondary-100">
+          <tr *ngFor="let c of credits" class="hover:bg-secondary-50/30 transition-colors group">
+            <td class="px-6 py-5">
+              <span class="text-xs font-black text-secondary-900 tracking-tight">{{ c.date_vente | date:'dd/MM/yyyy' }}</span>
+            </td>
+            <td class="px-6 py-5">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-secondary-100 flex items-center justify-center text-secondary-400 font-bold text-[10px]">
+                  {{ (c.client?.nom || 'A').substring(0,1) }}
+                </div>
+                <div>
+                  <p class="text-xs font-black text-secondary-900">{{ c.client?.nom || 'Anonyme' }}</p>
+                  <p class="text-[9px] text-secondary-400 font-medium">{{ c.client?.telephone }}</p>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-5 text-right">
+              <span class="text-xs font-bold text-secondary-900">{{ c.montant_total | number:'1.0' }} F</span>
+            </td>
+            <td class="px-6 py-5 text-right">
+              <span class="text-xs font-bold text-green-600">{{ c.montant_avance | number:'1.0' }} F</span>
+            </td>
+            <td class="px-6 py-5 text-right">
+              <span class="px-3 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-black">{{ c.montant_restant | number:'1.0' }} F</span>
+            </td>
+            <td class="px-6 py-5 text-center">
+              <button (click)="viewDetail(c.id)" class="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center hover:bg-primary-600 hover:text-white transition-all mx-auto">
+                <i class="bi bi-eye-fill"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="credits.length === 0">
+            <td colspan="6" class="px-6 py-20 text-center">
+              <div class="w-16 h-16 bg-secondary-50 rounded-full flex items-center justify-center mx-auto mb-4 text-secondary-200">
+                <i class="bi bi-credit-card-2-back text-3xl"></i>
+              </div>
+              <p class="text-secondary-400 font-bold italic text-sm">Aucune vente à crédit en cours.</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

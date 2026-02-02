@@ -1,0 +1,323 @@
+<!-- Custom Typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<!-- Print Rules Context -->
+<style>
+  :host { font-family: 'Inter', sans-serif; }
+  .serif-title { font-family: 'Cormorant Garamond', serif; }
+  @media print {
+    @page { size: A4; margin: 0; }
+    body { margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .print-container {
+      width: 210mm;
+      height: 297mm;
+      margin: 0 auto;
+      padding: 12mm 15mm !important;
+      box-shadow: none !important;
+      border: none !important;
+      display: flex;
+      flex-direction: column;
+    }
+    .no-print { display: none !important; }
+    tr { page-break-inside: avoid; }
+    thead { display: table-header-group; }
+    .footer-print { margin-top: auto; padding-bottom: 10mm; }
+  }
+</style>
+
+<!-- Action Header & UI (Screen Only) -->
+<div class="p-8 animate-fade-in text-secondary-900 d-print-none no-print" *ngIf="vente">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 bg-white p-6 rounded-[2rem] shadow-sm border border-secondary-100">
+    <div class="flex items-center gap-4">
+      <a routerLink="/credits/list" class="w-10 h-10 rounded-xl bg-secondary-50 text-secondary-400 hover:text-primary-600 transition-all flex items-center justify-center">
+        <i class="bi bi-chevron-left text-lg"></i>
+      </a>
+      <div>
+        <h1 class="text-xl font-black text-secondary-900 tracking-tight">{{ isProforma ? 'Pro-forma' : 'Détails Vente' }} #{{ vente.id }}</h1>
+        <p class="text-[10px] text-secondary-500 font-bold uppercase tracking-widest">{{ isProforma ? 'Bordereau Commercial' : 'Suivi de Crédit' }}</p>
+      </div>
+    </div>
+    
+    <div class="flex gap-2">
+      <button (click)="printStatement()" class="px-4 py-2.5 bg-secondary-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all flex items-center gap-2 shadow-md">
+        <i class="bi bi-printer"></i> Imprimer
+      </button>
+      <button (click)="exportPDF()" class="px-4 py-2.5 bg-white border border-secondary-200 text-secondary-900 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-secondary-50 transition-all flex items-center gap-2 shadow-sm">
+        <i class="bi bi-file-earmark-pdf text-red-500"></i> PDF
+      </button>
+      <button *ngIf="vente.montant_restant > 0 && !isProforma" (click)="showPaymentForm = !showPaymentForm" 
+              class="px-4 py-2.5 bg-primary-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary-600 transition-all flex items-center gap-2 shadow-lg">
+        <i class="bi bi-cash-stack"></i> {{ showPaymentForm ? 'Fermer' : 'Paiement' }}
+      </button>
+      <button *ngIf="isProforma" (click)="checkoutProforma()"
+              class="px-4 py-2.5 bg-amber-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-600 transition-all flex items-center gap-2 shadow-lg">
+        <i class="bi bi-cart-check"></i> Finaliser
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+    <!-- Info Cards -->
+    <div class="xl:col-span-1 space-y-8">
+      <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-secondary-100">
+        <h3 class="text-[9px] font-black text-secondary-300 uppercase tracking-widest mb-6">Informations Client</h3>
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-14 h-14 rounded-2xl bg-secondary-900 text-white flex items-center justify-center text-xl font-black">
+            {{ (vente.client?.nom || 'A').substring(0,1) | uppercase }}
+          </div>
+          <div>
+            <p class="text-base font-black text-secondary-900 leading-tight">{{ vente.client?.nom || 'Anonyme' }}</p>
+            <p class="text-xs text-secondary-400 font-medium">{{ vente.client?.telephone }}</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="p-4 bg-secondary-50 rounded-2xl">
+            <p class="text-[8px] font-black text-secondary-400 uppercase mb-1">Date</p>
+            <p class="text-[10px] font-bold text-secondary-900">{{ vente.date_vente | date:'dd MMM yyyy' }}</p>
+          </div>
+          <div class="p-4 bg-secondary-50 rounded-2xl">
+            <p class="text-[8px] font-black text-secondary-400 uppercase mb-1">Vendeur</p>
+            <p class="text-[10px] font-bold text-secondary-900">{{ vente.user?.name }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial Card -->
+      <div class="bg-secondary-900 rounded-[2rem] p-8 shadow-xl text-white relative overflow-hidden">
+        <div class="relative z-10 space-y-6">
+          <div class="flex justify-between items-end border-b border-white/5 pb-6">
+            <div>
+              <p class="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">Total Document</p>
+              <p class="text-2xl font-black tracking-tight">{{ vente.montant_total | number:'1.0' }} <span class="text-[10px] opacity-40">CFA</span></p>
+            </div>
+            <div class="text-right">
+              <p class="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1">Paiements</p>
+              <p class="text-lg font-black tracking-tight text-emerald-400">{{ (vente.montant_total - vente.montant_restant) | number:'1.0' }}</p>
+            </div>
+          </div>
+          
+          <div>
+            <p class="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1">Reste à Payer</p>
+            <div class="flex items-center justify-between">
+              <p class="text-4xl font-black tracking-tightest">{{ vente.montant_restant | number:'1.0' }}</p>
+              <div *ngIf="vente.montant_restant === 0" class="px-3 py-1.5 bg-emerald-500 rounded-xl text-[8px] font-black uppercase tracking-widest">Réglé</div>
+            </div>
+          </div>
+        </div>
+        <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
+      </div>
+    </div>
+
+    <!-- Details Table -->
+    <div class="xl:col-span-2 space-y-8">
+      <!-- Payment Form Overlay -->
+      <div *ngIf="showPaymentForm" class="bg-amber-50 border border-amber-100 rounded-[2.5rem] p-8 animate-slide-in">
+        <h3 class="text-[10px] font-black text-amber-900 uppercase tracking-widest mb-6">Nouveau Versement</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+           <div>
+             <label class="block text-[8px] font-black text-amber-700 uppercase mb-2">Montant du versement</label>
+             <input type="number" [(ngModel)]="paymentAmount" class="w-full bg-white border border-amber-200 rounded-2xl px-5 py-3 text-sm font-black focus:ring-4 focus:ring-amber-500/10 outline-none">
+           </div>
+           <div>
+             <label class="block text-[8px] font-black text-amber-700 uppercase mb-2">Mode</label>
+             <select [(ngModel)]="paymentMode" class="w-full bg-white border border-amber-200 rounded-2xl px-5 py-3 text-sm font-bold outline-none">
+               <option>Espèces</option>
+               <option>Mobile Money</option>
+               <option>Virement</option>
+             </select>
+           </div>
+        </div>
+        <div class="flex justify-end gap-3">
+           <button (click)="showPaymentForm = false" class="px-6 py-3 text-[9px] font-black uppercase text-amber-400">Annuler</button>
+           <button (click)="addPayment()" class="px-8 py-3 bg-amber-500 text-white rounded-xl text-[9px] font-black uppercase shadow-lg">Valider</button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-[2rem] shadow-sm border border-secondary-100 overflow-hidden">
+        <div class="px-8 py-6 border-b border-secondary-50 bg-secondary-50/30">
+           <h3 class="text-[10px] font-black text-secondary-900 uppercase tracking-widest">Journal des Opérations</h3>
+        </div>
+        <div class="p-8">
+           <!-- Items -->
+           <div>
+             <h4 class="text-[8px] font-bold text-slate-300 uppercase tracking-widest mb-4">Articles du Bordereau</h4>
+             <table class="w-full text-left mb-10">
+               <thead>
+                  <tr class="text-[8px] font-black text-secondary-400 uppercase border-b border-secondary-50">
+                    <th class="py-3 px-2">Désignation</th>
+                    <th class="py-3 px-2 text-center">Qté</th>
+                    <th class="py-3 px-2 text-right">P.U</th>
+                    <th class="py-3 px-2 text-right">Total</th>
+                  </tr>
+               </thead>
+               <tbody class="divide-y divide-secondary-50">
+                  <tr class="text-xs" *ngFor="let d of vente.detail_ventes">
+                     <td class="py-4 px-2">
+                       <p class="font-bold text-secondary-900 uppercase text-[11px]">{{ d.produit?.nom }}</p>
+                       <p class="text-[8px] text-secondary-400">{{ d.produit?.categorie?.nom }}</p>
+                     </td>
+                     <td class="py-4 px-2 text-center font-bold text-secondary-700">{{ d.quantite }}</td>
+                     <td class="py-4 px-2 text-right font-medium text-secondary-500">{{ d.prix_unitaire | number:'1.0' }}</td>
+                     <td class="py-4 px-2 text-right font-black text-secondary-900">{{ d.montant_total | number:'1.0' }}</td>
+                  </tr>
+               </tbody>
+             </table>
+           </div>
+
+           <!-- Payments -->
+           <div *ngIf="!isProforma">
+             <h4 class="text-[8px] font-bold text-slate-300 uppercase tracking-widest mb-4">Paiements Reçus</h4>
+             <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                  <tbody class="divide-y divide-secondary-50">
+                     <tr class="text-[10px]" *ngFor="let p of vente.paiements_credit">
+                        <td class="py-4 px-2 text-secondary-400 font-medium">{{ p.date_paiement | date:'dd/MM/yy' }}</td>
+                        <td class="py-4 px-2 font-bold uppercase tracking-tighter">{{ p.mode_paiement }}</td>
+                        <td class="py-4 px-2 text-right font-black text-secondary-900">+ {{ p.montant | number:'1.0' }} CFA</td>
+                     </tr>
+                     <tr *ngIf="!vente.paiements_credit?.length" class="text-[10px] text-secondary-300 italic">
+                        <td colspan="3" class="py-6 text-center">En attente de versement</td>
+                     </tr>
+                  </tbody>
+                </table>
+             </div>
+           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Premium Print Version (A4 Compact) -->
+<div id="printable-credit" class="fixed -left-[9999px] top-0 print:static print:block print-container bg-white" *ngIf="vente">
+  <!-- Header -->
+  <div class="flex justify-between items-start mb-8 pb-6 border-b-2 border-slate-900">
+    <div class="space-y-4">
+      <div class="space-y-0.5">
+        <h1 class="text-3xl serif-title font-bold text-slate-900 leading-none">{{ vente.boutique?.nom || '-----' }}</h1>
+        <p class="text-[9px] font-bold text-amber-500 uppercase tracking-[0.4em]">{{ vente.boutique?.description || '-----' }}</p>
+      </div>
+      <div class="text-[9px] font-bold text-slate-400 space-y-0.5 uppercase tracking-widest">
+        <p>{{ vente.boutique?.adresse || '-----' }}</p>
+        <p>Tél: {{ vente.boutique?.telephone || '-----' }}</p>
+      </div>
+    </div>
+    <div class="text-right space-y-2">
+      <h2 class="text-3xl font-black tracking-tightest leading-none">{{ isProforma ? 'PROFORMA' : 'BORDEREAU' }}</h2>
+      <div class="space-y-1">
+        <p class="text-sm font-black text-slate-900">N° {{ vente.id }}/{{ date | date:'yy' }}</p>
+        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{{ vente.date_vente | date:'dd / MM / yyyy' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Client Mini Bar -->
+  <div class="grid grid-cols-2 gap-8 mb-10 pb-4 border-b border-slate-50">
+    <div class="space-y-1 px-1">
+      <span class="text-[8px] font-black text-slate-200 uppercase tracking-widest">Destinataire</span>
+      <p class="text-lg font-bold text-slate-900 leading-tight uppercase">{{ vente.client?.nom || 'CLIENT DE PASSAGE' }}</p>
+    </div>
+    <div class="text-right space-y-1 px-1">
+      <span class="text-[8px] font-black text-slate-200 uppercase tracking-widest">Contact Client</span>
+      <p class="text-[11px] font-bold text-slate-900 uppercase">{{ vente.client?.telephone || 'N/A' }}</p>
+    </div>
+  </div>
+
+  <!-- Items Table -->
+  <div class="flex-grow">
+    <table class="w-full mb-10 border-collapse">
+      <thead>
+        <tr class="bg-slate-50">
+          <th class="py-2.5 px-3 text-left text-[9px] font-black text-slate-400 uppercase tracking-widest">Désignation</th>
+          <th class="py-2.5 px-3 text-center text-[9px] font-black text-slate-400 uppercase tracking-widest w-16">Qté</th>
+          <th class="py-2.5 px-3 text-right text-[9px] font-black text-slate-400 uppercase tracking-widest w-24">Prix Unit.</th>
+          <th class="py-2.5 px-3 text-right text-[9px] font-black text-slate-900 uppercase tracking-widest w-32">Montant</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <tr *ngFor="let item of vente.detail_ventes" class="text-[10px]">
+          <td class="py-3 px-3">
+            <p class="font-bold text-slate-900 uppercase">{{ item.produit?.nom }}</p>
+            <p class="text-[8px] text-slate-400 italic">Code: #P-{{ item.produit?.id }}</p>
+          </td>
+          <td class="py-3 px-3 text-center font-bold text-slate-700">{{ item.quantite }}</td>
+          <td class="py-3 px-3 text-right tabular-nums">{{ item.prix_unitaire | number:'1.0' }}</td>
+          <td class="py-3 px-3 text-right font-black text-slate-900 tabular-nums">{{ item.montant_total | number:'1.0' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Payments Mini Table -->
+    <div *ngIf="!isProforma && vente.paiements_credit?.length" class="mb-10 max-w-sm">
+      <p class="text-[8px] font-black text-slate-300 uppercase underline mb-3">Relevé des versements</p>
+      <div class="space-y-1">
+        <div *ngFor="let p of vente.paiements_credit" class="flex justify-between text-[8px] font-bold py-1 border-b border-slate-50 last:border-0 italic">
+          <span class="text-slate-500">{{ p.date_paiement | date:'dd/MM/yy' }} - {{ p.mode_paiement }}</span>
+          <p class="text-slate-900">{{ p.montant | number:'1.0' }} CFA</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Recap -->
+  <div class="footer-print">
+    <div class="flex justify-between items-end mb-12">
+       <div class="flex-1 pr-10">
+          <div class="p-4 bg-slate-50/50 rounded-2xl border border-slate-100 italic text-[9px] text-slate-400 leading-tight">
+            Note: Ce document est la propriété de Ma Boutique jusqu'au règlement intégral. Tout défaut de paiement pourra entraîner des poursuites.
+          </div>
+       </div>
+       <div class="w-64 space-y-3">
+          <div class="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest px-2">
+            <span>Total Général</span>
+            <span class="text-slate-900">{{ vente.montant_total | number:'1.0' }}</span>
+          </div>
+          <div *ngIf="!isProforma" class="flex justify-between text-[9px] font-black text-emerald-500 uppercase tracking-widest px-2 border-b border-slate-100 pb-2">
+            <span>Déjà Réglé</span>
+            <span>- {{ (vente.montant_total - vente.montant_restant) | number:'1.0' }}</span>
+          </div>
+          <div class="bg-slate-900 text-white rounded-3xl p-5 shadow-xl relative overflow-hidden">
+             <div class="relative z-10">
+                <span class="block text-[8px] font-black text-amber-400 uppercase tracking-widest mb-1">{{ isProforma ? 'NET A PAYER' : 'RESTE A PAYER' }}</span>
+                <p class="text-3xl font-black tracking-tighter">{{ vente.montant_restant | number:'1.0' }} <span class="text-[10px] opacity-40">CFA</span></p>
+             </div>
+             <i class="bi bi-shield-check absolute -right-4 -bottom-4 text-6xl text-white/5"></i>
+          </div>
+       </div>
+    </div>
+
+    <!-- Signatures -->
+    <div class="grid grid-cols-2 gap-10 pt-8 border-t border-dashed border-slate-200">
+      <div class="text-center space-y-16">
+        <p class="text-[8px] font-black uppercase text-slate-300 tracking-widest">Le Responsable</p>
+        <div class="h-8"></div>
+      </div>
+      <div class="text-center space-y-16">
+        <p class="text-[8px] font-black uppercase text-slate-300 tracking-widest">Le Client (Bon pour accord)</p>
+        <div class="h-8"></div>
+      </div>
+    </div>
+
+    <p class="text-center text-[7px] text-slate-200 uppercase tracking-[0.5em] mt-10">DOCUMENT OFFICELL DE GESTION - MA BOUTIQUE v2.0</p>
+  </div>
+</div>
+
+<!-- Modal -->
+<div *ngIf="isConfirmModalVisible" class="fixed inset-0 z-[150] flex items-center justify-center p-6 no-print">
+  <div (click)="closeConfirm()" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in"></div>
+  <div class="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden animate-scale-in p-8 text-center space-y-6">
+    <div class="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500 mx-auto">
+      <i class="bi bi-question-circle text-2xl"></i>
+    </div>
+    <div class="space-y-2">
+      <h3 class="text-lg font-black text-slate-900">{{ confirmConfig.title }}</h3>
+      <p class="text-xs text-slate-500 font-medium leading-relaxed">{{ confirmConfig.message }}</p>
+    </div>
+    <div class="flex gap-3">
+      <button (click)="closeConfirm()" class="flex-1 py-3 text-[10px] font-black uppercase text-slate-400">Retour</button>
+      <button (click)="executeConfirm()" class="flex-1 py-3 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase shadow-lg">Confirmer</button>
+    </div>
+  </div>
+</div>

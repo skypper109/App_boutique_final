@@ -1,0 +1,56 @@
+<ngx-spinner bdColor="rgba(0,0,0,0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true">
+  <p class="text-white mt-4 font-medium italic text-sm tracking-wide">Chargement des débiteurs...</p>
+</ngx-spinner>
+
+<div class="p-8 animate-fade-in text-secondary-900">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 bg-white p-8 rounded-[2rem] shadow-elegant border border-secondary-100">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <a routerLink="/credits/list" class="text-secondary-400 hover:text-primary-600 transition-colors">
+          <i class="bi bi-arrow-left-circle-fill text-xl"></i>
+        </a>
+        <h1 class="text-2xl font-black text-secondary-900 tracking-tight">Liste des Débiteurs</h1>
+      </div>
+      <p class="text-xs text-secondary-500 font-medium italic">Clients ayant des dettes impayées au total</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div *ngFor="let d of debtors" class="bg-white rounded-3xl p-6 shadow-elegant border border-secondary-100 hover:border-red-200 hover:shadow-elegant-lg transition-all group">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-12 h-12 rounded-2xl bg-secondary-900/5 flex items-center justify-center text-secondary-900 text-xl font-black">
+          {{ d.nom.substring(0,1) | uppercase }}
+        </div>
+        <div class="px-3 py-1 bg-red-50 text-red-600 rounded-xl text-[10px] font-black uppercase tracking-widest">
+          En Dette
+        </div>
+      </div>
+      
+      <div class="space-y-1 mb-6">
+        <h3 class="text-base font-black text-secondary-900">{{ d.nom }}</h3>
+        <p class="text-xs text-secondary-400 font-medium flex items-center gap-1.5">
+          <i class="bi bi-telephone text-[10px]"></i>
+          {{ d.telephone }}
+        </p>
+      </div>
+
+      <div class="pt-4 border-t border-secondary-50 flex items-center justify-between">
+        <div>
+          <p class="text-[9px] font-black text-secondary-400 uppercase tracking-widest mb-0.5">Dette Totale</p>
+          <p class="text-lg font-black text-red-600 tracking-tight">{{ d.total_dette | number:'1.0' }} <span class="text-[10px]">F</span></p>
+        </div>
+        <button [routerLink]="['/credits/list']" [queryParams]="{search: d.nom}" class="w-10 h-10 rounded-xl bg-secondary-50 text-secondary-400 flex items-center justify-center hover:bg-primary-600 hover:text-white transition-all">
+          <i class="bi bi-arrow-right-short text-2xl"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="debtors.length === 0" class="col-span-full py-20 text-center bg-white rounded-[2rem] border border-secondary-100 border-dashed">
+       <div class="w-16 h-16 bg-secondary-50 rounded-full flex items-center justify-center mx-auto mb-4 text-secondary-200">
+         <i class="bi bi-shield-check text-3xl"></i>
+       </div>
+       <p class="text-secondary-400 font-bold italic">Aucun client débiteur actuellement.</p>
+    </div>
+  </div>
+</div>
