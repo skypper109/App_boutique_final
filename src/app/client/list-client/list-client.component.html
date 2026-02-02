@@ -1,0 +1,123 @@
+
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true">
+  <p class="text-white mt-4 font-medium italic">Chargement des clients...</p>
+</ngx-spinner>
+
+<div class="space-y-8 animate-fade-in mb-12">
+  
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold text-secondary-900 tracking-tight">Gestion des Clients</h1>
+      <nav class="flex mt-1 text-sm text-secondary-500 font-medium">
+        <a [routerLink]="['/accueil']" class="hover:text-primary-600 transition-colors">Accueil</a>
+        <span class="mx-2 text-secondary-300">/</span>
+        <span class="text-secondary-400">Clients</span>
+      </nav>
+    </div>
+    
+    <div class="flex items-center space-x-3">
+      <div class="relative group">
+        <select [(ngModel)]="annee" (change)="getClientAnnee(annee)"
+          class="block w-full pl-4 pr-10 py-2.5 bg-white border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all text-sm font-bold text-secondary-700 appearance-none shadow-sm cursor-pointer">
+          <option [ngValue]="undefined" (click)="accueil()">Choisir une année</option>
+          <option *ngFor="let a of annee" [value]="a.annee">{{ a.annee }}</option>
+        </select>
+        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-secondary-400">
+           <i class="bi bi-chevron-down text-[10px]"></i>
+        </div>
+      </div>
+      
+      <a [routerLink]="['../fidele']" 
+         class="inline-flex items-center px-6 py-3 bg-secondary-900 border border-secondary-800 hover:bg-black text-white rounded-2xl shadow-elegant-dark font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 group">
+        <i class="bi bi-award mr-2.5 text-primary-400 group-hover:scale-110 transition-transform"></i>
+        Clients Fidèles
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Clients Card -->
+  <div class="bg-white rounded-3xl shadow-elegant border border-secondary-100 overflow-hidden">
+    <!-- Card Header -->
+    <div class="px-8 py-6 border-b border-secondary-50 bg-white items-center justify-between flex">
+      <div>
+        <h3 class="text-lg font-bold text-secondary-900">La Liste des Clients</h3>
+        <p class="text-xs text-secondary-500 mt-1">Transactions et coordonnées clients</p>
+      </div>
+      <div class="px-3 py-1 bg-secondary-100 text-secondary-600 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+        {{annee || 'Archive'}}
+      </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left whitespace-nowrap">
+        <thead>
+          <tr class="bg-secondary-50/50">
+            <th class="px-8 py-4 text-[10px] font-bold text-secondary-400 uppercase tracking-widest">Date</th>
+            <th class="px-4 py-4 text-[10px] font-bold text-secondary-400 uppercase tracking-widest">Identité Client</th>
+            <th class="px-4 py-4 text-[10px] font-bold text-secondary-400 uppercase tracking-widest">Téléphone</th>
+            <th class="px-4 py-4 text-[10px] font-bold text-secondary-400 uppercase tracking-widest text-center">Articles</th>
+            <th class="px-4 py-4 text-[10px] font-bold text-secondary-400 uppercase tracking-widest text-right">Montant Payé</th>
+            <th class="px-4 py-4 text-[10px] font-bold text-secondary-400 uppercase tracking-widest text-center">Statut</th>
+            <th class="px-8 py-4 text-[10px] font-bold text-secondary-400 uppercase tracking-widest text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-secondary-50">
+          <tr *ngFor="let client of clients" class="hover:bg-primary-50/20 transition-colors group">
+            @if (client.nomClient !== "ANONYME") {
+              <td class="px-8 py-6">
+                <p class="text-sm font-bold text-secondary-900">{{ client.dateVente | date:'dd MMMM yyyy '}}</p>
+                <p class="text-[10px] text-secondary-400 mt-0.5 font-medium italic">Enregistré à {{boutique.adresse || 'Bamako'}}</p>
+              </td>
+              <td class="px-4 py-6">
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 rounded-full bg-secondary-100 flex items-center justify-center text-primary-600 font-bold border border-secondary-200">
+                    {{ (client.nomClient || '').substring(0, 1) | uppercase }}
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-secondary-900 group-hover:text-primary-700 transition-colors">{{ client.nomClient }}</p>
+                    <p class="text-[10px] text-secondary-400 font-medium">Fiche Client #{{client.idFacture}}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-6">
+                <span class="text-sm font-medium text-secondary-600">{{ client.telClient || '** ** ** **'}}</span>
+              </td>
+              <td class="px-4 py-6 text-center">
+                <span class="px-2.5 py-1 bg-secondary-100 text-secondary-700 rounded-lg text-xs font-bold">
+                  {{ client.quantite }} unit.
+                </span>
+              </td>
+              <td class="px-4 py-6 text-right">
+                <p class="text-sm font-extrabold text-secondary-900">{{ client.montant | number:'1.0' }}</p>
+                <p class="text-[9px] text-secondary-400 font-black uppercase tracking-tighter">FCFA</p>
+              </td>
+              <td class="px-4 py-6 text-center">
+                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tight ring-1 ring-inset"
+                  [ngClass]="client.statut === 'Payée' ? 'bg-green-50 text-green-700 ring-green-600/20' : 'bg-orange-50 text-orange-700 ring-orange-600/20'">
+                  {{ client.statut }}
+                </span>
+              </td>
+              <td class="px-8 py-6 text-center">
+                <a [routerLink]="['../facture', client.idFacture]"
+                  class="inline-flex items-center px-4 py-2 bg-secondary-900 border border-secondary-800 text-white hover:bg-black rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm group">
+                  <i class="bi bi-file-earmark-text mr-2 text-primary-400 group-hover:scale-110 transition-transform"></i> Détailler
+                </a>
+              </td>
+            }
+          </tr>
+        </tbody>
+      </table>
+      
+      <!-- Empty State -->
+      <div *ngIf="!clients?.length" class="py-24 text-center">
+        <div class="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4 text-secondary-300">
+          <i class="bi bi-people text-3xl"></i>
+        </div>
+        <p class="text-secondary-400 font-medium italic">Aucun client trouvé pour cette sélection.</p>
+      </div>
+    </div>
+  </div>
+
+</div>

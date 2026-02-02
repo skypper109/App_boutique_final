@@ -1,0 +1,26 @@
+
+<div class="animate-fade-in relative">
+  <!-- Index Header (Shared Shell for Client context) -->
+  <div class="mb-8 p-8 bg-white rounded-[2rem] shadow-elegant border border-secondary-100 flex flex-col md:flex-row md:items-center justify-between gap-6 d-print-none">
+    <div class="flex items-center space-x-5">
+      <div class="w-14 h-14 bg-secondary-900 rounded-2xl flex items-center justify-center text-white shadow-elegant-dark">
+        <i class="bi bi-people text-2xl"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl font-black text-secondary-900 tracking-tight">Relation Client</h1>
+        <p class="text-xs text-secondary-500 mt-1 font-medium italic">Gestion et suivi de la clientèle boutique</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center space-x-2 bg-secondary-50 p-2 rounded-2xl border border-secondary-100">
+       <div class="px-4 py-2 bg-white rounded-xl shadow-sm text-xs font-black text-secondary-900 uppercase tracking-widest border border-secondary-100">
+          Espace Ventes
+       </div>
+    </div>
+  </div>
+
+  <!-- Router Outlet for Child Components (List, Fidele, etc.) -->
+  <div class="relative min-h-[400px] py-1">
+     <router-outlet></router-outlet>
+  </div>
+</div>
