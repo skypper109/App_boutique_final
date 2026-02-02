@@ -1,0 +1,121 @@
+
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true">
+  <p class="text-white mt-4 font-medium italic">Chargement...</p>
+</ngx-spinner>
+
+<div class="min-h-screen flex items-center justify-center bg-secondary-50 px-4 py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+  <!-- Decorative background elements -->
+  <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-400 via-primary-600 to-primary-400"></div>
+  <div class="absolute -top-24 -left-24 w-96 h-96 bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+  <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" style="animation-delay: 2s;"></div>
+
+  <div class="max-w-md w-full space-y-8 z-10 transition-all duration-500 ease-in-out">
+    <div class="text-center">
+      <div class="flex justify-center">
+        <div class="p-4 bg-white rounded-2xl shadow-elegant-lg mb-6 transform hover:scale-105 transition-transform duration-300">
+          <img class="h-16 w-auto" src="logo.svg" alt="Ma Boutique">
+        </div>
+      </div>
+      <h2 class="mt-2 text-3xl font-extrabold text-secondary-900 tracking-tight">
+        Ma Boutique
+      </h2>
+      <p class="mt-2 text-sm text-secondary-600">
+        {{ verification ? 'Activation de votre espace de gestion' : 'Connectez-vous à votre espace de travail' }}
+      </p>
+    </div>
+
+    <div class="bg-white py-10 px-8 shadow-elegant-lg rounded-3xl border border-secondary-100 backdrop-blur-sm bg-white/90">
+      <form [formGroup]="authForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        
+        <!-- Error Alert -->
+        <div *ngIf="error" class="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-r-lg animate-bounce">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium">{{ error.error }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verification Mode -->
+        <ng-container *ngIf="verification; else loginFields">
+          <div>
+            <label for="numero" class="block text-sm font-semibold text-secondary-700 mb-1">Clé de Validation</label>
+            <div class="relative group">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-secondary-400 group-focus-within:text-primary-500 transition-colors">
+                <i class="bi bi-key-fill"></i>
+              </div>
+              <input id="numero" formControlName="numero" type="text" required
+                class="block w-full pl-10 pr-3 py-3 border border-secondary-200 rounded-xl leading-5 bg-white placeholder-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 sm:text-sm transition-all shadow-sm"
+                placeholder="Entrez votre clé de validation">
+            </div>
+            <p *ngIf="authForm.get('numero')?.invalid && authForm.get('numero')?.touched" class="mt-2 text-xs text-red-500 flex items-center">
+              <i class="bi bi-info-circle mr-1"></i> Veuillez entrer votre clé de validation.
+            </p>
+          </div>
+
+          <button type="submit" (click)="verifcate()" [disabled]="authForm.get('numero')?.invalid"
+            class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-elegant text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 transition-all">
+            ACTIVER MAINTENANT
+          </button>
+        </ng-container>
+
+        <!-- Login Mode -->
+        <ng-template #loginFields>
+          <div class="space-y-5">
+            <div>
+              <label for="email" class="block text-sm font-semibold text-secondary-700 mb-1">Email</label>
+              <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-secondary-400 group-focus-within:text-primary-500 transition-colors">
+                  <i class="bi bi-envelope-fill"></i>
+                </div>
+                <input id="email" formControlName="email" type="email" required
+                  class="block w-full pl-10 pr-3 py-3 border border-secondary-200 rounded-xl leading-5 bg-white placeholder-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 sm:text-sm transition-all shadow-sm"
+                  placeholder="admin@maboutique.com">
+              </div>
+              <p *ngIf="authForm.get('email')?.invalid && authForm.get('email')?.touched" class="mt-2 text-xs text-red-500 flex items-center">
+                <i class="bi bi-info-circle mr-1"></i> Adresse email non valide.
+              </p>
+            </div>
+
+            <div>
+              <label for="password" class="block text-sm font-semibold text-secondary-700 mb-1">Mot de passe</label>
+              <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-secondary-400 group-focus-within:text-primary-500 transition-colors">
+                  <i class="bi bi-lock-fill"></i>
+                </div>
+                <input id="password" formControlName="password" type="password" required
+                  class="block w-full pl-10 pr-3 py-3 border border-secondary-200 rounded-xl leading-5 bg-white placeholder-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 sm:text-sm transition-all shadow-sm"
+                  placeholder="••••••••">
+              </div>
+              <p *ngIf="authForm.get('password')?.invalid && authForm.get('password')?.touched" class="mt-2 text-xs text-red-500 flex items-center">
+                <i class="bi bi-info-circle mr-1"></i> Mot de passe requis (min 6 caractères).
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end">
+            <div class="text-sm">
+              <a routerLink="/forgot-password" class="font-semibold text-primary-600 hover:text-primary-700 transition-colors">
+                Mot de passe oublié ?
+              </a>
+            </div>
+          </div>
+
+          <button type="submit" [disabled]="authForm.invalid"
+            class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-elegant text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 transition-all">
+            SE CONNECTER
+          </button>
+        </ng-template>
+      </form>
+
+      <div class="mt-8 pt-6 border-t border-secondary-100">
+        <p class="text-center text-xs text-secondary-400">
+          Propulsé par <span class="font-bold text-secondary-650">AMD-Service</span> &copy; {{ 2024 }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
