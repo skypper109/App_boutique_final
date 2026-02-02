@@ -1,0 +1,397 @@
+
+<!-- Print Rules Context -->
+<style>
+  @media print {
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .print-container {
+      width: 297mm; /* Landscape A4 */
+      min-height: 210mm;
+      margin: 0 auto;
+      padding: 10mm !important;
+      box-shadow: none !important;
+      border: none !important;
+    }
+    .no-print {
+      display: none !important;
+    }
+    tr { page-break-inside: avoid; }
+    thead { display: table-header-group; }
+  }
+</style>
+
+<div class="max-w-[1600px] mx-auto space-y-10 animate-fade-in pb-20 px-4 no-print">
+  
+  <!-- Header Expert -->
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mt-4">
+    <div class="space-y-2">
+      <div class="inline-flex items-center px-3 py-1 bg-primary-50 rounded-full border border-primary-100 mb-2">
+        <span class="w-1.5 h-1.5 bg-primary-500 rounded-full animate-pulse mr-2"></span>
+        <span class="text-[10px] font-black text-primary-700 uppercase tracking-widest">Audit de Stock en Temps Réel</span>
+      </div>
+      <h1 class="text-4xl font-black text-secondary-900 tracking-tight leading-none">Journal d'Inventaire</h1>
+      <p class="text-secondary-500 font-medium max-w-xl">Supervision exhaustive des mouvements de stock et valorisation comptable des flux entrants et sortants.</p>
+    </div>
+    
+    <div class="flex items-center gap-4">
+      <button (click)="print()" class="group px-6 py-3 bg-secondary-900 text-white hover:bg-black rounded-2xl shadow-lg transition-all flex items-center transform hover:-translate-y-1">
+        <i class="bi bi-printer text-primary-400 mr-2"></i>
+        <span class="text-[10px] font-black uppercase tracking-widest">Imprimer</span>
+      </button>
+      <button (click)="exportPDF()" class="group px-6 py-3 bg-white border border-secondary-200 text-secondary-900 hover:bg-secondary-50 rounded-2xl shadow-sm transition-all flex items-center transform hover:-translate-y-1">
+        <i class="bi bi-file-earmark-pdf text-red-500 mr-2"></i>
+        <span class="text-[10px] font-black uppercase tracking-widest">Exporter PDF</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Board -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- KPI 1: Volumétrie Entrante -->
+    <div class="bg-white rounded-[2.5rem] p-8 shadow-elegant border border-secondary-100 group hover:border-green-200 transition-all">
+      <div class="flex items-start justify-between mb-6">
+        <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 transition-transform group-hover:scale-110">
+          <i class="bi bi-box-arrow-in-down text-2xl"></i>
+        </div>
+        <div class="text-right">
+          <span class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Flux Entrants</span>
+          <span class="text-sm font-black text-green-600">+ {{ stats.totalEntrees }} Unités</span>
+        </div>
+      </div>
+      <div class="space-y-1">
+        <h4 class="text-2xl font-black text-secondary-900 tracking-tighter">{{ stats.valeurAchatEntrante | number:'1.0' }} <small class="text-xs text-secondary-300">FCFA</small></h4>
+        <p class="text-[10px] font-bold text-secondary-400 uppercase tracking-widest italic">Valeur d'Acquisition</p>
+      </div>
+    </div>
+
+    <!-- KPI 2: Volumétrie Sortante -->
+    <div class="bg-white rounded-[2.5rem] p-8 shadow-elegant border border-secondary-100 group hover:border-orange-200 transition-all">
+      <div class="flex items-start justify-between mb-6">
+        <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 transition-transform group-hover:scale-110">
+          <i class="bi bi-box-arrow-up text-2xl"></i>
+        </div>
+        <div class="text-right">
+          <span class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Flux Sortants</span>
+          <span class="text-sm font-black text-orange-600">- {{ stats.totalSorties }} Unités</span>
+        </div>
+      </div>
+      <div class="space-y-1">
+        <h4 class="text-2xl font-black text-secondary-900 tracking-tighter">{{ stats.valeurVenteSortante | number:'1.0' }} <small class="text-xs text-secondary-300">FCFA</small></h4>
+        <p class="text-[10px] font-bold text-secondary-400 uppercase tracking-widest italic">C.A. de Sortie</p>
+      </div>
+    </div>
+
+    <!-- KPI 3: Mouvement Net -->
+    <div class="bg-white rounded-[2.5rem] p-8 shadow-elegant border border-secondary-100 group hover:border-primary-200 transition-all">
+      <div class="flex items-start justify-between mb-6">
+        <div class="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center text-primary-600 transition-transform group-hover:scale-110">
+          <i class="bi bi-layers text-2xl"></i>
+        </div>
+        <div class="text-right">
+          <span class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Variation de Stock</span>
+          <span class="text-sm font-black" [ngClass]="stats.netMouvement >= 0 ? 'text-primary-600' : 'text-red-500'">
+            {{ stats.netMouvement > 0 ? '+' : '' }}{{ stats.netMouvement }} Unités
+          </span>
+        </div>
+      </div>
+      <div class="space-y-1">
+        <h4 class="text-2xl font-black text-secondary-900 tracking-tighter">
+          {{ (stats.valeurVenteSortante - stats.valeurAchatEntrante) | number:'1.0' }} <small class="text-xs text-secondary-300">FCFA</small>
+        </h4>
+        <p class="text-[10px] font-bold text-secondary-400 uppercase tracking-widest italic">Différence de Flux</p>
+      </div>
+    </div>
+
+    <!-- KPI 4: Activité Auditée -->
+    <div class="bg-secondary-900 rounded-[2.5rem] p-8 shadow-elegant-dark text-white group overflow-hidden relative">
+      <div class="relative z-10 flex items-start justify-between mb-6">
+        <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-primary-400">
+          <i class="bi bi-activity text-2xl"></i>
+        </div>
+        <div class="text-right">
+          <span class="block text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Volume d'Audit</span>
+          <span class="text-sm font-black text-primary-400">{{ filteredInventaires.length }} Opérations</span>
+        </div>
+      </div>
+      <div class="relative z-10 space-y-1">
+        <h4 class="text-2xl font-black tracking-tighter">{{ stats.totalEntrees + stats.totalSorties | number }}</h4>
+        <p class="text-[10px] font-bold text-white/40 uppercase tracking-widest italic">Articles Manipulés</p>
+      </div>
+      <!-- Background Abstract Decor -->
+      <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-primary-500/10 rounded-full blur-2xl"></div>
+    </div>
+  </div>
+
+  <!-- Advanced Control Center -->
+  <div class="bg-white rounded-[2.5rem] p-2 shadow-elegant border border-secondary-100 d-print-none">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-2">
+      <!-- Search -->
+      <div class="lg:col-span-4 p-4 relative group">
+        <label class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] mb-2 px-2">Rechercher</label>
+        <div class="relative">
+          <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()"
+            placeholder="Produit, Actor ou Motif..."
+            class="w-full pl-11 pr-4 py-3 bg-secondary-50 border-none rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:bg-white transition-all text-sm font-bold text-secondary-700">
+          <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-secondary-400 group-focus-within:text-primary-500 transition-colors"></i>
+        </div>
+      </div>
+      
+      <!-- Type Filter -->
+      <div class="lg:col-span-3 p-4">
+        <label class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] mb-2 px-2">Nature du Flux</label>
+        <select [(ngModel)]="filterType" (change)="applyFilters()"
+          class="w-full px-4 py-3 bg-secondary-50 border-none rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:bg-white transition-all text-sm font-bold text-secondary-700 appearance-none">
+          <option value="all">Tous les flux</option>
+          <option value="ajout">Entrées (Approvisionnements)</option>
+          <option value="retrait">Sorties (Ventes / Pertes)</option>
+        </select>
+      </div>
+
+      <!-- Date Pickers -->
+      <div class="lg:col-span-5 flex items-end gap-2 p-4">
+        <div class="flex-1">
+          <label class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] mb-2 px-2">Période d'Audit</label>
+          <div class="flex items-center gap-2">
+            <input type="date" [(ngModel)]="dateDebut" (change)="getInventaireByDate()"
+              class="w-full px-4 py-3 bg-secondary-50 border-none rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:bg-white transition-all text-sm font-bold text-secondary-700">
+            <span class="text-secondary-300 font-black">→</span>
+            <input type="date" [(ngModel)]="dateFin" (change)="getInventaireByDate()"
+              class="w-full px-4 py-3 bg-secondary-50 border-none rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:bg-white transition-all text-sm font-bold text-secondary-700">
+          </div>
+        </div>
+        <button (click)="loadData()" class="h-11 w-11 bg-secondary-900 text-white rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center">
+          <i class="bi bi-arrow-clockwise text-lg"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="printable-inventaire">
+    <!-- KPI Board (Visible in print too if desired, but typically we want the ledger) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 print:hidden">
+      <!-- ... (keeping current cards but adding print:hidden if needed) ... -->
+    </div>
+
+    <!-- Audit Master Ledger -->
+    <div class="bg-white rounded-[3rem] shadow-elegant border border-secondary-100 overflow-hidden">
+    <!-- Ledger Header -->
+    <div class="px-10 py-10 border-b border-secondary-50 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div class="flex items-center gap-5">
+        <div class="w-16 h-16 bg-primary-50 rounded-3xl flex items-center justify-center text-primary-600 shadow-inner">
+          <i class="bi bi-journal-text text-3xl"></i>
+        </div>
+        <div>
+          <h3 class="text-xl font-black text-secondary-900 tracking-tight">Grand Livre des Mouvements</h3>
+          <p class="text-xs text-secondary-500 font-bold uppercase tracking-widest mt-1">Audit détaillé par article et acteur</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="px-4 py-2 bg-secondary-50 rounded-full text-[10px] font-black text-secondary-600 uppercase tracking-widest">
+          {{ filteredInventaires.length }} Écritures
+        </span>
+      </div>
+    </div>
+
+    <!-- Ledger Table -->
+    <div class="overflow-x-auto ledger-table">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-secondary-50/30">
+            <th class="pl-10 pr-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50">Référence / Date</th>
+            <th class="px-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50">Produit / Catégorie</th>
+            <th class="px-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50">Nature Mutation</th>
+            <th class="px-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50 text-center">Quantité</th>
+            <th class="px-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50 text-right">Val. Unitaire</th>
+            <th class="pr-10 pl-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50 text-right">Impact Net</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-secondary-50">
+          <tr *ngFor="let detail of filteredInventaires" class="group hover:bg-primary-50/20 transition-all duration-300">
+            <!-- Ref & Date -->
+            <td class="pl-10 pr-4 py-6">
+              <div class="flex flex-col">
+                <span class="text-xs font-black text-secondary-900 tracking-tighter uppercase mb-0.5">MOV-{{ detail.id | number:'4.0' }}</span>
+                <span class="text-[10px] text-secondary-400 font-bold">{{ detail.created_at | date: 'dd/MM/yyyy • HH:mm' }}</span>
+              </div>
+            </td>
+            
+            <!-- Product Info -->
+            <td class="px-4 py-6">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl border border-secondary-100 overflow-hidden bg-secondary-50 flex-shrink-0">
+                  <img [src]="detail.produit?.image" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all">
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-sm font-black text-secondary-900 group-hover:text-primary-600 transition-colors">{{ detail.produit?.nom }}</span>
+                  <span class="text-[10px] font-bold text-secondary-400 uppercase tracking-widest">{{ detail.produit?.categorie?.nom }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Nature Mutation -->
+            <td class="px-4 py-6">
+              <div class="flex flex-col gap-1">
+                <div class="inline-flex items-center gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full" [ngClass]="detail.type === 'retrait' ? 'bg-orange-500' : 'bg-green-500'"></span>
+                  <span class="text-xs font-black text-secondary-900">{{ detail.description }}</span>
+                </div>
+                <div class="flex items-center gap-1.5 ml-3.5">
+                  <span class="text-[9px] font-bold text-secondary-400 uppercase tracking-widest">Par</span>
+                  <span class="text-[10px] font-black text-primary-500 underline decoration-primary-200 decoration-2 underline-offset-2">{{ detail.user?.name }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Quantity -->
+            <td class="px-4 py-6 text-center">
+              <span class="px-3 py-1.5 rounded-xl text-xs font-black tracking-widest transition-all"
+                [ngClass]="detail.type === 'retrait' ? 'bg-orange-50 text-orange-600 group-hover:bg-orange-600 group-hover:text-white' : 'bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white'">
+                {{ detail.type === 'retrait' ? '-' : '+' }}{{ detail.quantite }}
+              </span>
+            </td>
+
+            <!-- Unit Value -->
+            <td class="px-4 py-6 text-right">
+              <div class="flex flex-col items-end">
+                <span class="text-xs font-bold text-secondary-500 tracking-tight">
+                   {{ (detail.type === 'retrait' ? detail.produit?.stock?.prix_vente : detail.produit?.stock?.prix_achat) | number:'1.0' }}
+                </span>
+                <span class="text-[9px] font-black text-secondary-300 uppercase tracking-[0.2em]">P.{{ detail.type === 'retrait' ? 'Vente' : 'Achat' }}</span>
+              </div>
+            </td>
+
+            <!-- Impact Net -->
+            <td class="pr-10 pl-4 py-6 text-right">
+              <div class="flex flex-col items-end">
+                <span class="text-sm font-black tracking-tight" [ngClass]="detail.type === 'retrait' ? 'text-secondary-900 font-black' : 'text-primary-600'">
+                  {{ (detail.quantite * (detail.type === 'retrait' ? (detail.produit?.stock?.prix_vente || 0) : (detail.produit?.stock?.prix_achat || 0))) | number:'1.0' }}
+                </span>
+                <span class="text-[9px] font-black text-secondary-300 uppercase tracking-widest">FCFA</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        
+        <!-- Table Footer: Expert Recap -->
+        <tfoot *ngIf="filteredInventaires.length > 0" class="bg-secondary-900 shadow-2xl relative overflow-hidden">
+          <tr class="relative z-10 border-t border-white/5">
+            <td colspan="4" class="pl-10 pr-4 py-12">
+              <div class="flex items-center gap-10">
+                <div class="space-y-1">
+                  <span class="block text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Bilan des Entrées</span>
+                  <span class="text-2xl font-black text-primary-400 tracking-tighter">{{ stats.valeurAchatEntrante | number:'1.0' }} <small class="text-xs text-white/50">FCFA</small></span>
+                </div>
+                <div class="w-px h-12 bg-white/10 hidden sm:block"></div>
+                <div class="space-y-1">
+                  <span class="block text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">C.A. Théorique Sortant</span>
+                  <span class="text-2xl font-black text-orange-400 tracking-tighter">{{ stats.valeurVenteSortante | number:'1.0' }} <small class="text-xs text-white/50">FCFA</small></span>
+                </div>
+              </div>
+            </td>
+            <td colspan="2" class="pr-10 pl-4 py-12 text-right">
+              <span class="block text-[10px] font-black text-white/40 uppercase tracking-[0.3em] mb-1">Marge de Mouvement (théorique)</span>
+              <span class="text-4xl font-black text-white tracking-tightest">
+                {{ (stats.valeurVenteSortante - stats.valeurAchatEntrante) | number:'1.0' }}
+                <span class="text-sm font-bold text-primary-500 ml-1 tracking-widest uppercase">FCFA</span>
+              </span>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    <!-- Ledger Table -->
+    <div class="overflow-x-auto ledger-table">
+      ...
+    </div>
+  </div>
+</div>
+
+<!-- Dedicated Print View (A4 Landscape) -->
+<div id="printable-inventaire" class="fixed -left-[9999px] top-0 print:static print:block print-container bg-white" *ngIf="filteredInventaires.length">
+  <!-- Header Audit Pro -->
+  <div class="flex justify-between items-start mb-6 pb-4 border-b-2 border-secondary-900">
+    <div>
+      <h1 class="text-2xl font-black text-secondary-900 tracking-tight uppercase mb-1">Rapport d'Audit Journalier</h1>
+      <p class="text-[9px] font-black text-primary-500 uppercase tracking-[0.2em]">Journal d'Inventaire & Mouvements de Stock</p>
+    </div>
+    <div class="text-right">
+      <p class="text-lg font-black text-secondary-900 leading-none">Ma Boutique</p>
+      <div class="mt-2 text-[9px] font-bold text-secondary-500 space-y-0.5">
+        <p>Période: {{ dateDebut ? (dateDebut | date:'dd/MM/yyyy') : 'Origine' }} au {{ dateFin ? (dateFin | date:'dd/MM/yyyy') : 'Ce jour' }}</p>
+        <p>Filtre : {{ filterType === 'all' ? 'Tous les flux' : (filterType === 'ajout' ? 'Entrées uniquement' : 'Sorties uniquement') }}</p>
+        <p *ngIf="searchTerm">Recherche : "{{ searchTerm }}"</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Grid -->
+  <div class="grid grid-cols-4 gap-4 mb-10">
+    <div class="p-4 bg-secondary-50 border border-secondary-100 rounded-2xl">
+      <span class="block text-[8px] font-black text-secondary-400 uppercase tracking-widest mb-1">Total Entrées</span>
+      <span class="text-sm font-black text-secondary-900">{{ stats.totalEntrees }} Unités</span>
+    </div>
+    <div class="p-4 bg-secondary-50 border border-secondary-100 rounded-2xl">
+      <span class="block text-[8px] font-black text-secondary-400 uppercase tracking-widest mb-1">Total Sorties</span>
+      <span class="text-sm font-black text-secondary-900">{{ stats.totalSorties }} Unités</span>
+    </div>
+    <div class="p-4 bg-secondary-50 border border-secondary-100 rounded-2xl">
+      <span class="block text-[8px] font-black text-secondary-400 uppercase tracking-widest mb-1">Valeur Entrante</span>
+      <span class="text-sm font-black text-secondary-900">{{ stats.valeurAchatEntrante | number:'1.0' }} F</span>
+    </div>
+    <div class="p-4 bg-secondary-900 text-white rounded-2xl">
+      <span class="block text-[8px] font-black text-white/50 uppercase tracking-widest mb-1">Variation Nette</span>
+      <span class="text-sm font-black tracking-tight">{{ (stats.valeurVenteSortante - stats.valeurAchatEntrante) | number:'1.0' }} F</span>
+    </div>
+  </div>
+
+  <!-- Table Compacte -->
+  <table class="w-full text-[9px] border-collapse mb-10">
+    <thead>
+      <tr class="bg-secondary-100 text-secondary-600">
+        <th class="p-2 border border-secondary-200 text-left uppercase">Réf / Date</th>
+        <th class="p-2 border border-secondary-200 text-left uppercase">Article</th>
+        <th class="p-2 border border-secondary-200 text-left uppercase">Nature / Motif</th>
+        <th class="p-2 border border-secondary-200 text-center uppercase">Qté</th>
+        <th class="p-2 border border-secondary-200 text-right uppercase">Val. Unit</th>
+        <th class="p-2 border border-secondary-200 text-right uppercase font-black">Impact</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of filteredInventaires" class="border-b border-secondary-100 italic">
+        <td class="p-2 border-x border-secondary-200">{{ item.id }} - {{ item.created_at | date:'dd/MM HH:mm' }}</td>
+        <td class="p-2 border-r border-secondary-200 font-bold">{{ item.produit?.nom }}</td>
+        <td class="p-2 border-r border-secondary-200 uppercase">{{ item.description }}</td>
+        <td class="p-2 border-r border-secondary-200 text-center font-black" [ngClass]="item.type === 'retrait' ? 'text-red-600' : 'text-green-600'">
+          {{ item.type === 'retrait' ? '-' : '+' }}{{ item.quantite }}
+        </td>
+        <td class="p-2 border-r border-secondary-200 text-right">
+          {{ (item.type === 'retrait' ? item.produit?.stock?.prix_vente : item.produit?.stock?.prix_achat) | number:'1.0' }}
+        </td>
+        <td class="p-2 border-r border-secondary-200 text-right font-bold text-secondary-900">
+          {{ (item.quantite * (item.type === 'retrait' ? (item.produit?.stock?.prix_vente || 0) : (item.produit?.stock?.prix_achat || 0))) | number:'1.0' }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Signatures -->
+  <div class="grid grid-cols-2 gap-20 pt-10">
+    <div class="text-center">
+      <p class="text-[10px] font-black uppercase underline mb-20">Le Responsable Stock</p>
+      <div class="h-10"></div>
+    </div>
+    <div class="text-center">
+      <p class="text-[10px] font-black uppercase underline mb-20">Visa Direction / Audit</p>
+      <div class="h-10"></div>
+    </div>
+  </div>
+
+  <p class="text-center text-[8px] text-secondary-400 mt-20 italic">Document d'audit officiel - Ma Boutique - Rapport généré le {{ date | date:'dd/MM/yyyy HH:mm' }}</p>
+</div>
