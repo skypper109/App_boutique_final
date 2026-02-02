@@ -1,0 +1,306 @@
+
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true">
+  <p class="text-white mt-4 font-medium italic">Chargement...</p>
+</ngx-spinner>
+
+<div class="min-h-screen bg-secondary-50 font-sans antialiased">
+  
+  <!-- Header -->
+  <header id="header" 
+    [ngClass]="{'bg-white/80 backdrop-blur-md shadow-elegant border-b border-secondary-100': isHeaderScrolled, 'bg-transparent': !isHeaderScrolled}"
+    class="header fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-6 h-16 transition-all duration-300 d-print-none">
+    
+    <div class="flex items-center space-x-4">
+      <a [routerLink]="['/accueil']" class="logo flex items-center space-x-2 group">
+        <div class="p-1.5 bg-white rounded-lg shadow-sm border border-secondary-100 group-hover:scale-110 transition-transform duration-300">
+          <img src="logo.svg" alt="Logo" class="h-8 w-auto">
+        </div>
+        <span class="text-xl font-bold text-secondary-900 tracking-tight hidden lg:block">Ma <span class="text-primary-600">Boutique</span></span>
+      </a>
+      <button (click)="toggleSidebar()" class="p-2 rounded-xl text-secondary-630 hover:bg-secondary-100 hover:text-primary-600 transition-all duration-200">
+        <i class="bi bi-list text-2xl"></i>
+      </button>
+    </div>
+
+    <!-- Search Bar (Desktop) -->
+    <!-- <div class="hidden md:flex flex-1 max-w-md mx-8">
+      <div class="relative w-full group">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-secondary-400 group-focus-within:text-primary-500 transition-colors">
+          <i class="bi bi-search"></i>
+        </div>
+        <input type="text" placeholder="Rechercher..." 
+          class="block w-full pl-10 pr-3 py-2 border border-secondary-200 rounded-2xl bg-secondary-100/50 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/10 focus:border-primary-500 sm:text-sm transition-all">
+      </div>
+    </div> -->
+
+    <!-- Right Nav Icons -->
+    <nav class="flex items-center space-x-2 sm:space-x-4">
+      <!-- Notifications -->
+      <div class="relative group">
+        <button class="p-2 rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all relative">
+          <i class="bi bi-bell text-xl"></i>
+          <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+        </button>
+      </div>
+
+      <!-- Messages -->
+      <div class="relative group hidden sm:block">
+        <button class="p-2 rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all">
+          <i class="bi bi-chat-left-text text-xl"></i>
+        </button>
+      </div>
+
+      <!-- User Profile -->
+      <div class="relative">
+        <button (click)="toggleProfile($event)" class="flex items-center space-x-2 p-1.5 rounded-2xl hover:bg-secondary-100 transition-all">
+          <div class="w-8 h-8 rounded-xl bg-primary-100 flex items-center justify-center text-primary-600 overflow-hidden shadow-sm">
+            <img src="assets/img/profil.png" alt="Admin" class="w-full h-full object-cover">
+          </div>
+          <div class="hidden md:block text-left">
+            <p class="text-xs font-bold text-secondary-900 leading-none">{{ isAdmin ? (boutiqueNom || 'Administrateur') : (isVendeur ? 'Vendeur' : (isComptable ? 'Comptable' : 'Gestionnaire')) }}</p>
+            <p class="text-[10px] text-secondary-500 mt-1 uppercase tracking-wider font-semibold">{{ boutiqueNom ? (isAdmin ? 'Gérant Principal' : boutiqueNom) : 'Sélection Boutique...' }}</p>
+          </div>
+          <i class="bi bi-chevron-down text-xs text-secondary-400 transition-transform duration-200" [ngClass]="{'rotate-180': isProfileOpen}"></i>
+        </button>
+        
+        <!-- Dropdown Menu -->
+        <div [ngClass]="{'opacity-100 visible translate-y-0': isProfileOpen, 'opacity-0 invisible translate-y-2': !isProfileOpen}" 
+          class="absolute right-0 mt-2 w-64 transition-all duration-200 z-50">
+          <div class="bg-white rounded-2xl shadow-elegant-lg border border-secondary-100 overflow-hidden">
+            <div class="px-4 py-4 border-b border-secondary-50 bg-secondary-50/50">
+              <p class="text-sm font-black text-secondary-900 leading-none">Espace {{ isAdmin ? ('Administrateur') : (isVendeur ? 'Vendeur' : (isComptable ? 'Comptable' : 'Gestionnaire')) }}</p>
+              <p class="text-xs text-secondary-500 mt-1.5 truncate flex items-center">
+                <i class="bi bi-envelope-at mr-2"></i> {{user.email}}
+              </p>
+            </div>
+            <div class="py-2">
+              <a [routerLink]="['/profils']" class="flex items-center px-4 py-2.5 text-sm font-medium text-secondary-700 hover:bg-primary-50 hover:text-primary-700 transition-colors">
+                <div class="w-8 h-8 rounded-lg bg-primary-50 flex items-center justify-center mr-3">
+                  <i class="bi bi-person"></i>
+                </div>
+                Mon Profil
+              </a>
+              
+              <!-- Switch Boutique Link -->
+              <a *ngIf="isAdmin && boutiqueNom" (click)="switchBoutique()" class="flex items-center px-4 py-2.5 text-sm font-medium text-primary-600 hover:bg-primary-50 transition-colors cursor-pointer">
+                <div class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center mr-3">
+                  <i class="bi bi-arrow-left-right"></i>
+                </div>
+                Changer de boutique
+              </a>
+
+              <a class="flex items-center px-4 py-2.5 text-sm font-medium text-secondary-700 hover:bg-primary-50 hover:text-primary-700 transition-colors cursor-pointer">
+                <div class="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center mr-3 text-orange-600">
+                  <i class="bi bi-gear"></i>
+                </div>
+                Paramètres
+              </a>
+            </div>
+            <div class="p-2 bg-red-50/30">
+              <button (click)="logout()" 
+                class="w-full flex items-center px-4 py-3 text-sm font-black text-red-600 hover:bg-red-50 rounded-xl transition-all group">
+                <div class="w-10 h-10 rounded-lg bg-red-100/50 flex items-center justify-center mr-3 group-hover:bg-red-100 transition-colors">
+                  <i class="bi bi-power"></i>
+                </div>
+                Déconnexion
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" 
+    [ngClass]="{'translate-x-0 w-64': isSidebarOpen, '-translate-x-full w-0': !isSidebarOpen}"
+    class="sidebar fixed top-16 left-0 bottom-0 bg-white border-r border-secondary-100 z-40 transition-all duration-300 ease-in-out d-print-none overflow-y-auto overflow-x-hidden">
+    
+    <div class="p-6 space-y-6">
+      
+      <!-- General Section -->
+      <div>
+        <h3 class="px-3 text-[10px] font-bold text-secondary-400 uppercase tracking-widest mb-4">Principal</h3>
+        <ul class="space-y-1">
+          <li *ngIf="isAdmin || isGestionnaire || isVendeur || isComptable">
+            <a [routerLink]="['accueil']" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm" [routerLinkActiveOptions]="{exact: true}"
+              class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all group">
+              <i class="bi bi-grid-fill mr-3 transition-transform group-hover:scale-110"></i>
+              <span>Tableau de bord</span>
+            </a>
+          </li>
+          <li *ngIf="isVendeur">
+            <a [routerLink]="['/ventes/new']" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm"
+              class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all group">
+              <i class="bi bi-plus-circle-fill mr-3 transition-transform group-hover:scale-110"></i>
+              <span>Faire une Vente</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Inventory Section -->
+      <div *ngIf="isAdmin || isGestionnaire || isVendeur">
+        <h3 class="px-3 text-[10px] font-bold text-secondary-400 uppercase tracking-widest mb-4">Stock & Boutique</h3>
+        <ul class="space-y-1">
+          <li *ngIf="isAdmin || isGestionnaire">
+            <div class="relative">
+              <div class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all cursor-pointer"
+                   (click)="toggleMenu('stock', $event)">
+                <i class="bi bi-box-seam-fill mr-3"></i>
+                <span>Produits</span>
+                <i class="bi bi-chevron-down ml-auto text-xs transition-transform duration-200" [ngClass]="{'rotate-180': stockOpen}"></i>
+              </div>
+              <ul class="mt-1 ml-4 border-l border-secondary-100 space-y-1 hidden" [ngClass]="{'!block': stockOpen}">
+                <li><a [routerLink]="['/produits/list']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Liste des produits</a></li>
+                <li><a [routerLink]="['/produits/new']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Nouveau produit</a></li>
+                <li><a [routerLink]="['/produits/reappro']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Réapprovisionner</a></li>
+                <li><a [routerLink]="['/produits/categories']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Catégories</a></li>
+              </ul>
+            </div>
+          </li>
+          <li>
+            <div class="relative">
+              <div class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all cursor-pointer"
+                   (click)="toggleMenu('vente', $event)">
+                <i class="bi bi-cart-check-fill mr-3"></i>
+                <span>Ventes</span>
+                <i class="bi bi-chevron-down ml-auto text-xs transition-transform duration-200" [ngClass]="{'rotate-180': venteOpen}"></i>
+              </div>
+              <ul class="mt-1 ml-4 border-l border-secondary-100 space-y-1 hidden" [ngClass]="{'!block': venteOpen}">
+                <li *ngIf="isVendeur || isAdmin"><a [routerLink]="['/ventes/new']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Nouvelle vente</a></li>
+                <li *ngIf="isAdmin || isVendeur || isGestionnaire"><a [routerLink]="['/ventes/bordereaux']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Historique Bordereaux</a></li>
+                <li *ngIf="isAdmin || isGestionnaire"><a [routerLink]="['/ventes/historique']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Historique des ventes</a></li>
+              </ul>
+            </div>
+          </li>
+          <li *ngIf="isAdmin || isGestionnaire">
+            <a [routerLink]="['/clients/index']" class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all">
+              <i class="bi bi-people-fill mr-3"></i>
+              <span>Clients</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div *ngIf="isAdmin || isGestionnaire">
+        <h3 class="px-3 text-[10px] font-bold text-secondary-400 uppercase tracking-widest mb-4">Administration</h3>
+        <ul class="space-y-1">
+          <li>
+            <div class="relative">
+              <div class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all cursor-pointer"
+                   (click)="toggleMenu('user', $event)">
+                <i class="bi bi-person-badge-fill mr-3"></i>
+                <span>Utilisateurs</span>
+                <i class="bi bi-chevron-down ml-auto text-xs transition-transform duration-200" [ngClass]="{'rotate-180': userOpen}"></i>
+              </div>
+              <ul class="mt-1 ml-4 border-l border-secondary-100 space-y-1 hidden" [ngClass]="{'!block': userOpen}">
+                <li><a [routerLink]="['/users/list']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Liste des comptes</a></li>
+                <li *ngIf="isAdmin"><a [routerLink]="['/users/new']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Nouveau personnel</a></li>
+              </ul>
+            </div>
+          </li>
+          <!-- <li *ngIf="isAdmin">
+            <a (click)="openAdminPanel()" class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-primary-700 bg-primary-100 hover:bg-primary-200 transition-all cursor-pointer group">
+              <i class="bi bi-speedometer mr-3 transition-transform group-hover:scale-110"></i>
+              <span>Dashboard Admin Principal</span>
+            </a>
+          </li> -->
+          <li *ngIf="isAdmin">
+            <a [routerLink]="['/boutiques']" class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all">
+              <i class="bi bi-shop mr-3"></i>
+              <span>Mes Boutiques</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div *ngIf="isAdmin || isComptable || isGestionnaire || isVendeur">
+        <h3 class="px-3 text-[10px] font-bold text-secondary-400 uppercase tracking-widest mb-4">Finance & Compta</h3>
+        <ul class="space-y-1">
+          <li>
+            <div class="relative">
+              <div class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all cursor-pointer"
+                   (click)="toggleMenu('compta', $event)">
+                <i class="bi bi-graph-up-arrow mr-3"></i>
+                <span>Comptabilité</span>
+                <i class="bi bi-chevron-down ml-auto text-xs transition-transform duration-200" [ngClass]="{'rotate-180': comptaOpen}"></i>
+              </div>
+              <ul class="mt-1 ml-4 border-l border-secondary-100 space-y-1 hidden" [ngClass]="{'!block': comptaOpen}">
+                <li *ngIf="isAdmin || isComptable || isGestionnaire"><a routerLink="comptabilite/compta-ca" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Chiffre d'Affaire</a></li>
+                <li *ngIf="isAdmin || isComptable || isGestionnaire || isVendeur"><a routerLink="comptabilite/compta-facture" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Facturation</a></li>
+                <li *ngIf="isAdmin || isGestionnaire"><a routerLink="/credits/list" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Gestion des Crédits</a></li>
+                <li *ngIf="isAdmin || isComptable || isGestionnaire"><a routerLink="comptabilite/compta-inventaire" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Inventaire Global</a></li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Configuration Section -->
+      <div *ngIf="isAdmin">
+        <h3 class="px-3 text-[10px] font-bold text-secondary-400 uppercase tracking-widest mb-4">Configuration</h3>
+        <ul class="space-y-1">
+          <li>
+            <a [routerLink]="['/annee']" class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all">
+              <i class="bi bi-calendar-check mr-3"></i>
+              <span>Gestion de l'Année</span>
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="['/profils']" class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all">
+              <i class="bi bi-gear-fill mr-3"></i>
+              <span>Paramètres Système</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Bottom Sidebar Section -->
+    <div class=" bottom-6 left-6 right-6" *ngIf="isAdmin || isGestionnaire">
+      <div class="p-4 bg-primary-50 rounded-2xl border border-primary-100">
+        <div class="flex items-center mb-2">
+          <div class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white mr-3">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <span class="text-xs font-bold text-secondary-900">MaBoutique Pro</span>
+        </div>
+        <p class="text-[10px] text-secondary-600 mb-3">Votre licence est active jusqu'au 31 Déc 2024.</p>
+        <div class="h-1.5 w-full bg-secondary-200 rounded-full overflow-hidden">
+          <div class="h-full bg-primary-600 w-[85%] rounded-full"></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main id="main" 
+    [ngClass]="{'lg:pl-64': isSidebarOpen, 'lg:pl-0': !isSidebarOpen}"
+    class="main pt-6 min-h-screen transition-all duration-300 ease-in-out">
+    
+    <div class="p-2 sm:p-4 lg:p-6 max-w-7xl mx-auto">
+      <!-- Breadcrumbs or Page Title can go here -->
+      <router-outlet></router-outlet>
+    </div>
+
+    <!-- Footer -->
+    <footer id="footer" class="mt-auto py-8 text-center d-print-none opacity-60">
+      <p class="text-xs text-secondary-500">
+        &copy; Copyright <span class="font-bold text-secondary-700">MaBoutique</span>. Tous droits réservés.
+      </p>
+      <p class="text-[10px] text-secondary-400 mt-1">
+        Conçu avec soin par <a class="hover:text-primary-600 transition-colors font-medium">AMD-Service</a>
+      </p>
+    </footer>
+  </main>
+
+  <!-- Scroll to top -->
+  <button (click)="scrollToTop()"
+    [ngClass]="{'opacity-100': isHeaderScrolled, 'opacity-0': !isHeaderScrolled}"
+    class="fixed bottom-6 right-6 p-3 bg-primary-600 text-white rounded-2xl shadow-elegant-lg hover:bg-primary-700 hover:-translate-y-1 transition-all duration-300 z-50">
+    <i class="bi bi-arrow-up-short text-2xl"></i>
+  </button>
+
+</div>
