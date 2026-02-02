@@ -1,0 +1,30 @@
+
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true">
+  <p class="text-white mt-4 font-medium italic">Accès au module produit...</p>
+</ngx-spinner>
+
+<!-- Optional Secondary Nav for Product Module -->
+<div class="mb-8 d-print-none" *ngIf="isAdmin || isGestionnaire">
+  <div class="bg-white/60 backdrop-blur-md border border-secondary-100 p-2 rounded-2xl md:inline-flex items-center space-y-2 md:space-y-0 md:space-x-2 shadow-sm">
+    <a [routerLink]="['list']" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm ring-1 ring-primary-100"
+       class="px-4 py-2 rounded-xl text-sm font-bold text-secondary-500 hover:text-secondary-700 transition-all flex items-center">
+      <i class="bi bi-list-ul mr-2"></i> Catalogue
+    </a>
+    <a [routerLink]="['new']" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm ring-1 ring-primary-100"
+       class="px-4 py-2 rounded-xl text-sm font-bold text-secondary-500 hover:text-secondary-700 transition-all flex items-center">
+      <i class="bi bi-plus-square mr-2"></i> Ajouter
+    </a>
+    <a [routerLink]="['categories']" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm ring-1 ring-primary-100"
+       class="px-4 py-2 rounded-xl text-sm font-bold text-secondary-500 hover:text-secondary-700 transition-all flex items-center">
+      <i class="bi bi-tags mr-2"></i> Catégories
+    </a>
+    <a [routerLink]="['reappro']" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm ring-1 ring-primary-100"
+       class="px-4 py-2 rounded-xl text-sm font-bold text-secondary-500 hover:text-secondary-700 transition-all flex items-center">
+      <i class="bi bi-box-seam mr-2"></i> Réappro
+    </a>
+  </div>
+</div>
+
+<div class="animate-fade-in">
+  <router-outlet></router-outlet>
+</div>

@@ -1,0 +1,237 @@
+
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true">
+  <p class="text-white mt-4 font-medium italic">Préparation du formulaire...</p>
+</ngx-spinner>
+
+<div class="max-w-5xl mx-auto space-y-8 animate-fade-in mb-12">
+  
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold text-secondary-900 tracking-tight">
+        {{ buttonUpdate ? 'Modifier le Produit' : 'Nouvel Article' }}
+      </h1>
+      <nav class="flex mt-1 text-sm text-secondary-500 font-medium">
+        <a [routerLink]="['/accueil']" class="hover:text-primary-600 transition-colors">Accueil</a>
+        <span class="mx-2 text-secondary-300">/</span>
+        <a [routerLink]="['/produits/list']" class="hover:text-primary-600 transition-colors">Catalogue</a>
+        <span class="mx-2 text-secondary-300">/</span>
+        <span class="text-secondary-400">{{ buttonUpdate ? 'Édition' : 'Ajout' }}</span>
+      </nav>
+    </div>
+    
+    <a [routerLink]="['/produits/list']" 
+       class="inline-flex items-center px-4 py-2 bg-white border border-secondary-200 rounded-xl shadow-sm text-sm font-bold text-secondary-700 hover:bg-secondary-50 hover:border-secondary-300 transition-all">
+      <i class="bi bi-arrow-left mr-2"></i>
+      Retour à la Liste
+    </a>
+  </div>
+
+  <form [formGroup]="produitForm" (ngSubmit)="verifierSubmit()" enctype="multipart/form-data" class="space-y-8">
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 ">
+      
+      <!-- Left: Form Fields (2/3) -->
+      <div class="lg:col-span-2 space-y-8">
+        
+        <!-- General Information Card -->
+        <div class="bg-white rounded-3xl shadow-elegant border border-secondary-100 p-8 space-y-6">
+          <div class="flex items-center space-x-3 mb-2">
+            <div class="w-8 h-8 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center">
+              <i class="bi bi-info-circle-fill"></i>
+            </div>
+            <h3 class="text-lg font-bold text-secondary-900">Informations Générales</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-1">
+              <label for="nom" class="text-sm font-bold text-secondary-700 flex items-center">
+                Nom du produit <span class="text-red-500 ml-1">*</span>
+              </label>
+              <input id="nom" formControlName="nom" type="text"
+                class="block w-full px-4 py-3 bg-secondary-50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-medium"
+                placeholder="Ex: Fauteuil Malien Royal">
+            </div>
+
+            <div class="space-y-1">
+              <label for="reference" class="text-sm font-bold text-secondary-700 flex items-center">
+                Référence
+              </label>
+              <input id="reference" formControlName="reference" type="text"
+                class="block w-full px-4 py-3 bg-secondary-50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-medium"
+                placeholder="Ex: REF-001">
+            </div>
+
+            <div class="space-y-1">
+              <label for="categorie" class="text-sm font-bold text-secondary-700">Catégorie <span class="text-red-500 ml-1">*</span></label>
+              <select id="categorie" formControlName="categorie_id"
+                class="block w-full px-4 py-3 bg-secondary-50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-medium appearance-none">
+                <option value="" disabled>Sélectionner une catégorie</option>
+                <option *ngFor="let cat of categories" [value]="cat.id">{{cat.nom}}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label for="description" class="text-sm font-bold text-secondary-700">Description détaillée</label>
+            <textarea id="description" formControlName="description" rows="4"
+              class="block w-full px-4 py-3 bg-secondary-50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-medium"
+              placeholder="Décrivez les caractéristiques du produit..."></textarea>
+          </div>
+        </div>
+
+        <!-- Inventory & Pricing Card -->
+        <div class="bg-white rounded-3xl shadow-elegant border border-secondary-100 p-8 space-y-6">
+          <div class="flex items-center space-x-3 mb-2">
+            <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
+              <i class="bi bi-cash-stack"></i>
+            </div>
+            <h3 class="text-lg font-bold text-secondary-900">Stock & Tarification</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="space-y-1">
+              <label for="quantite" class="text-sm font-bold text-secondary-700">Quantité Initiale</label>
+              <div class="relative group">
+                <input id="quantite" formControlName="quantite" type="number"
+                  class="block w-full pl-4 pr-10 py-3 bg-secondary-100/50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-bold text-secondary-900 disabled:opacity-60 disabled:cursor-not-allowed">
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-secondary-400">
+                  <i class="bi bi-stack"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-1 text-secondary-900">
+              <label for="prixAchat" class="text-sm font-bold text-secondary-700">Prix d'Achat (Unité)</label>
+              <div class="relative">
+                <input id="prixAchat" formControlName="prixAchat" type="number"
+                  class="block w-full pl-4 pr-12 py-3 bg-secondary-100/50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-bold disabled:opacity-60">
+                 <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-secondary-400 font-mono text-xs">
+                  FCFA
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <label for="montantPaye" class="text-sm font-bold text-secondary-700">Total Investi</label>
+              <div class="relative">
+                <input id="montantPaye" formControlName="montantPaye" type="number" readonly
+                  class="block w-full pl-4 pr-12 py-3 bg-secondary-50 border border-secondary-200 rounded-xl text-secondary-400 sm:text-sm font-bold">
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-secondary-300 font-mono text-xs">
+                  FCFA
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-secondary-50">
+            <div class="space-y-1">
+              <label for="prixVente" class="text-sm font-bold text-primary-700">Prix de Vente Conseillé</label>
+              <div class="relative">
+                <input id="prixVente" formControlName="prixVente" type="number"
+                  class="block w-full pl-4 pr-12 py-3 bg-primary-50 border border-primary-100 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-black text-primary-900 placeholder-primary-300 disabled:opacity-60">
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-primary-400 font-mono text-xs">
+                  FCFA
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <label for="montantEstime" class="text-sm font-bold text-green-700">Bénéfice Prévu</label>
+              <div class="relative">
+                <input id="montantEstime" formControlName="montantEstime" type="number" readonly
+                  class="block w-full pl-4 pr-12 py-3 bg-green-50 border border-green-100 rounded-xl text-green-700 sm:text-sm font-black">
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-green-400 font-mono text-xs">
+                  FCFA
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dates Card -->
+        <div class="bg-white rounded-3xl shadow-elegant border border-secondary-100 p-8 space-y-6">
+          <div class="flex items-center space-x-3 mb-2">
+            <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center">
+              <i class="bi bi-calendar-check-fill"></i>
+            </div>
+            <h3 class="text-lg font-bold text-secondary-900">Dates & Garanties</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-1">
+              <label for="dateAchat" class="text-sm font-bold text-secondary-700">Date d'Acquisition</label>
+              <input id="dateAchat" formControlName="dateAchat" type="date"
+                class="block w-full px-4 py-3 bg-secondary-50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-medium disabled:opacity-60">
+            </div>
+
+            <div class="space-y-1">
+              <label for="dateFinGarantie" class="text-sm font-bold text-secondary-700">Fin de Garantie</label>
+              <input id="dateFinGarantie" formControlName="dateFinGarantie" type="date"
+                class="block w-full px-4 py-3 bg-secondary-50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-medium disabled:opacity-60">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: Media & Actions (1/3) -->
+      <div class="space-y-8">
+        
+        <!-- Image Upload Card -->
+        <div class="bg-white rounded-3xl shadow-elegant border border-secondary-100 p-8 text-center space-y-6">
+          <div class="flex items-center space-x-3 mb-2 text-left">
+            <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+              <i class="bi bi-image-fill"></i>
+            </div>
+            <h3 class="text-lg font-bold text-secondary-900">Visuel Produit</h3>
+          </div>
+
+          <div class="relative aspect-square w-full rounded-2xl bg-secondary-50 border-2 border-dashed border-secondary-200 flex items-center justify-center overflow-hidden transition-all hover:border-primary-400 group cursor-pointer"
+               (click)="fileInput.click()">
+            
+            <img *ngIf="filePreview" [src]="filePreview" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            
+            <div *ngIf="!filePreview" class="text-center p-6">
+              <i class="bi bi-cloud-arrow-up text-4xl text-secondary-300 mb-2"></i>
+              <p class="text-xs font-bold text-secondary-400 uppercase tracking-widest">Cliquez pour ajouter</p>
+              <p class="text-[10px] text-secondary-400 mt-1">PNG, JPG jusqu'à 2MB</p>
+            </div>
+
+            <!-- Overlay on hover if image exists -->
+            <div *ngIf="filePreview" class="absolute inset-0 bg-primary-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+               <span class="px-4 py-2 bg-white text-primary-700 rounded-xl text-xs font-bold shadow-lg">Changer l'image</span>
+            </div>
+          </div>
+          
+          <input #fileInput type="file" (change)="onFileSelected($event)" class="hidden" accept="image/*">
+          
+          <p *ngIf="!filePreview && produitForm.get('image')?.touched" class="text-xs text-red-500 font-medium">L'image est requise pour le catalogue.</p>
+        </div>
+
+        <!-- Form Actions Card -->
+        <div class="bg-white rounded-3xl shadow-elegant border border-secondary-100 p-8 space-y-4 sticky top-24">
+           <button type="submit" [disabled]="produitForm.invalid"
+            class="w-full py-4.5 bg-secondary-900 border border-secondary-800 hover:bg-black text-white rounded-[2rem] shadow-elegant-dark font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center h-16 group">
+            <i class="bi bi-check2-circle mr-3 text-lg text-primary-400 group-hover:scale-110 transition-transform"></i>
+            {{ buttonUpdate ? 'Mettre à jour Article' : 'Enregistrer le Produit' }}
+          </button>
+          
+          <button type="reset" *ngIf="!buttonUpdate"
+            class="w-full py-3.5 bg-secondary-100 hover:bg-secondary-200 text-secondary-700 rounded-2xl font-bold text-sm transition-all">
+            Vider le formulaire
+          </button>
+          
+          <div class="pt-4 text-center">
+            <p class="text-[10px] text-secondary-400 font-medium italic">
+              <i class="bi bi-shield-check mr-1"></i> Vos données sont protégées
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </form>
+</div>
