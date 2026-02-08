@@ -25,9 +25,16 @@ export class ListClientComponent implements OnInit {
   annees: any = [];
   dataS: any;
   annee: any;
-  clients: any = [];
+  clients: any[] = [];
   change: boolean = false;
-  boutique:any;
+  boutique: any;
+
+  // Pagination
+  paginatedClients: any[] = [];
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalPages: number = 0;
+  pages: number[] = [];
 
   constructor(private data: DataService, private router: Router, private spinne: NgxSpinnerService) { }
   ngOnInit(): void {
@@ -37,6 +44,8 @@ export class ListClientComponent implements OnInit {
     this.spinne.show();
     this.data.getAll(Env.CLIENT).subscribe((data: any) => {
       this.clients = data;
+      this.currentPage = 1;
+      this.updatePagination();
       this.spinne.hide();
       console.log(this.clients);
     });
@@ -51,9 +60,25 @@ export class ListClientComponent implements OnInit {
     this.annee = annee;
     this.data.getByAnnee(Env.CLIENT, annee).subscribe((data: any) => {
       this.clients = data;
+      this.currentPage = 1;
+      this.updatePagination();
       console.log(data);
-    }
-    );
+    });
+  }
+
+  updatePagination(): void {
+    this.totalPages = Math.ceil(this.clients.length / this.itemsPerPage);
+    this.pages = Array(this.totalPages).fill(0).map((x, i) => i + 1);
+    
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedClients = this.clients.slice(startIndex, endIndex);
+  }
+
+  changePage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.updatePagination();
   }
   accueil() {
     this.router.navigateByUrl('clients/index');

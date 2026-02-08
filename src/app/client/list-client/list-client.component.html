@@ -64,7 +64,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-secondary-50">
-          <tr *ngFor="let client of clients" class="hover:bg-primary-50/20 transition-colors group">
+          <tr *ngFor="let client of paginatedClients; let i = index" class="hover:bg-primary-50/20 transition-colors group">
             @if (client.nomClient !== "ANONYME") {
               <td class="px-8 py-6">
                 <p class="text-sm font-bold text-secondary-900">{{ client.dateVente | date:'dd MMMM yyyy '}}</p>
@@ -109,9 +109,34 @@
           </tr>
         </tbody>
       </table>
+
+      <!-- Pagination Controls -->
+      <div class="flex items-center justify-between p-8 border-t border-secondary-100" *ngIf="totalPages > 1">
+          <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1" 
+                  class="px-5 py-2.5 rounded-xl bg-white border border-secondary-200 text-secondary-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary-50 transition-all font-black text-[10px] uppercase tracking-wider shadow-sm flex items-center">
+              <i class="bi bi-chevron-left mr-2"></i> Précédent
+          </button>
+          
+          <div class="flex gap-2">
+              <button *ngFor="let page of pages" (click)="changePage(page)" 
+                      [class.bg-primary-600]="currentPage === page" 
+                      [class.text-white]="currentPage === page" 
+                      [class.bg-white]="currentPage !== page" 
+                      [class.text-secondary-600]="currentPage !== page"
+                      class="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs transition-all shadow-sm border border-secondary-200"
+                      [ngClass]="currentPage === page ? 'border-primary-600' : 'hover:bg-secondary-50'">
+                  {{ page }}
+              </button>
+          </div>
+
+          <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages" 
+                  class="px-5 py-2.5 rounded-xl bg-white border border-secondary-200 text-secondary-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary-50 transition-all font-black text-[10px] uppercase tracking-wider shadow-sm flex items-center">
+              Suivant <i class="bi bi-chevron-right mr-2"></i>
+          </button>
+      </div>
       
       <!-- Empty State -->
-      <div *ngIf="!clients?.length" class="py-24 text-center">
+      <div *ngIf="!clients.length" class="py-24 text-center">
         <div class="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4 text-secondary-300">
           <i class="bi bi-people text-3xl"></i>
         </div>

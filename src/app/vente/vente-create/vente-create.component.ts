@@ -29,10 +29,11 @@ export class VenteCreateComponent implements OnInit {
   reduction: number = 0;
   reduit: boolean = false;
   montantInter: number = 0;
-  date = new Date().toISOString();
+  date: string = new Date().toISOString() || '';
 
   typePaiement: string = 'contant';
   montantAvance: number = 0;
+  pricingMode: 'detail' | 'gros' = 'detail'; // New state for pricing mode
 
   // UI State Controls
   isCartModalVisible: boolean = false;
@@ -42,6 +43,13 @@ export class VenteCreateComponent implements OnInit {
     message: '',
     action: () => { }
   };
+
+  // Pagination properties
+  paginatedProduits: any[] = [];
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalPages: number = 1;
+  pages: number[] = [];
 
   constructor(
     private data: DataService,
@@ -57,8 +65,14 @@ export class VenteCreateComponent implements OnInit {
     });
   }
 
+  isDateModalVisible: boolean = false;
+
   ngOnInit(): void {
     this.loadProduits();
+  }
+
+  toggleDate(): void {
+    this.isDateModalVisible = !this.isDateModalVisible;
   }
 
   loadProduits(): void {
@@ -67,6 +81,8 @@ export class VenteCreateComponent implements OnInit {
       next: (data: any) => {
         this.produits = data;
         this.produitsOriginal = [...data];
+        this.currentPage = 1;
+        this.updatePagination();
         this.spinner.hide();
       },
       error: (err) => {
@@ -74,6 +90,21 @@ export class VenteCreateComponent implements OnInit {
         this.toast.error("Erreur de chargement des produits");
       }
     });
+  }
+
+  updatePagination(): void {
+    this.totalPages = Math.ceil(this.produits.length / this.itemsPerPage);
+    this.pages = Array(this.totalPages).fill(0).map((x, i) => i + 1);
+    
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedProduits = this.produits.slice(startIndex, endIndex);
+  }
+
+  changePage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.updatePagination();
   }
 
   toggleCart(): void {
@@ -106,6 +137,44 @@ export class VenteCreateComponent implements OnInit {
     }
   }
 
+  // Helper to get price based on mode
+  getPrice(product: any): number {
+    if (this.pricingMode === 'gros') {
+      return product.prix_master || product.stock?.prix_vente || 0;
+    }
+    return product.prix_detail || product.stock?.prix_vente || 0;
+  }
+
+  changePricingMode(mode: 'detail' | 'gros'): void {
+    this.pricingMode = mode;
+    // Recalculate all items in cart
+    this.produitsVente.forEach(item => {
+      item.prix = this.getPrice(item.produits);
+      item.montant = item.prix; // base unit price stored in monto? actually item.montant seemed unused or redundant in push below
+    });
+    this.calculateTotal();
+    this.toast.info(`Mode tarification : ${mode === 'gros' ? 'Grossiste' : 'Détail'}`);
+  }
+
+  onQuantityChange(produit: any, newQuantity: number): void {
+    if (newQuantity <= 0) {
+      this.onDelete(produit);
+      return;
+    }
+
+    const stockDisponible = produit.stock?.quantite || 0;
+    if (newQuantity > stockDisponible) {
+      this.toast.warning(`Stock insuffisant. Disponible : ${stockDisponible}`);
+      // Reset to max available or last valid
+      const item = this.produitsVente.find(i => i.produits.id === produit.id);
+      if (item) {
+        item.quantite = stockDisponible;
+      }
+    }
+
+    this.calculateTotal();
+  }
+
   onRemove(produit: any): void {
     const index = this.produitsVente.findIndex(i => i.produits.id === produit.id);
     if (index > -1) {
@@ -132,11 +201,12 @@ export class VenteCreateComponent implements OnInit {
       this.onAdd(produit);
     } else {
       if (produit.stock?.quantite > 0) {
+        const price = this.getPrice(produit);
         this.produitsVente.push({
           produits: produit,
-          prix: produit.stock.prix_vente,
+          prix: price,
           quantite: 1,
-          montant: produit.stock.prix_vente
+          montant: price
         });
         this.calculateTotal();
         this.toast.success(`${produit.nom} ajouté au panier`);
@@ -257,6 +327,8 @@ export class VenteCreateComponent implements OnInit {
         p.categorie.nom.toLowerCase().includes(filterValue)
       );
     }
+    this.currentPage = 1;
+    this.updatePagination();
   }
 
   isInCart(produitId: number): boolean {

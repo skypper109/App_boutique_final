@@ -52,54 +52,103 @@
             <th class="pr-10 pl-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50 text-center">Engagement</th>
           </tr>
         </thead>
+        <!-- Pricing Mode Toggles -->
+        <div class="px-10 py-4 bg-slate-50 border-b border-secondary-50 flex items-center gap-4">
+          <span class="text-[9px] font-black text-secondary-400 uppercase tracking-widest">Mode Tarification :</span>
+          <div class="flex bg-white rounded-xl p-1 shadow-sm border border-secondary-100">
+            <button (click)="changePricingMode('detail')" 
+              [class]="pricingMode === 'detail' ? 'bg-secondary-900 text-white shadow-md' : 'text-secondary-500 hover:bg-secondary-50'"
+              class="px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all">
+              Détail
+            </button>
+            <button (click)="changePricingMode('gros')" 
+              [class]="pricingMode === 'gros' ? 'bg-indigo-600 text-white shadow-md' : 'text-secondary-500 hover:bg-secondary-50'"
+              class="px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all">
+              <i class="bi bi-box-seam mr-1"></i> Gros / Master
+            </button>
+          </div>
+        </div>
         <tbody class="divide-y divide-secondary-50">
-          <tr *ngFor="let p of produits" 
-            [ngClass]="{'bg-green-50/50 border-l-4 border-l-green-500': isInCart(p.id)}"
-            class="group hover:bg-primary-50/10 transition-all duration-300">
-            <td class="pl-10 pr-4 py-6">
+          <tr *ngFor="let p of paginatedProduits" 
+            [ngClass]="{'bg-blue-50/40 border-l-4 border-l-primary-500': isInCart(p.id)}"
+            class="group hover:bg-primary-50/20 transition-all duration-300 cursor-pointer">
+            <td (click)="onStock(p)" class="pl-10 pr-4 py-7">
               <div class="flex items-center gap-6">
                 <!-- Mini Visual -->
-                <div class="w-14 h-14 bg-secondary-50 rounded-2xl flex items-center justify-center overflow-hidden border border-secondary-100 shadow-sm shrink-0 group-hover:scale-110 transition-transform">
-                  <img *ngIf="p.image" [src]="p.image" class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0">
-                  <i *ngIf="!p.image" class="bi bi-box-seam text-2xl text-secondary-200"></i>
+                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center overflow-hidden border border-secondary-100 shadow-sm shrink-0 group-hover:scale-105 group-hover:shadow-md transition-all">
+                  <img *ngIf="p.image" [src]="p.image" class="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-500">
+                  <i *ngIf="!p.image" class="bi bi-box-seam text-2xl text-secondary-300"></i>
                 </div>
                 <div class="flex flex-col">
-                  <span class="text-sm font-black text-secondary-900 group-hover:text-primary-600 transition-colors leading-none mb-1">{{ p.nom }}</span>
-                  <span class="text-[10px] text-secondary-400 font-medium italic truncate max-w-[200px]">{{ p.description || 'N/A' }}</span>
+                  <span class="text-sm font-black text-secondary-900 group-hover:text-primary-600 transition-colors leading-none mb-1.5 uppercase tracking-tight">{{ p.nom }}</span>
+                  <span class="text-[10px] text-secondary-400 font-bold italic truncate max-w-[250px]">{{ p.reference || 'Aucune reference' }}</span>
                 </div>
               </div>
             </td>
-            <td class="px-4 py-6">
-              <span class="px-3 py-1 bg-secondary-100 text-secondary-500 text-[9px] font-black rounded-full border border-secondary-200 uppercase tracking-widest">
+            <td (click)="onStock(p)" class="px-4 py-7">
+              <span class="px-3.5 py-1.5 bg-secondary-50 text-secondary-500 text-[9px] font-black rounded-xl border border-secondary-200 uppercase tracking-widest group-hover:bg-primary-50 group-hover:text-primary-600 group-hover:border-primary-100 transition-all">
                 {{ p.categorie.nom }}
               </span>
             </td>
-            <td class="px-4 py-6 text-center">
+            <td (click)="onStock(p)" class="px-4 py-7 text-center">
               <div class="inline-flex flex-col items-center">
-                 <span class="text-sm font-black" [ngClass]="p.stock.quantite > 10 ? 'text-green-600' : (p.stock.quantite > 0 ? 'text-orange-500' : 'text-red-500')">
-                   {{ p.stock.quantite }}
-                 </span>
-                 <span class="text-[8px] font-black text-secondary-400 uppercase tracking-widest">Restant</span>
+                 <div class="px-3 py-1 rounded-lg" [ngClass]="p.stock.quantite > 10 ? 'bg-green-50 text-green-600' : (p.stock.quantite > 0 ? 'bg-orange-50 text-orange-500' : 'bg-red-50 text-red-500')">
+                    <span class="text-sm font-black">{{ p.stock.quantite }}</span>
+                 </div>
+                 <span class="text-[8px] font-black text-secondary-400 uppercase tracking-widest mt-1">En Stock</span>
               </div>
             </td>
-            <td class="px-4 py-6 text-right">
-              <span class="text-lg font-black text-secondary-900 tracking-tighter">
-                {{ p.stock.prix_vente | number:'1.0' }} <small class="text-[10px] font-bold text-secondary-400 uppercase">F</small>
-              </span>
+            <td (click)="onStock(p)" class="px-4 py-7 text-right">
+              <div class="flex flex-col items-end">
+                <span class="text-lg font-black text-secondary-900 tracking-tighter group-hover:text-primary-600 transition-colors">
+                  {{ getPrice(p) | number:'1.0' }} <small class="text-[10px] font-bold text-secondary-400 uppercase">F</small>
+                </span>
+                <span *ngIf="pricingMode === 'gros'" class="text-[8px] font-black text-indigo-500 uppercase tracking-widest leading-none mt-1">Tarif Master</span>
+                <span *ngIf="pricingMode === 'detail'" class="text-[8px] font-black text-emerald-500 uppercase tracking-widest leading-none mt-1">Tarif Détail</span>
+              </div>
             </td>
-            <td class="pr-10 pl-4 py-6 text-center">
+            <td class="pr-10 pl-4 py-7 text-center">
               <button (click)="onStock(p)" [disabled]="p.stock.quantite <= 0"
-                class="px-5 py-2.5 bg-white border border-secondary-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-secondary-900 shadow-sm hover:bg-primary-500 hover:text-white hover:border-primary-400 hover:shadow-lg hover:shadow-primary-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95">
-                <i class="bi bi-plus-lg mr-2"></i> Sélectionner
+                class="w-12 h-12 flex items-center justify-center bg-white border border-secondary-100 rounded-2xl text-secondary-400 shadow-sm hover:bg-primary-600 hover:text-white hover:border-primary-600 hover:shadow-xl hover:shadow-primary-600/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all transform active:scale-90 overflow-hidden relative">
+                <i class="bi bi-cart-plus text-lg relative z-10 transition-transform group-active:scale-125" [class.bi-check-lg]="isInCart(p.id)" [class.text-primary-600]="isInCart(p.id)"></i>
+                <div *ngIf="isInCart(p.id)" class="absolute inset-0 bg-primary-50"></div>
               </button>
             </td>
           </tr>
         </tbody>
       </table>
+
+      <!-- Improved Pagination Controls -->
+      <div class="flex items-center justify-between px-10 py-8 bg-secondary-50/30 border-t border-secondary-50" *ngIf="totalPages > 1">
+          <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1" 
+                  class="px-5 py-3 rounded-2xl bg-white border border-secondary-200 text-secondary-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary-50 transition-all font-black text-[10px] uppercase tracking-[0.2em] shadow-sm flex items-center group">
+              <i class="bi bi-chevron-left mr-2 transition-transform group-hover:-translate-x-1"></i> Précédent
+          </button>
+          
+          <div class="flex gap-2">
+              <button *ngFor="let page of pages" (click)="changePage(page)" 
+                      [class.bg-secondary-900]="currentPage === page" 
+                      [class.text-white]="currentPage === page" 
+                      [class.bg-white]="currentPage !== page" 
+                      [class.text-secondary-600]="currentPage !== page"
+                      class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs transition-all shadow-sm border border-secondary-200"
+                      [ngClass]="currentPage === page ? 'border-secondary-900' : 'hover:bg-secondary-100'">
+                  {{ page }}
+              </button>
+          </div>
+
+          <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages" 
+                  class="px-5 py-3 rounded-2xl bg-secondary-900 border border-secondary-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black transition-all font-black text-[10px] uppercase tracking-[0.2em] shadow-elegant flex items-center group">
+              Suivant <i class="bi bi-chevron-right ml-2 transition-transform group-hover:translate-x-1"></i>
+          </button>
+      </div>
+
       <!-- No Results -->
-      <div *ngIf="!produits.length" class="py-40 text-center opacity-40">
-        <i class="bi bi-search text-6xl text-secondary-200 block mb-4"></i>
-        <p class="text-secondary-400 font-black italic tracking-widest uppercase text-xs">Aucune correspondance transactionnelle</p>
+      <div *ngIf="!produits.length" class="py-40 text-center">
+        <div class="w-24 h-24 bg-secondary-50 rounded-full flex items-center justify-center mx-auto mb-6 text-secondary-200">
+          <i class="bi bi-search text-4xl"></i>
+        </div>
+        <p class="text-secondary-400 font-black italic tracking-[0.3em] uppercase text-xs">Aucun produit ne correspond à votre recherche</p>
       </div>
     </div>
   </div>
@@ -122,6 +171,26 @@
             <h3 class="text-xl font-black text-white tracking-tight">Finalisation</h3>
             <p class="text-[10px] text-secondary-500 font-bold uppercase tracking-widest italic">Informations client & paiement</p>
           </div>
+          <div>
+            <!-- Button pour afficher la partie de selection de date si date n'est pas aujoud'hui -->
+             <button (click)="toggleDate()" class="px-5 py-2.5 bg-white border border-secondary-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-secondary-900 shadow-sm hover:bg-primary-500 hover:text-white hover:border-primary-400 hover:shadow-lg hover:shadow-primary-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95">
+              <i class="bi bi-calendar3"></i> 
+              @if (isDateModalVisible) {
+                <i class="bi bi-chevron-up ml-2"></i>Date du jour
+              }
+              @else {
+              <span class="ml-2">{{ date | date:'dd/MM/yyyy' }}</span>
+                <i class="bi bi-chevron-down ml-2"></i>Changer la date
+              }
+             </button>
+          </div>
+        </div> 
+
+
+        <div class="space-y-1 mb-6" [ngClass]="{ 'hidden': !isDateModalVisible }">
+          <label for="dateFinGarantie" class="text-sm font-bold text-white tracking-tight">Date de vente</label>
+          <input id="dateFinGarantie" [value]="date" type="date"
+            class="block w-full px-4 py-3 bg-white/5 text-white border border-white/10 rounded-2xl focus:bg-white focus:outline-2 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-medium disabled:opacity-80">
         </div>
 
         <form [formGroup]="factureInformation" class="space-y-6">
@@ -129,7 +198,7 @@
           <div class="space-y-2">
             <label class="text-[10px] font-black text-secondary-400 uppercase tracking-widest ml-4">Nom du Client</label>
             <div class="relative group">
-              <input type="text" formControlName="client_nom" placeholder="Ex: Jean Dupont..."
+              <input type="text" formControlName="client_nom" placeholder="votre nom Complet"
                 class="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all placeholder:text-secondary-700 outline-none">
               <i class="bi bi-person absolute right-4 top-1/2 -translate-y-1/2 text-secondary-600"></i>
             </div>
@@ -240,9 +309,9 @@
               </div>
               
               <div class="flex items-center justify-between mt-6">
-                <div class="flex items-center gap-2 bg-black/60 rounded-2xl p-1.5 border border-white/10">
+                <div class="flex items-center gap-1 bg-black/60 rounded-2xl p-1.5 border border-white/10 w-10">
                   <button (click)="onRemove(item.produits)" class="w-10 h-10 flex items-center justify-center text-secondary-400 hover:text-white hover:bg-white/10 rounded-xl transition-all"><i class="bi bi-dash-lg"></i></button>
-                  <span class="text-sm font-black min-w-[45px] text-center text-white">{{ item.quantite }}</span>
+                  <input type="number" class="text-sm font-black text-center text-white bg-transparent border-none focus:outline-none" [(ngModel)]="item.quantite" (ngModelChange)="onQuantityChange(item.produits, $event)">
                   <button (click)="onAdd(item.produits)" class="w-10 h-10 flex items-center justify-center text-secondary-400 hover:text-white hover:bg-white/10 rounded-xl transition-all"><i class="bi bi-plus-lg"></i></button>
                 </div>
                 <div class="text-right">

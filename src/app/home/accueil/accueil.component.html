@@ -58,7 +58,7 @@
           </div>
           <div class="hidden md:block text-left">
             <p class="text-xs font-bold text-secondary-900 leading-none">{{ isAdmin ? (boutiqueNom || 'Administrateur') : (isVendeur ? 'Vendeur' : (isComptable ? 'Comptable' : 'Gestionnaire')) }}</p>
-            <p class="text-[10px] text-secondary-500 mt-1 uppercase tracking-wider font-semibold">{{ boutiqueNom ? (isAdmin ? 'Gérant Principal' : boutiqueNom) : 'Sélection Boutique...' }}</p>
+            <p class="text-[10px] text-secondary-500 mt-1 uppercase tracking-wider font-semibold">{{ boutiqueNom ? (isAdmin ? 'Gérant Principal' : boutiqueNom) : 'Gerer votre Profil' }}</p>
           </div>
           <i class="bi bi-chevron-down text-xs text-secondary-400 transition-transform duration-200" [ngClass]="{'rotate-180': isProfileOpen}"></i>
         </button>
@@ -70,7 +70,7 @@
             <div class="px-4 py-4 border-b border-secondary-50 bg-secondary-50/50">
               <p class="text-sm font-black text-secondary-900 leading-none">Espace {{ isAdmin ? ('Administrateur') : (isVendeur ? 'Vendeur' : (isComptable ? 'Comptable' : 'Gestionnaire')) }}</p>
               <p class="text-xs text-secondary-500 mt-1.5 truncate flex items-center">
-                <i class="bi bi-envelope-at mr-2"></i> {{user.email}}
+                <i class="bi bi-envelope-at mr-2"></i> {{user.email}} 
               </p>
             </div>
             <div class="py-2">
@@ -89,12 +89,12 @@
                 Changer de boutique
               </a>
 
-              <a class="flex items-center px-4 py-2.5 text-sm font-medium text-secondary-700 hover:bg-primary-50 hover:text-primary-700 transition-colors cursor-pointer">
+              <!-- <a class="flex items-center px-4 py-2.5 text-sm font-medium text-secondary-700 hover:bg-primary-50 hover:text-primary-700 transition-colors cursor-pointer">
                 <div class="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center mr-3 text-orange-600">
                   <i class="bi bi-gear"></i>
                 </div>
                 Paramètres
-              </a>
+              </a> -->
             </div>
             <div class="p-2 bg-red-50/30">
               <button (click)="logout()" 
@@ -129,7 +129,7 @@
               <span>Tableau de bord</span>
             </a>
           </li>
-          <li *ngIf="isVendeur">
+          <li *ngIf="isVendeur ||isGestionnaire">
             <a [routerLink]="['/ventes/new']" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm"
               class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all group">
               <i class="bi bi-plus-circle-fill mr-3 transition-transform group-hover:scale-110"></i>
@@ -152,10 +152,10 @@
                 <i class="bi bi-chevron-down ml-auto text-xs transition-transform duration-200" [ngClass]="{'rotate-180': stockOpen}"></i>
               </div>
               <ul class="mt-1 ml-4 border-l border-secondary-100 space-y-1 hidden" [ngClass]="{'!block': stockOpen}">
-                <li><a [routerLink]="['/produits/list']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Liste des produits</a></li>
-                <li><a [routerLink]="['/produits/new']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Nouveau produit</a></li>
-                <li><a [routerLink]="['/produits/reappro']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Réapprovisionner</a></li>
-                <li><a [routerLink]="['/produits/categories']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Catégories</a></li>
+                <li><a [routerLink]="['/produits/list']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Liste des produits</a></li>
+                <li><a [routerLink]="['/produits/new']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Nouveau produit</a></li>
+                <li><a [routerLink]="['/produits/reappro']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Réapprovisionner</a></li>
+                <li><a [routerLink]="['/produits/categories']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Catégories</a></li>
               </ul>
             </div>
           </li>
@@ -168,14 +168,15 @@
                 <i class="bi bi-chevron-down ml-auto text-xs transition-transform duration-200" [ngClass]="{'rotate-180': venteOpen}"></i>
               </div>
               <ul class="mt-1 ml-4 border-l border-secondary-100 space-y-1 hidden" [ngClass]="{'!block': venteOpen}">
-                <li *ngIf="isVendeur || isAdmin"><a [routerLink]="['/ventes/new']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Nouvelle vente</a></li>
-                <li *ngIf="isAdmin || isVendeur || isGestionnaire"><a [routerLink]="['/ventes/bordereaux']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Historique Bordereaux</a></li>
-                <li *ngIf="isAdmin || isGestionnaire"><a [routerLink]="['/ventes/historique']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Historique des ventes</a></li>
+                <li *ngIf="isVendeur || isAdmin"><a [routerLink]="['/ventes/new']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Nouvelle vente</a></li>
+                <li *ngIf="isAdmin || isVendeur || isGestionnaire"><a [routerLink]="['/ventes/bordereaux']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Historique Bordereaux</a></li>
+                <li *ngIf="isAdmin || isGestionnaire"><a [routerLink]="['/ventes/historique']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Historique des ventes</a></li>
               </ul>
             </div>
           </li>
           <li *ngIf="isAdmin || isGestionnaire">
-            <a [routerLink]="['/clients/index']" class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all">
+            <a [routerLink]="['/clients/index']" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm"
+               class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all">
               <i class="bi bi-people-fill mr-3"></i>
               <span>Clients</span>
             </a>
@@ -195,8 +196,8 @@
                 <i class="bi bi-chevron-down ml-auto text-xs transition-transform duration-200" [ngClass]="{'rotate-180': userOpen}"></i>
               </div>
               <ul class="mt-1 ml-4 border-l border-secondary-100 space-y-1 hidden" [ngClass]="{'!block': userOpen}">
-                <li><a [routerLink]="['/users/list']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Liste des comptes</a></li>
-                <li *ngIf="isAdmin"><a [routerLink]="['/users/new']" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Nouveau personnel</a></li>
+                <li><a [routerLink]="['/users/list']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Liste des comptes</a></li>
+                <li *ngIf="isAdmin || isGestionnaire"><a [routerLink]="['/users/new']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Nouveau personnel</a></li>
               </ul>
             </div>
           </li>
@@ -207,7 +208,8 @@
             </a>
           </li> -->
           <li *ngIf="isAdmin">
-            <a [routerLink]="['/boutiques']" class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all">
+            <a [routerLink]="['/boutiques']" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm"
+               class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all">
               <i class="bi bi-shop mr-3"></i>
               <span>Mes Boutiques</span>
             </a>
@@ -227,10 +229,11 @@
                 <i class="bi bi-chevron-down ml-auto text-xs transition-transform duration-200" [ngClass]="{'rotate-180': comptaOpen}"></i>
               </div>
               <ul class="mt-1 ml-4 border-l border-secondary-100 space-y-1 hidden" [ngClass]="{'!block': comptaOpen}">
-                <li *ngIf="isAdmin || isComptable || isGestionnaire"><a routerLink="comptabilite/compta-ca" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Chiffre d'Affaire</a></li>
-                <li *ngIf="isAdmin || isComptable || isGestionnaire || isVendeur"><a routerLink="comptabilite/compta-facture" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Facturation</a></li>
-                <li *ngIf="isAdmin || isGestionnaire"><a routerLink="/credits/list" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Gestion des Crédits</a></li>
-                <li *ngIf="isAdmin || isComptable || isGestionnaire"><a routerLink="comptabilite/compta-inventaire" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:text-primary-600 transition-colors">Inventaire Global</a></li>
+                <li *ngIf="isAdmin || isComptable || isGestionnaire"><a routerLink="comptabilite/compta-ca" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Chiffre d'Affaire</a></li>
+                <li *ngIf="isAdmin || isComptable || isGestionnaire || isVendeur"><a routerLink="comptabilite/compta-facture" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Facturation</a></li>
+                <li *ngIf="isAdmin || isGestionnaire"><a [routerLink]="['/expenses/dashboard']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Gestion des Dépenses</a></li>
+                <li *ngIf="isAdmin || isGestionnaire"><a routerLink="/credits/list" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Gestion des Crédits</a></li>
+                <li *ngIf="isAdmin || isComptable || isGestionnaire"><a routerLink="comptabilite/compta-inventaire" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Inventaire Global</a></li>
               </ul>
             </div>
           </li>
@@ -242,13 +245,15 @@
         <h3 class="px-3 text-[10px] font-bold text-secondary-400 uppercase tracking-widest mb-4">Configuration</h3>
         <ul class="space-y-1">
           <li>
-            <a [routerLink]="['/annee']" class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all">
+            <a [routerLink]="['/annee']" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm"
+               class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all">
               <i class="bi bi-calendar-check mr-3"></i>
               <span>Gestion de l'Année</span>
             </a>
           </li>
           <li>
-            <a [routerLink]="['/profils']" class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all">
+            <a [routerLink]="['/profils']" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm"
+               class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all">
               <i class="bi bi-gear-fill mr-3"></i>
               <span>Paramètres Système</span>
             </a>
@@ -267,10 +272,21 @@
           </div>
           <span class="text-xs font-bold text-secondary-900">MaBoutique Pro</span>
         </div>
-        <p class="text-[10px] text-secondary-600 mb-3">Votre licence est active jusqu'au 31 Déc 2024.</p>
-        <div class="h-1.5 w-full bg-secondary-200 rounded-full overflow-hidden">
-          <div class="h-full bg-primary-600 w-[85%] rounded-full"></div>
+        <p class="text-[10px] text-secondary-600 mb-3">Pour signaler un probleme contactez Administrateur du Système via : </p>
+        <!-- Button de redirection vers whatsapp et boite d'email -->
+        <div class="flex items-center justify-between">
+          <a href="https://wa.me/+22382200766" target="_blank" title="+223 82 20 07 66" class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all">
+            <i class="bi bi-whatsapp mr-3"></i>
+            <span>WhatsApp</span>
+          </a>
+          <a href="mailto:ibrahimsorydiallo204@outlook.fr" title="ibrahimsorydiallo204@outlook.fr" class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all">
+            <i class="bi bi-envelope mr-3"></i>
+            <span>Email</span>
+          </a>
         </div>
+        <!-- <div class="h-1.5 w-full bg-secondary-200 rounded-full overflow-hidden">
+          <div class="h-full bg-primary-600 w-[85%] rounded-full"></div>
+        </div> -->
       </div>
     </div>
   </aside>

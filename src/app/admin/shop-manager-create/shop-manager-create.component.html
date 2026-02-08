@@ -1,0 +1,143 @@
+<div class="max-w-4xl mx-auto space-y-8 animate-fade-in mb-12">
+  
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold text-secondary-900 tracking-tight">
+        Initialisation Boutique
+      </h1>
+      <p class="mt-1 text-sm text-secondary-500 font-medium">Créez votre espace de vente et son administrateur principal.</p>
+    </div>
+    
+    <a [routerLink]="['/boutiques']" 
+       class="inline-flex items-center px-4 py-2 bg-white border border-secondary-200 rounded-xl shadow-sm text-sm font-bold text-secondary-700 hover:bg-secondary-50 hover:border-secondary-300 transition-all">
+      <i class="bi bi-arrow-left mr-2"></i>
+      Retour
+    </a>
+  </div>
+
+  <form [formGroup]="shopManagerForm" (ngSubmit)="onSubmit()" class="space-y-8">
+    
+    <!-- Boutique Section -->
+    <div class="bg-white rounded-3xl shadow-elegant border border-secondary-100 p-8 space-y-6">
+      <div class="flex items-center space-x-3 mb-2">
+        <div class="w-8 h-8 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center">
+          <i class="bi bi-shop"></i>
+        </div>
+        <h3 class="text-lg font-bold text-secondary-900">Identité de la Boutique</h3>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-1">
+          <label for="nom" class="text-sm font-bold text-secondary-700">Nom commercial <span class="text-red-500 ml-1">*</span></label>
+          <input type="text" id="nom" formControlName="nom"
+            class="block w-full px-4 py-3 bg-secondary-50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-medium"
+            placeholder="Ex: Ma Super Boutique">
+        </div>
+
+        <div class="space-y-1">
+          <label for="telephone" class="text-sm font-bold text-secondary-700">Téléphone contact <span class="text-red-500 ml-1">*</span></label>
+          <input type="text" id="telephone" formControlName="telephone"
+            class="block w-full px-4 py-3 bg-secondary-50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-medium"
+            placeholder="+225 07...">
+        </div>
+      </div>
+      
+      <div class="space-y-1">
+        <label for="adresse" class="text-sm font-bold text-secondary-700">Adresse géographique <span class="text-red-500 ml-1">*</span></label>
+        <input type="text" id="adresse" formControlName="adresse"
+          class="block w-full px-4 py-3 bg-secondary-50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-medium"
+          placeholder="Commune, Quartier...">
+      </div>
+    </div>
+
+    <!-- PDF Customization Section (Optional) -->
+    <div class="bg-white rounded-3xl shadow-elegant border border-secondary-100 p-8 space-y-6">
+      <div class="flex items-center space-x-3 mb-2">
+        <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
+          <i class="bi bi-file-earmark-pdf"></i>
+        </div>
+        <h3 class="text-lg font-bold text-secondary-900">Personnalisation PDF (Optionnel)</h3>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="space-y-1">
+          <label for="description_facture" class="text-sm font-bold text-secondary-700">Slogan Facture</label>
+          <input type="text" id="description_facture" formControlName="description_facture"
+            class="block w-full px-4 py-3 bg-secondary-50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-medium"
+            placeholder="HAUTE COLLECTION">
+        </div>
+
+        <div class="space-y-1">
+          <label for="couleur_principale" class="text-sm font-bold text-secondary-700">Couleur Principale</label>
+          <input type="color" id="couleur_principale" formControlName="couleur_principale"
+            class="block w-full h-12 bg-secondary-50 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all">
+        </div>
+
+        <div class="space-y-1">
+          <label for="devise" class="text-sm font-bold text-secondary-700">Devise</label>
+          <input type="text" id="devise" formControlName="devise"
+            class="block w-full px-4 py-3 bg-secondary-50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-medium"
+            placeholder="FCFA">
+        </div>
+      </div>
+    </div>
+
+    <!-- Manager Section -->
+    <div class="bg-white rounded-3xl shadow-elegant border border-secondary-100 p-8 space-y-6">
+      <div class="flex items-center space-x-3 mb-2">
+        <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+          <i class="bi bi-person-badge-fill"></i>
+        </div>
+        <h3 class="text-lg font-bold text-secondary-900">Compte Gestionnaire</h3>
+      </div>
+
+      <div class="space-y-6">
+         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-1">
+              <label for="manager_name" class="text-sm font-bold text-secondary-700">Nom complet <span class="text-red-500 ml-1">*</span></label>
+              <input type="text" id="manager_name" formControlName="manager_name"
+                class="block w-full px-4 py-3 bg-secondary-50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-medium">
+            </div>
+            
+            <div class="space-y-1">
+              <label for="manager_email" class="text-sm font-bold text-secondary-700">Email (Identifiant) <span class="text-red-500 ml-1">*</span></label>
+              <input type="email" id="manager_email" formControlName="manager_email"
+                class="block w-full px-4 py-3 bg-secondary-50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-medium">
+            </div>
+         </div>
+
+         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-secondary-50/50 p-6 rounded-2xl border border-secondary-100">
+            <div class="space-y-1">
+              <label for="manager_password" class="text-sm font-bold text-secondary-700">Mot de passe <span class="text-red-500 ml-1">*</span></label>
+              <input type="password" id="manager_password" formControlName="manager_password"
+                class="block w-full px-4 py-3 bg-white border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-medium">
+            </div>
+            
+            <div class="space-y-1">
+               <label for="manager_password_confirmation" class="text-sm font-bold text-secondary-700">Confirmer mot de passe <span class="text-red-500 ml-1">*</span></label>
+               <input type="password" id="manager_password_confirmation" formControlName="manager_password_confirmation"
+                 class="block w-full px-4 py-3 bg-white border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all sm:text-sm font-medium">
+            </div>
+            
+            <p *ngIf="shopManagerForm.hasError('mismatch')" class="text-xs text-red-600 font-bold col-span-full">
+              <i class="bi bi-exclamation-circle mr-1"></i> Les mots de passe ne correspondent pas.
+            </p>
+         </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center justify-end gap-4 pt-4">
+      <a [routerLink]="['/boutiques']" class="px-6 py-4 text-sm font-bold text-secondary-500 hover:text-secondary-900 transition-colors">
+        Annuler
+      </a>
+      <button type="submit" [disabled]="shopManagerForm.invalid"
+        class="px-8 py-4 bg-secondary-900 border border-secondary-800 hover:bg-black text-white rounded-2xl shadow-elegant-dark font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center group">
+        <i class="bi bi-shop-window mr-3 text-lg text-primary-400 group-hover:scale-110 transition-transform"></i>
+        Initialiser la Boutique
+      </button>
+    </div>
+
+  </form>
+</div>

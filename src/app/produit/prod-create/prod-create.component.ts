@@ -44,6 +44,7 @@ export class ProdCreateComponent implements OnInit {
   categories: any;
   buttonUpdate: boolean = false;
   toastr = inject(ToastrService) as ToastrService;
+prix_vente: any;
 
   constructor(
     private fb: FormBuilder,
@@ -58,8 +59,10 @@ export class ProdCreateComponent implements OnInit {
       reference: [''],
       categorie_id: ['', Validators.required],
       quantite: [1, { value: Number, disabled: false }],
-      prixVente: [0, { value: Number, disabled: false }],
-      prixAchat: [0, { value: Number, disabled: false }],
+      prix_vente: [0, { value: Number, disabled: false }],
+      prix_achat: [0, { value: Number, disabled: false }],
+      prix_detail: [0, { value: Number, disabled: false }],
+      prix_master: [0, { value: Number, disabled: false }],
       montantPaye: [{ value: Number, disabled: true }],
       montantEstime: [{ value: 0, disabled: true }],
       description: [''],
@@ -72,11 +75,25 @@ export class ProdCreateComponent implements OnInit {
       .get('quantite')
       ?.valueChanges.subscribe(() => this.updateMontantPaye());
     this.produitForm
-      .get('prixAchat')
+      .get('prix_achat')
       ?.valueChanges.subscribe(() => this.updateMontantPaye());
     this.produitForm
-      .get('prixVente')
+      .get('prix_vente')
       ?.valueChanges.subscribe(() => this.updateMontantEstime());
+    this.produitForm
+      .get('prix_detail')
+      ?.valueChanges.subscribe(() => this.validatePrices());
+    this.produitForm
+      .get('prix_master')
+      ?.valueChanges.subscribe(() => this.validatePrices());
+  }
+
+  validatePrices() {
+    const detail = this.produitForm.get('prix_detail')?.value || 0;
+    const master = this.produitForm.get('prix_master')?.value || 0;
+    if (master > detail && detail > 0) {
+      this.toastr.warning('Le prix de gros ne peut pas être supérieur au prix de détail', 'Attention');
+    }
   }
   id: any;
   ngOnInit() {
@@ -95,9 +112,6 @@ export class ProdCreateComponent implements OnInit {
     // Pour la modification d'un produit
     this.id = this.router.url.split('/')[3];
     if (this.id) {
-      this.produitForm.get('quantite')?.disable();
-      this.produitForm.get('prixVente')?.disable();
-      this.produitForm.get('prixAchat')?.disable();
       this.produitForm.get('dateAchat')?.disable();
       this.produitForm.get('dateFinGarantie')?.disable();
       this.buttonUpdate = true;
@@ -110,8 +124,10 @@ export class ProdCreateComponent implements OnInit {
           this.produitForm.get('reference')?.setValue(data.reference);
           this.produitForm.get('categorie_id')?.setValue(data.categorie.id);
           this.produitForm.get('quantite')?.setValue(data.stock.quantite);
-          this.produitForm.get('prixVente')?.setValue(data.stock.prix_vente);
-          this.produitForm.get('prixAchat')?.setValue(data.stock.prix_achat);
+          this.produitForm.get('prix_vente')?.setValue(data.stock.prix_vente);
+          this.produitForm.get('prix_achat')?.setValue(data.stock.prix_achat);
+          this.produitForm.get('prix_detail')?.setValue(data.prix_detail);
+          this.produitForm.get('prix_master')?.setValue(data.prix_master);
           this.produitForm.get('description')?.setValue(data.description);
           this.filePreview = data.image;
         },
@@ -141,16 +157,22 @@ export class ProdCreateComponent implements OnInit {
     this.spinne.hide();
   }
 
+  changePrixVente() {
+    this.produitForm.get('prix_detail')?.setValue(this.produitForm.get('prix_vente')?.value);
+    this.updateMontantEstime();
+  }
+
   updateMontantPaye() {
     const quantite = this.produitForm.get('quantite')?.value || 1;
-    const prixUnitaire = this.produitForm.get('prixAchat')?.value || 0;
+    const prixUnitaire = this.produitForm.get('prix_achat')?.value || 0;
     this.produitForm.get('montantPaye')?.setValue(quantite * prixUnitaire);
+    this.updateMontantEstime();
   }
 
   updateMontantEstime() {
     const quantite = this.produitForm.get('quantite')?.value || 1;
     const montantPaye = this.produitForm.get('montantPaye')?.value || 0;
-    const prixUnitaire = this.produitForm.get('prixVente')?.value || 0;
+    const prixUnitaire = this.produitForm.get('prix_vente')?.value || 0;
     this.produitForm
       .get('montantEstime')
       ?.setValue(quantite * prixUnitaire - montantPaye);
@@ -186,13 +208,15 @@ export class ProdCreateComponent implements OnInit {
       formData.append('nom', this.produitForm.value.nom);
       formData.append('categorie_id', this.produitForm.value.categorie_id);
       formData.append('quantite', this.produitForm.value.quantite);
-      formData.append('prixVente', this.produitForm.value.prixVente);
-      formData.append('prixAchat', this.produitForm.value.prixAchat);
+      formData.append('prix_vente', this.produitForm.value.prix_vente);
+      formData.append('prix_detail', this.produitForm.value.prix_detail);
+      formData.append('prix_master', this.produitForm.value.prix_master);
+      formData.append('prix_achat', this.produitForm.value.prix_achat);
       formData.append('montantPaye', this.produitForm.value.montantPaye);
       formData.append('montantEstime', this.produitForm.value.montantEstime);
       formData.append('image', this.selectedFile);
       formData.append('description', this.produitForm.value.description);
-      formData.append('dateAchat', this.produitForm.value.dateAchat);
+      formData.append('date_achat', this.produitForm.value.dateAchat);
 
       // Afficher chaque paire clé/valeur du FormData pour vérifier
 
@@ -231,8 +255,10 @@ export class ProdCreateComponent implements OnInit {
       formData.append('nom', this.produitForm.value.nom);
       formData.append('categorie_id', this.produitForm.value.categorie_id);
       formData.append('quantite', this.produitForm.value.quantite);
-      formData.append('prixVente', this.produitForm.value.prixVente);
-      formData.append('prixAchat', this.produitForm.value.prixAchat);
+      formData.append('prix_vente', this.produitForm.value.prix_vente);
+      formData.append('prix_detail', this.produitForm.value.prix_detail);
+      formData.append('prix_master', this.produitForm.value.prix_master);
+      formData.append('prix_achat', this.produitForm.value.prix_achat);
       formData.append('montantPaye', this.produitForm.value.montantPaye);
       formData.append('montantEstime', this.produitForm.value.montantEstime);
       formData.append('description', this.produitForm.value.description);
@@ -286,8 +312,13 @@ export class ProdCreateComponent implements OnInit {
       // Ajoute tous les champs avec les bonnes clés
       formData.append('nom', this.produitForm.value.nom);
       formData.append('reference', this.produitForm.value.reference || '');
+      formData.append('prix_detail', this.produitForm.value.prix_detail || '');
+      formData.append('prix_master', this.produitForm.value.prix_master || '');
       formData.append('categorie_id', this.produitForm.value.categorie_id.toString());
       formData.append('description', this.produitForm.value.description);
+      formData.append('quantite', this.produitForm.getRawValue().quantite);
+      formData.append('prix_vente', this.produitForm.getRawValue().prix_vente);
+      formData.append('prix_achat', this.produitForm.getRawValue().prix_achat);
 
       // Vérifie si une image est sélectionnée
       if (this.selectedFile) {

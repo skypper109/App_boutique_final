@@ -1,5 +1,6 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, Inject, PLATFORM_ID } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { DataService } from '../../services/data.service';
 import { Env } from '../../services/env';
 import { CfaPipe } from '../../pipes/cfa.pipe';
@@ -49,12 +50,46 @@ export class AccueilComponent {
 
   ngOnInit(): void {
     this.userRole = this.dataLog.getRole();
-    if (isPlatformBrowser(this.platformId)) {
+    if (this.platformId && isPlatformBrowser(this.platformId)) {
       window.addEventListener('scroll', () => {
         this.isHeaderScrolled = window.scrollY > 20;
       });
+      
       this.boutiqueNom = localStorage.getItem('boutique_nom');
-      this.user = this.dataLog.userConnect;
+      const userId = localStorage.getItem('user_id');
+      
+      if (userId) {
+        this.data.getAll(Env.USER + '/' + userId).subscribe({
+          next: (data: any) => {
+            this.user = data;
+          },
+          error: (err) => {
+            console.error('Erreur lors de la récupération des données utilisateur', err);
+          }
+        });
+      }
+
+      // Initial menu state update based on current URL
+      this.updateMenuState(this.router.url);
+
+      // Subscribe to route changes to keep sub-menus expanded correctly
+      this.router.events.pipe(
+        filter(event => event instanceof NavigationEnd)
+      ).subscribe((event: NavigationEnd | any) => {
+        this.updateMenuState(event.urlAfterRedirects || event.url);
+      });
+    }
+  }
+
+  private updateMenuState(url: string) {
+    if (url.includes('/produits/')) {
+      this.stockOpen = true;
+    } else if (url.includes('/ventes/')) {
+      this.venteOpen = true;
+    } else if (url.includes('/users/')) {
+      this.userOpen = true;
+    } else if (url.includes('/comptabilite/') || url.includes('/expenses/') || url.includes('/credits/')) {
+      this.comptaOpen = true;
     }
   }
 

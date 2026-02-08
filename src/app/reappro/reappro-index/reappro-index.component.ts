@@ -3,7 +3,6 @@ import { DataService } from '../../services/data.service';
 import { Env } from '../../services/env';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CfaPipe } from '../../pipes/cfa.pipe';
 import { ProduitsService } from '../../Data/produits.service';
 import { ToastrService } from 'ngx-toastr';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
@@ -16,7 +15,6 @@ import { RouterLink } from '@angular/router';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    CfaPipe,
     NgxSpinnerModule,
     RouterLink
   ],
@@ -31,9 +29,16 @@ export class ReapproIndexComponent implements OnInit {
   }
   toastr = inject(ToastrService) as ToastrService
   constructor(private data: DataService, private dataP: ProduitsService, private spinne: NgxSpinnerService) { }
-  produits: any;
+  produits: any[] = []; // Changed to array
   produitTri: any;
-  produitsOriginal: any;
+  produitsOriginal: any[] = []; // Changed to array
+
+  // Pagination
+  paginatedProduits: any[] = [];
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalPages: number = 0;
+  pages: number[] = [];
   ngOnInit(): void {
 
     this.spinne.show();
@@ -42,6 +47,8 @@ export class ReapproIndexComponent implements OnInit {
         console.log(data);
         this.produits = data;
         this.produitsOriginal = data;
+        this.currentPage = 1;
+        this.updatePagination();
       }
     );
     this.spinne.hide();
@@ -112,6 +119,8 @@ export class ReapproIndexComponent implements OnInit {
             // console.log(data);
             this.produits = data;
             this.produitsOriginal = data;
+            this.currentPage = 1;
+            this.updatePagination();
           }
         );
         this.spinne.hide();
@@ -151,14 +160,32 @@ export class ReapproIndexComponent implements OnInit {
     } else {
       // Filtrer les produits selon le filtre
       this.produitTri = this.produitsOriginal.filter((produit: { nom: string; description: string; categorie: any }) =>
-        produit.nom.toLowerCase().includes(filterValue) || produit.description.toLowerCase().includes(filterValue) || produit.categorie.nom.toLowerCase().includes(filterValue)
+        produit.nom.toLowerCase().includes(filterValue) || 
+        (produit.description && produit.description.toLowerCase().includes(filterValue)) || 
+        (produit.categorie && produit.categorie.nom.toLowerCase().includes(filterValue))
       );
 
       // Mettez à jour la liste affichée
       this.produits = [...this.produitTri];
     }
+    
+    this.currentPage = 1;
+    this.updatePagination();
+  }
 
-    console.log(this.produits);
+  updatePagination(): void {
+    this.totalPages = Math.ceil(this.produits.length / this.itemsPerPage);
+    this.pages = Array(this.totalPages).fill(0).map((x, i) => i + 1);
+    
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedProduits = this.produits.slice(startIndex, endIndex);
+  }
+
+  changePage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.updatePagination();
   }
 
 }

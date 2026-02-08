@@ -139,7 +139,7 @@ export class LoginService {
     return localStorage.getItem('user_id');
   }
 
-  get userConnect() {
+  get userConnect$() {
     const token = this.getToken();
     const headers = {
       'Authorization': `Bearer ${token}`,

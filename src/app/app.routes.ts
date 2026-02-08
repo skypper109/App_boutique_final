@@ -3,7 +3,7 @@ import { AccueilComponent } from './home/accueil/accueil.component';
 import { ErrorGeneraleComponent } from './error/error-generale/error-generale.component';
 import { produitsRoute } from './produit/routes';
 import { VenteRoutes } from './vente/vente-routes';
-import { creditRoutes } from './credit/credit-routes';
+import { CreditRoutingModule } from './credit/credit-routes';
 import { comptaRoute } from './comptabilite/routes';
 import { LoginComponent } from './login/login/login.component';
 import { DashboardComponent } from './home/dashboard/dashboard.component';
@@ -18,6 +18,7 @@ import { roleGuard } from './guards/role.guard';
 import { ProfilsComponent } from './home/profils/profils.component';
 import { GestionRoutes } from './gestion/routes';
 import { BoutiqueSelectionComponent } from './admin/boutique-selection/boutique-selection.component';
+import { ExpensesRoutingModule } from './expenses/expenses-routing.module';
 
 export const routes: Routes = [
   // Pour la page d'accueil :
@@ -28,8 +29,9 @@ export const routes: Routes = [
         { path: 'accueil', component: DashboardComponent, pathMatch: 'full', data: { roles: ['admin', 'gestionnaire', 'vendeur', 'comptable'] } },
         ...produitsRoute.routes,
         ...VenteRoutes.routes,
-        ...creditRoutes,
+        ...CreditRoutingModule.routes,
         ...comptaRoute.routes,
+        ...ExpensesRoutingModule.routes,
         {
           path: 'clients', component: IndexClientComponent,
           data: { roles: ['admin', 'gestionnaire'] },
@@ -41,7 +43,7 @@ export const routes: Routes = [
         },
         { path: 'annee', component: AnneeCreateComponent, data: { roles: ['admin'] } },
         { path: 'profils', component: ProfilsComponent, data: { roles: ['admin', 'gestionnaire', 'vendeur', 'comptable'] } },
-        ...GestionRoutes.routes
+        ...GestionRoutes.routes,
 
       ],
     canActivate: [loginGuard, roleGuard]
@@ -60,7 +62,5 @@ export const routes: Routes = [
   { path: 'error', component: ErrorGeneraleComponent },
 
   // Pour les autres pages :
-
-
   { path: '**', redirectTo: 'error' }
 ];

@@ -2,6 +2,8 @@ export class Produit {
   id!: number;
   nom!: string;
   reference?: string;
+  prix_detail?: number;
+  prix_master?: number;
   description!: string;
   prixUnitaire!: number;
   quantite!: number;

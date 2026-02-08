@@ -14,6 +14,13 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class ProformaListComponent implements OnInit {
     proformas: any[] = [];
+    paginatedProformas: any[] = [];
+
+    // Pagination
+    currentPage: number = 1;
+    itemsPerPage: number = 10;
+    totalPages: number = 0;
+    pages: number[] = [];
 
     constructor(
         private data: DataService,
@@ -31,6 +38,8 @@ export class ProformaListComponent implements OnInit {
         this.data.getAll(Env.PROFORMAS).subscribe({
             next: (res: any) => {
                 this.proformas = res;
+                this.currentPage = 1;
+                this.updatePagination();
                 this.spinner.hide();
             },
             error: (err) => {
@@ -43,5 +52,20 @@ export class ProformaListComponent implements OnInit {
 
     viewDetail(id: number): void {
         this.router.navigate(['/credits/detail', id]);
+    }
+
+    updatePagination(): void {
+        this.totalPages = Math.ceil(this.proformas.length / this.itemsPerPage);
+        this.pages = Array(this.totalPages).fill(0).map((x, i) => i + 1);
+        
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = startIndex + this.itemsPerPage;
+        this.paginatedProformas = this.proformas.slice(startIndex, endIndex);
+    }
+
+    changePage(page: number): void {
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.updatePagination();
     }
 }

@@ -1,0 +1,122 @@
+<div class="space-y-8 animate-fade-in">
+  
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold text-secondary-900 tracking-tight">Gestion des Dépenses</h1>
+      <nav class="flex mt-1 text-sm text-secondary-500 font-medium">
+        <a [routerLink]="['/home']" class="hover:text-primary-600 transition-colors">Accueil</a>
+        <span class="mx-2 text-secondary-300">/</span>
+        <span class="text-secondary-400">Historique des Charges</span>
+      </nav>
+    </div>
+    
+    <div class="flex items-center gap-3">
+      <a [routerLink]="['/expenses/dashboard']" 
+         class="inline-flex items-center px-6 py-3 bg-white border border-secondary-200 text-secondary-600 hover:bg-secondary-50 rounded-2xl shadow-elegant font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 group">
+        <i class="bi bi-graph-up mr-2.5 text-primary-500 group-hover:scale-110 transition-transform"></i>
+        Tableau de Bord
+      </a>
+
+      <a [routerLink]="['/expenses/create']" 
+         class="inline-flex items-center px-6 py-3 bg-secondary-900 border border-secondary-800 hover:bg-black text-white rounded-2xl shadow-elegant-dark font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 group">
+        <i class="bi bi-plus-lg mr-2.5 text-primary-400 group-hover:scale-110 transition-transform"></i>
+        Nouvelle Dépense
+      </a>
+    </div>
+  </div>
+
+  <!-- Main List Card -->
+  <div class="bg-white rounded-3xl shadow-elegant border border-secondary-100 overflow-hidden">
+    <!-- Card Header -->
+    <div class="px-8 py-6 border-b border-secondary-50 lg:flex lg:items-center lg:justify-between space-y-4 lg:space-y-0 bg-white">
+      <h3 class="text-lg font-bold text-secondary-900">
+        Liste des Opérations
+      </h3>
+      
+      <!-- Search (Assuming functionality exists or just placeholder matching design) -->
+      <!-- Note: If there is no search function in component TS, we can keep it visual or remove it. Keeping it simple for now as original had no search but user wants design context -->
+      <div class="relative w-full lg:max-w-xs group hidden"> 
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-secondary-400 group-focus-within:text-primary-500 transition-colors">
+          <i class="bi bi-search"></i>
+        </div>
+        <input type="text" placeholder="Rechercher..." 
+          class="block w-full pl-10 pr-3 py-2.5 bg-secondary-50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 sm:text-sm transition-all">
+      </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left whitespace-nowrap">
+        <thead>
+          <tr class="bg-secondary-50/50">
+            <th class="px-8 py-4 text-[10px] font-bold text-secondary-400 uppercase tracking-widest">Date</th>
+            <th class="px-4 py-4 text-[10px] font-bold text-secondary-400 uppercase tracking-widest">Type</th>
+            <th class="px-4 py-4 text-[10px] font-bold text-secondary-400 uppercase tracking-widest">Description</th>
+            <th class="px-4 py-4 text-[10px] font-bold text-secondary-400 uppercase tracking-widest text-right">Montant</th>
+            <th class="px-8 py-4 text-[10px] font-bold text-secondary-400 uppercase tracking-widest text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-secondary-50">
+          <tr *ngFor="let expense of expenses" class="hover:bg-primary-50/20 transition-colors group">
+            <td class="px-8 py-4 text-sm font-bold text-secondary-900">
+              {{ expense.date | date:'dd/MM/yyyy' }}
+            </td>
+            <td class="px-4 py-4">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-secondary-100 text-secondary-700 text-[10px] font-bold uppercase tracking-tight ring-1 ring-inset ring-secondary-200">
+                {{ expense.type }}
+              </span>
+            </td>
+            <td class="px-4 py-4 text-sm text-secondary-500 max-w-xs truncate">
+              {{ expense.description || '-' }}
+            </td>
+            <td class="px-4 py-4 text-right">
+               <span class="text-sm font-black text-secondary-900 block">{{ expense.montant | number }} <span class="text-[10px] font-mono text-secondary-400">FCFA</span></span>
+            </td>
+            <td class="px-8 py-4 text-center">
+              <button (click)="deleteExpense(expense.id)"
+                class="inline-flex items-center justify-center w-8 h-8 text-red-600 bg-red-50 hover:bg-red-600 hover:text-white rounded-lg transition-all shadow-sm border border-red-100/50"
+                title="Supprimer">
+                <i class="bi bi-trash3 text-xs"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <!-- Pagination Controls -->
+      <div class="flex items-center justify-between p-6 border-t border-secondary-100" *ngIf="pagination.last_page > 1">
+          <button (click)="loadExpenses(pagination.current_page - 1)" [disabled]="pagination.current_page === 1" 
+                  class="px-4 py-2 rounded-xl bg-white border border-secondary-100 text-secondary-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary-50 transition-all font-black text-[10px] uppercase tracking-wider shadow-sm flex items-center">
+              <i class="bi bi-chevron-left mr-1"></i> Précédent
+          </button>
+          
+          <div class="flex gap-2">
+              <button *ngFor="let page of pages" (click)="loadExpenses(page)" 
+                      [class.bg-primary-600]="pagination.current_page === page" 
+                      [class.text-white]="pagination.current_page === page" 
+                      [class.bg-white]="pagination.current_page !== page" 
+                      [class.text-secondary-600]="pagination.current_page !== page"
+                      class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs transition-all shadow-sm border border-secondary-100"
+                      [ngClass]="pagination.current_page === page ? 'border-primary-600' : 'hover:bg-secondary-50'">
+                  {{ page }}
+              </button>
+          </div>
+
+          <button (click)="loadExpenses(pagination.current_page + 1)" [disabled]="pagination.current_page === pagination.last_page" 
+                  class="px-4 py-2 rounded-xl bg-white border border-secondary-100 text-secondary-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary-50 transition-all font-black text-[10px] uppercase tracking-wider shadow-sm flex items-center">
+              Suivant <i class="bi bi-chevron-right ml-1"></i>
+          </button>
+      </div>
+      
+      <!-- Empty State -->
+      <div *ngIf="expenses.length === 0" class="py-16 text-center bg-secondary-50/20">
+        <div class="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4 text-secondary-300">
+          <i class="bi bi-wallet2 text-2xl"></i>
+        </div>
+        <h4 class="text-base font-bold text-secondary-900">Aucune dépense enregistrée</h4>
+        <p class="text-xs text-secondary-500 mt-1">Commencez par ajouter une nouvelle dépense.</p>
+      </div>
+    </div>
+  </div>
+</div>

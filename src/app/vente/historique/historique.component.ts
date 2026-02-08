@@ -37,6 +37,13 @@ export class HistoriqueComponent implements OnInit {
   annee: any;
   mois: any;
 
+  // Pagination
+  paginatedVentes: any[] = [];
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalPages: number = 0;
+  pages: number[] = [];
+
   // Status controls
   change: boolean = false;
   selectedMois: boolean = false;
@@ -82,6 +89,8 @@ export class HistoriqueComponent implements OnInit {
         this.ventes = data;
         this.filteredVentes = [...data];
         this.venteDate();
+        this.currentPage = 1;
+        this.updatePagination();
         this.spinne.hide();
       },
       error: (err) => {
@@ -117,6 +126,23 @@ export class HistoriqueComponent implements OnInit {
     }
 
     this.filteredVentes = result;
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  updatePagination(): void {
+    this.totalPages = Math.ceil(this.filteredVentes.length / this.itemsPerPage);
+    this.pages = Array(this.totalPages).fill(0).map((x, i) => i + 1);
+    
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedVentes = this.filteredVentes.slice(startIndex, endIndex);
+  }
+
+  changePage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.updatePagination();
   }
 
   venteDate() {
@@ -179,8 +205,13 @@ export class HistoriqueComponent implements OnInit {
   }
 
   openConfirm(title: string, message: string, action: () => void) {
-    this.confirmConfig = { title, message, action };
-    this.isConfirmModalVisible = true;
+    // Ensure modal is closed first to reset state
+    this.isConfirmModalVisible = false;
+    // Use setTimeout to ensure change detection picks up the state change
+    setTimeout(() => {
+      this.confirmConfig = { title, message, action };
+      this.isConfirmModalVisible = true;
+    }, 0);
   }
 
   closeConfirm() {

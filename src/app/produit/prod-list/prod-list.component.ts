@@ -37,9 +37,12 @@ export class ProdListComponent implements OnInit {
 
   userRole: string | null = null;
 
-  // Pagination simplified
-  pageSize = 10;
+  // Pagination
+  paginatedProduits: any[] = [];
+  itemsPerPage = 10;
   currentPage = 1;
+  totalPages = 0;
+  pages: number[] = [];
 
   // Modal states
   selectedProdId?: number;
@@ -97,6 +100,8 @@ export class ProdListComponent implements OnInit {
         this.produits = data;
         if (!this.showTrash) {
           this.filteredProduits = data;
+          this.currentPage = 1;
+          this.updatePagination();
         }
       },
       (error) => {
@@ -121,6 +126,8 @@ export class ProdListComponent implements OnInit {
         this.trashedProduits = data;
         if (this.showTrash) {
           this.filteredProduits = data;
+          this.currentPage = 1;
+          this.updatePagination();
         }
         this.spinne.hide();
       },
@@ -163,9 +170,10 @@ export class ProdListComponent implements OnInit {
         this.selectedFile = null;
       },
       error: (err) => {
-        console.log(formData.get('file'));
         console.error(err);
-        this.toast.error("Échec de l'importation. Vérifiez le format du fichier.", "Erreur");
+        const errorMessage = err.error?.message || "Échec de l'importation.";
+        const detail = err.error?.error || "Vérifiez le format du fichier.";
+        this.toast.error(`${errorMessage} ${detail}`, "Erreur d'importation");
         this.spinne.hide();
       }
     });
@@ -186,9 +194,26 @@ export class ProdListComponent implements OnInit {
     this.searchTerm = filterValue;
     this.filteredProduits = this.produits.filter(p =>
       p.nom.toLowerCase().includes(filterValue) ||
-      p.reference.toLowerCase().includes(filterValue) ||
-      p.categorie.nom.toLowerCase().includes(filterValue)
+      (p.reference && p.reference.toLowerCase().includes(filterValue)) ||
+      (p.categorie && p.categorie.nom.toLowerCase().includes(filterValue))
     );
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  updatePagination(): void {
+    this.totalPages = Math.ceil(this.filteredProduits.length / this.itemsPerPage);
+    this.pages = Array(this.totalPages).fill(0).map((x, i) => i + 1);
+    
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedProduits = this.filteredProduits.slice(startIndex, endIndex);
+  }
+
+  changePage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.updatePagination();
   }
 
   produitByid: any = {};
@@ -219,15 +244,26 @@ export class ProdListComponent implements OnInit {
     }
   }
 
-  openRestoreModal(id: number) {
+  openRestoreModal(id: number, quantite: number) {
     this.selectedProdId = id;
-    this.restoreQuantity = 0;
+    this.restoreQuantity = quantite;
     this.isRestoreModalOpen = true;
+  }
+
+  verifyRestoreQuantity() {
+    if (this.restoreQuantity < 0) {
+      this.toast.warning("Veuillez entrer une quantité positive", "Données manquantes");
+      return;
+    }
+    if (this.restoreQuantity > this.produitByid.quantite) {
+      this.toast.warning("Veuillez entrer une quantité inférieure ou égale à la quantité disponible", "Données manquantes");
+      return;
+    }
   }
 
   confirmRestore() {
     if (this.selectedProdId) {
-      const payload = { quantite: this.restoreQuantity };
+      const payload = { quantite: this.restoreQuantity};
       this.spinne.show();
       this.data.add(Env.PRODUITS + '/' + this.selectedProdId + '/restore', payload).subscribe({
         next: () => {
@@ -265,8 +301,8 @@ export class ProdListComponent implements OnInit {
     this.openDeleteModal(id);
   }
 
-  onRestore(id: number) {
-    this.openRestoreModal(id);
+  onRestore(id: number, quantite: number) {
+    this.openRestoreModal(id,quantite);
   }
   elementId(id: any) {
     console.log(id);

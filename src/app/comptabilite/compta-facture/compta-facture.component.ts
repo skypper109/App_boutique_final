@@ -25,9 +25,16 @@ export class ComptaFactureComponent implements OnInit {
   dataS: any;
   annee: any;
   factures: any = [];
-  change: boolean = false;
+  paginatedFactures: any = [];
+  
+  // Pagination properties
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalPages: number = 1;
+  pages: number[] = [];
 
   constructor(private data: DataService, private router: Router, private spinne: NgxSpinnerService) { }
+  
   ngOnInit(): void {
     if (isPlatformBrowser(this.data.platformId)) {
       this.data.getAll(Env.ANNEEVENTE).subscribe((data: any) => {
@@ -36,19 +43,40 @@ export class ComptaFactureComponent implements OnInit {
       this.spinne.show();
       this.data.getAll(Env.FACTURATION).subscribe((data: any) => {
         this.factures = data;
+        this.currentPage = 1;
+        this.updatePagination();
         this.spinne.hide();
       });
     }
   }
+
+  updatePagination(): void {
+    this.totalPages = Math.ceil(this.factures.length / this.itemsPerPage);
+    this.pages = Array(this.totalPages).fill(0).map((x, i) => i + 1);
+    
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedFactures = this.factures.slice(startIndex, endIndex);
+  }
+
+  changePage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.updatePagination();
+  }
+
   getClientAnnee(annee: any) {
     this.annee = annee;
-    // Utilisation de Env.FACTURATIONDATE qui est /facturations/
+    this.spinne.show();
     this.data.getByAnnee(Env.FACTURATIONDATE, annee).subscribe((data: any) => {
       this.factures = data;
+      this.currentPage = 1;
+      this.updatePagination();
+      this.spinne.hide();
       console.log(data);
-    }
-    );
+    });
   }
+
   accueil() {
     this.router.navigateByUrl('clients/index');
   }

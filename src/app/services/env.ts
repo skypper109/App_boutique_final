@@ -42,6 +42,7 @@ export class Env {
 
   public static PROFIL = Env.API_URL + '/profil';
   public static BOUTIQUES = Env.API_URL + '/boutiques';
+  public static BOUTIQUES_STORE_WITH_MANAGER = Env.BOUTIQUES + '/store-with-manager';
   public static PRODUITS_TRASHED = Env.PRODUITS + '/trashed';
   public static PRODUITS_RESTORE = Env.PRODUITS + '/restore';
 
@@ -55,4 +56,11 @@ export class Env {
   // User and Boutique Status Check
   public static CHECK_USER_STATUS = Env.API_URL + '/user/check-status';
   public static CHECK_BOUTIQUE_STATUS = Env.API_URL + '/boutique/check-status';
+  
+  public static EXPENSES = Env.API_URL + '/expenses';
+  public static EXPENSES_DASHBOARD = Env.API_URL + '/expenses/dashboard';
+  
+  // PDF Generation
+  public static PDF_GENERATE = Env.API_URL + '/pdf/generate';
+  public static PDF_PREVIEW = Env.API_URL + '/pdf/preview';
 }

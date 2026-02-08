@@ -184,6 +184,44 @@
                 </table>
              </div>
            </div>
+
+           <!-- History -->
+           <div *ngIf="history?.length" class="mt-8">
+             <h4 class="text-[8px] font-bold text-slate-300 uppercase tracking-widest mb-4">Historique des Mouvements</h4>
+             <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                  <tbody class="divide-y divide-secondary-50">
+                     <tr class="text-[10px]" *ngFor="let h of paginatedHistory">
+                        <td class="py-4 px-2 text-secondary-400 font-medium">{{ h.date | date:'dd/MM/yy' }}</td>
+                        <td class="py-4 px-2 font-bold uppercase tracking-tighter">{{ h.type === 'ajout' ? 'Retour/Annulation' : 'Sortie/Vente' }}</td>
+                        <td class="py-4 px-2 text-right font-black text-secondary-900">{{ h.quantite }} x {{ h.produit?.nom }}</td>
+                     </tr>
+                  </tbody>
+                </table>
+             </div>
+
+             <!-- History Pagination Controls -->
+             <div class="flex items-center justify-between mt-4" *ngIf="historyTotalPages > 1">
+                <button (click)="changeHistoryPage(historyPage - 1)" [disabled]="historyPage === 1" 
+                        class="p-1 text-secondary-400 hover:text-primary-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                
+                <div class="flex gap-1">
+                    <button *ngFor="let page of historyPages" (click)="changeHistoryPage(page)" 
+                            [class.text-primary-600]="historyPage === page" 
+                            [class.text-secondary-400]="historyPage !== page"
+                            class="w-6 h-6 flex items-center justify-center text-[10px] font-black transition-all">
+                        {{ page }}
+                    </button>
+                </div>
+
+                <button (click)="changeHistoryPage(historyPage + 1)" [disabled]="historyPage === historyTotalPages" 
+                        class="p-1 text-secondary-400 hover:text-primary-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+             </div>
+           </div>
         </div>
       </div>
     </div>
@@ -191,7 +229,7 @@
 </div>
 
 <!-- Premium Print Version (A4 Compact) -->
-<div id="printable-credit" class="fixed -left-[9999px] top-0 print:static print:block print-container bg-white" *ngIf="vente">
+<div id="printable-credit" class="hidden print:block print-container bg-white" *ngIf="vente">
   <!-- Header -->
   <div class="flex justify-between items-start mb-8 pb-6 border-b-2 border-slate-900">
     <div class="space-y-4">

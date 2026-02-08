@@ -1,7 +1,11 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import { Env } from './env';
+import { DataService } from './data.service';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,120 +13,113 @@ import { ToastrService } from 'ngx-toastr';
 export class ExportService {
 
   constructor(
+    private http: HttpClient,
     private spinner: NgxSpinnerService,
     private toastr: ToastrService,
+    private dataService: DataService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
   /**
-   * Detects if the app is running in Tauri
+   * Download PDF from backend
    */
-  private isTauri(): boolean {
-    return isPlatformBrowser(this.platformId) && (window as any).__TAURI__ !== undefined;
-  }
-
-  /**
-   * Professionally prints an element by ID
-   */
-  async printElement(selector: string) {
-    if (!isPlatformBrowser(this.platformId)) return;
-
-    try {
-      this.spinner.show();
-      
-      // Short delay for rendering
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      const element = document.querySelector(selector);
-      if (!element) {
-        this.toastr.error('Élément à imprimer introuvable');
-        return;
-      }
-
-      // Hide spinner BEFORE printing to avoid it blocking the UI thread or appearing in the print
-      this.spinner.hide();
-      
-      // Mandatory delay for NgxSpinner to fully disappear before system dialog opens
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      window.print();
-    } catch (error) {
-      console.error('Print error:', error);
-      this.toastr.error('Échec de l\'impression');
-      this.spinner.hide();
-    }
-  }
-
-  /**
-   * Professionally exports an element to PDF
-   * @param orientation 'portrait' or 'landscape'
-   */
-  async exportToPdf(selector: string, filename: string, orientation: 'portrait' | 'landscape' = 'portrait') {
+  async downloadPdf(type: 'facture' | 'bordereau' | 'recu_credit' | 'inventaire', id: number, filename?: string) {
     if (!isPlatformBrowser(this.platformId)) return;
 
     this.spinner.show();
-    this.toastr.info('Préparation du document...', 'Export PDF', { timeOut: 2000 });
+    this.toastr.info('Génération du PDF...', 'Export');
 
     try {
-      const element = document.querySelector(selector) as HTMLElement;
-      if (!element) {
-        throw new Error('Élément introuvable');
-      }
+      const response = await firstValueFrom(
+        this.http.post(
+          `${Env.API_URL}/pdf/generate`,
+          { type, id },
+          {
+            headers: this.dataService.getHeaders(),
+            responseType: 'blob'
+          }
+        )
+      );
 
-      // Temporarily show the element if it's hidden via .hidden or print:block
-      const originalDisplay = element.style.display;
-      const originalPosition = element.style.position;
-      const originalVisibility = element.style.visibility;
+      // Create blob and download
+      const blob = new Blob([response], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename || `${type}-${id}.pdf`;
+      link.click();
+      window.URL.revokeObjectURL(url);
 
-      // Handle common Tailwind/CSS hidden classes
-      const isHidden = window.getComputedStyle(element).display === 'none';
-      if (isHidden) {
-        element.style.setProperty('display', 'block', 'important');
-        element.style.position = 'absolute';
-        element.style.top = '-9999px';
-        element.style.left = '-9999px';
-        element.style.visibility = 'visible';
-      }
-
-      // Dynamic import
-      const html2pdf = (await import('html2pdf.js' as any)).default;
-
-      if (!html2pdf) {
-        throw new Error('Bibliothèque PDF non chargée');
-      }
-
-      const opt = {
-        margin: [0.15, 0.15],
-        filename: filename.endsWith('.pdf') ? filename : `${filename}.pdf`,
-        image: { type: 'jpeg', quality: 1.0 },
-        html2canvas: { 
-          scale: 3,
-          useCORS: true,
-          letterRendering: true,
-          scrollY: 0,
-          windowWidth: 1400
-        },
-        jsPDF: { unit: 'in', format: 'a4', orientation: orientation },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-      };
-
-      // Generate PDF
-      await html2pdf().set(opt).from(element).save();
-
-      // Restore original state
-      if (isHidden) {
-        element.style.display = originalDisplay;
-        element.style.position = originalPosition;
-        element.style.visibility = originalVisibility;
-      }
-
-      this.toastr.success('Document généré avec succès', 'Succès');
-
+      this.toastr.success('PDF téléchargé avec succès', 'Succès');
     } catch (error: any) {
-      console.error('PDF export error:', error);
-      this.toastr.error(error.message || 'Erreur lors de la génération du PDF');
+      console.error('PDF download error:', error);
+      // Try to read the blob error if possible
+      if (error.error instanceof Blob) {
+        const text = await error.error.text();
+        console.error('Backend error (text):', text);
+      }
+      this.toastr.error('Erreur lors de la génération du PDF. Vérifiez la console.', 'Erreur');
     } finally {
       this.spinner.hide();
     }
+  }
+
+  /**
+   * Print PDF from backend
+   */
+  async printPdf(type: 'facture' | 'bordereau' | 'recu_credit' | 'inventaire', id: number) {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    this.spinner.show();
+    this.toastr.info('Préparation de l\'impression...', 'Impression');
+
+    try {
+      const response = await firstValueFrom(
+        this.http.post(
+          `${Env.API_URL}/pdf/generate`,
+          { type, id },
+          {
+            headers: this.dataService.getHeaders(),
+            responseType: 'blob'
+          }
+        )
+      );
+
+      // Create blob URL and open in new window for printing
+      const blob = new Blob([response], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      
+      const printWindow = window.open(url, '_blank');
+      if (printWindow) {
+        printWindow.addEventListener('load', () => {
+          printWindow.print();
+        });
+      }
+
+      this.toastr.success('Document prêt à imprimer', 'Succès');
+    } catch (error: any) {
+      console.error('Print error:', error);
+      this.toastr.error('Erreur lors de la préparation de l\'impression', 'Erreur');
+    } finally {
+      this.spinner.hide();
+    }
+  }
+
+  /**
+   * Legacy method for backward compatibility (deprecated)
+   * @deprecated Use downloadPdf or printPdf instead
+   */
+  async exportToPdf(selector: string, filename: string, orientation: 'portrait' | 'landscape' = 'portrait') {
+    console.warn('exportToPdf is deprecated. Please use downloadPdf() instead.');
+    this.toastr.warning('Cette méthode est obsolète', 'Avertissement');
+  }
+
+  /**
+   * Legacy method for backward compatibility (deprecated)
+   * @deprecated Use printPdf instead
+   */
+  async printElement(selector: string) {
+    console.warn('printElement is deprecated. Please use printPdf() instead.');
+    this.toastr.warning('Cette méthode est obsolète', 'Avertissement');
   }
 }

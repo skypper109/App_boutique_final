@@ -1,0 +1,143 @@
+<!-- Loading Spinner -->
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true">
+  <p class="text-white mt-4 font-bold tracking-widest uppercase text-xs">Analyse des Dépenses...</p>
+</ngx-spinner>
+
+<div class="max-w-[1700px] mx-auto px-6 py-10 font-sans">
+  
+  <!-- Header Section -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 animate-fade-in">
+    <div class="space-y-1">
+      <div class="inline-flex items-center px-3 py-1 bg-red-50 rounded-full border border-red-100 mb-2">
+        <span class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse mr-2"></span>
+        <span class="text-[9px] font-black text-red-700 uppercase tracking-widest">Finance & Charges</span>
+      </div>
+      <h1 class="text-4xl font-black text-secondary-900 tracking-tight leading-none">Tableau de Bord Dépenses</h1>
+      <p class="text-secondary-500 font-medium text-sm">Suivi analytique des sorties financières et charges d'exploitation</p>
+    </div>
+    <div class="flex items-center gap-1">
+      <a [routerLink]="['/expenses/create']" 
+         class="inline-flex items-center px-6 py-3 bg-white border border-secondary-200 text-secondary-600 hover:bg-secondary-50 rounded-2xl shadow-elegant font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 group">
+        <i class="bi bi-plus-lg mr-2.5 text-primary-500 group-hover:scale-110 transition-transform"></i>
+        Nouvelle Dépense
+      </a>
+
+      <a [routerLink]="['/expenses/list']" 
+         
+         class="inline-flex items-center px-6 py-3 bg-white border border-secondary-200 text-secondary-600 hover:bg-secondary-50 rounded-2xl shadow-elegant font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 group">
+        <i class="bi bi-list mr-2.5 text-primary-400 group-hover:scale-110 transition-transform"></i>
+        Liste des Dépenses
+      </a>
+    </div>
+
+    <!-- Year Filter Pill -->
+    <div class="inline-flex items-center px-6 py-3 bg-secondary-900 border border-secondary-800 hover:bg-black text-white rounded-2xl shadow-elegant-dark font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 group">
+      <div class="px-4 py-2 border-r border-secondary-100">
+        <span class="text-[9px] font-black text-secondary-400 uppercase tracking-widest mr-2">Exercice</span>
+      </div>
+      <select [(ngModel)]="selectedYear" (change)="loadDashboardData()" 
+        class="bg-transparent border-none text-sm font-black text-secondary-900 text-white cursor-pointer focus:ring-0 pr-8 pl-4 py-2 outline-none">
+        <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+    <!-- Total Year Card -->
+    <div class="bg-secondary-900 rounded-[2.5rem] p-8 shadow-elegant-dark overflow-hidden relative group cursor-pointer">
+      <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-colors"></div>
+      
+      <div class="relative z-10">
+        <div class="flex items-center justify-between mb-8">
+          <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white backdrop-blur-sm">
+             <i class="bi bi-wallet2 text-xl"></i>
+          </div>
+          <span class="px-3 py-1 rounded-lg bg-red-500 text-white text-[9px] font-black uppercase tracking-widest">
+            {{ selectedYear }}
+          </span>
+        </div>
+        
+        <p class="text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] mb-1">Charge Totale Annuelle</p>
+        <p class="text-4xl font-black text-white tracking-tighter">
+          {{ totalYear | number }} <span class="text-sm text-secondary-500 font-bold">FCFA</span>
+        </p>
+
+        <div class="mt-6 pt-6 border-t border-white/10 flex items-center gap-2 text-[10px] text-secondary-400">
+          <i class="bi bi-info-circle"></i>
+          <span>Cumul des dépenses validées</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Action: View All Expenses -->
+    <a [routerLink]="['../list']" 
+      class="bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-[2.5rem] p-8 shadow-elegant border border-orange-200 hover:shadow-elegant-lg transition-all duration-300 group cursor-pointer overflow-hidden relative">
+      <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-colors"></div>
+      
+      <div class="relative z-10">
+        <div class="flex items-center justify-between mb-6">
+          <div class="w-14 h-14 rounded-2xl bg-white/80 backdrop-blur-sm flex items-center justify-center text-orange-600 shadow-sm group-hover:scale-110 transition-transform">
+            <i class="bi bi-list-ul text-2xl"></i>
+          </div>
+          <i class="bi bi-arrow-right text-orange-400 text-xl group-hover:translate-x-1 transition-transform"></i>
+        </div>
+        
+        <h3 class="text-lg font-black text-secondary-900 tracking-tight mb-2">Liste des Dépenses</h3>
+        <p class="text-[10px] text-secondary-600 font-medium leading-relaxed">
+          Consulter l'historique complet de toutes les charges enregistrées
+        </p>
+      </div>
+    </a>
+
+    <!-- Quick Action: Create New Expense -->
+    <a [routerLink]="['../create']" 
+      class="bg-gradient-to-br from-red-50 to-red-100/50 rounded-[2.5rem] p-8 shadow-elegant border border-red-200 hover:shadow-elegant-lg transition-all duration-300 group cursor-pointer overflow-hidden relative">
+      <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-red-500/10 rounded-full blur-2xl group-hover:bg-red-500/20 transition-colors"></div>
+      
+      <div class="relative z-10">
+        <div class="flex items-center justify-between mb-6">
+          <div class="w-14 h-14 rounded-2xl bg-white/80 backdrop-blur-sm flex items-center justify-center text-red-600 shadow-sm group-hover:scale-110 transition-transform">
+            <i class="bi bi-plus-circle-fill text-2xl"></i>
+          </div>
+          <i class="bi bi-arrow-right text-red-400 text-xl group-hover:translate-x-1 transition-transform"></i>
+        </div>
+        
+        <h3 class="text-lg font-black text-secondary-900 tracking-tight mb-2">Nouvelle Dépense</h3>
+        <p class="text-[10px] text-secondary-600 font-medium leading-relaxed">
+          Enregistrer une nouvelle sortie financière ou charge d'exploitation
+        </p>
+      </div>
+    </a>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Monthly Evolution -->
+    <div class="bg-white p-8 rounded-[3rem] shadow-elegant border border-secondary-100">
+      <div class="flex items-center justify-between mb-8">
+         <h3 class="text-lg font-black text-secondary-900 tracking-tight">Évolution Mensuelle</h3>
+         <button class="w-10 h-10 rounded-xl bg-secondary-50 text-secondary-400 hover:bg-secondary-100 flex items-center justify-center transition-colors">
+           <i class="bi bi-three-dots"></i>
+         </button>
+      </div>
+      <div class="h-80 w-full">
+        <canvas #monthlyChart></canvas>
+      </div>
+    </div>
+
+    <!-- Type Partition -->
+    <div class="bg-white p-8 rounded-[3rem] shadow-elegant border border-secondary-100">
+      <div class="flex items-center justify-between mb-8">
+         <h3 class="text-lg font-black text-secondary-900 tracking-tight">Répartition par Nature</h3>
+         <button class="w-10 h-10 rounded-xl bg-secondary-50 text-secondary-400 hover:bg-secondary-100 flex items-center justify-center transition-colors">
+           <i class="bi bi-download"></i>
+         </button>
+      </div>
+      <div class="h-80 w-full flex items-center justify-center">
+        <canvas #typeChart></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -36,7 +36,19 @@ export class BoutiqueListComponent implements OnInit {
             nom: ['', Validators.required],
             adresse: [''],
             telephone: [''],
-            email: ['', Validators.email]
+            email: ['', Validators.email],
+            // PDF Customization
+            logo: [''],
+            description_facture: ['HAUTE COLLECTION'],
+            description_bordereau: ['BORDEREAU COMMERCIAL'],
+            description_recu: ['REÇU DE PAIEMENT'],
+            footer_facture: ['Aucun échange ne sera accepté sans ce ticket de caisse original.'],
+            footer_bordereau: ['Ce document est la propriété de Ma Boutique jusqu\'au règlement intégral.'],
+            footer_recu: ['Merci pour votre confiance. Ce reçu fait foi de paiement.'],
+            couleur_principale: ['#4f46e5'],
+            couleur_secondaire: ['#10b981'],
+            devise: ['FCFA'],
+            format_facture: ['A4']
         });
     }
 

@@ -13,6 +13,7 @@ export class GestionRoutes {
             ]
         },
         { path: 'boutiques', component: BoutiqueListComponent, data: { roles: ['admin'] } },
+        { path: 'boutiques/initialization', loadComponent: () => import('../admin/shop-manager-create/shop-manager-create.component').then(m => m.ShopManagerCreateComponent), data: { roles: ['admin'] } },
         { path: 'boutiques/:id', loadComponent: () => import('./boutique-dashboard/boutique-dashboard.component').then(m => m.BoutiqueDashboardComponent), data: { roles: ['admin'] } }
     ];
 }

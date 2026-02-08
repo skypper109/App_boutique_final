@@ -73,11 +73,13 @@ export class ProdFactureComponent {
   }
 
   print() {
-    this.exportService.printElement('#printable-facture');
+    const venteId = this.route.snapshot.params['idVente'];
+    this.exportService.printPdf('facture', venteId);
   }
 
   exportPDF() {
-    this.exportService.exportToPdf('#printable-facture', `Facture_${this.idFacture}`);
+    const venteId = this.route.snapshot.params['idVente'];
+    this.exportService.downloadPdf('facture', venteId, `Facture_${this.idFacture}.pdf`);
   }
 
 }

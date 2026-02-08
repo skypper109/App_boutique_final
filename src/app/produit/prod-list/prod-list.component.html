@@ -4,7 +4,7 @@
 </ngx-spinner>
 
 <div class="space-y-8 animate-fade-in">
-  
+
   <!-- Page Header -->
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div>
@@ -15,7 +15,7 @@
         <span class="text-secondary-400">Catalogue Produits</span>
       </nav>
     </div>
-     
+
     <div class="flex items-center gap-3 d-print-none" *ngIf="isAdmin || isGestionnaire">
       <input type="file" #fileInput (change)="onFileSelected($event)" accept=".csv" class="hidden">
       <!-- (click)="fileInput.click()" -->
@@ -25,14 +25,14 @@
         Import CSV
       </button>
 
-      <button (click)="toggleTrash()" 
+      <button (click)="toggleTrash()"
          [ngClass]="showTrash ? 'bg-primary-600 border-primary-500 shadow-primary-200 text-white' : 'bg-white border-secondary-200 text-secondary-600 hover:bg-secondary-50'"
          class="inline-flex items-center px-6 py-3 border rounded-2xl shadow-elegant font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 group">
         <i class="bi mr-2.5 transition-transform" [ngClass]="showTrash ? 'bi-arrow-left text-white' : 'bi-trash3 text-primary-500'"></i>
         {{ showTrash ? 'Retour au catalogue' : 'Corbeille' }}
       </button>
 
-      <button *ngIf="!showTrash" [routerLink]="['../new']" 
+      <button *ngIf="!showTrash" [routerLink]="['../new']"
          class="inline-flex items-center px-6 py-3 bg-secondary-900 border border-secondary-800 hover:bg-black text-white rounded-2xl shadow-elegant-dark font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 group">
         <i class="bi bi-plus-lg mr-2.5 text-primary-400 group-hover:scale-110 transition-transform"></i>
         Ajouter un Produit
@@ -47,12 +47,12 @@
       <h3 class="text-lg font-bold text-secondary-900">
         {{ showTrash ? 'Corbeille (Articles Supprimés)' : 'Liste des Produits' }}
       </h3>
-      
+
       <div class="relative w-full lg:max-w-xs group">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-secondary-400 group-focus-within:text-primary-500 transition-colors">
           <i class="bi bi-search"></i>
         </div>
-        <input type="text" (input)="applyFilter($event)" placeholder="Rechercher un produit..." 
+        <input type="text" (input)="applyFilter($event)" placeholder="Rechercher un produit..."
           class="block w-full pl-10 pr-3 py-2.5 bg-secondary-50 border border-secondary-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 sm:text-sm transition-all">
       </div>
     </div>
@@ -72,8 +72,8 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-secondary-50">
-          <tr *ngFor="let produit of filteredProduits; let i = index" class="hover:bg-primary-50/20 transition-colors group">
-            <td class="px-8 py-4 text-xs font-bold text-secondary-400">{{ i + 1 }}</td>
+          <tr *ngFor="let produit of paginatedProduits; let i = index" class="hover:bg-primary-50/20 transition-colors group">
+            <td class="px-8 py-4 text-xs font-bold text-secondary-400">{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
             <td class="px-4 py-4">
               <div class="w-12 h-12 rounded-2xl bg-secondary-100 border border-secondary-200 overflow-hidden shadow-sm group-hover:scale-105 transition-transform duration-300">
                 <img [src]="produit.image" class="w-full h-full object-cover">
@@ -96,11 +96,11 @@
               </span>
             </td>
             <td class="px-4 py-4 text-right text-sm font-extrabold text-secondary-900">
-              {{ produit.stock.prix_vente | number:'1.0' }} <span class="text-[10px] font-mono text-secondary-400">FA</span>
+              {{ produit.stock.prix_vente | number:'1.0' }} <span class="text-[10px] font-mono text-secondary-400">FcFA</span>
             </td>
             <td class="px-8 py-4 space-x-1 text-center">
               <ng-container *ngIf="!showTrash">
-                <button [routerLink]="['../edit', produit.id]"
+                <button [routerLink]="['../new', produit.id]"
                   class="inline-flex items-center justify-center w-10 h-10 text-primary-600 bg-primary-50 hover:bg-primary-600 hover:text-white rounded-xl transition-all shadow-sm border border-primary-100/50" title="Modifier">
                   <i class="bi bi-pencil-square"></i>
                 </button>
@@ -110,8 +110,8 @@
                   <i class="bi bi-trash3"></i>
                 </button>
               </ng-container>
-              
-              <button *ngIf="showTrash" (click)="openRestoreModal(produit.id)" 
+
+              <button *ngIf="showTrash" (click)="openRestoreModal(produit.id,produit.stock.quantite)"
                 class="inline-flex items-center px-4 py-2 bg-green-50 text-green-700 hover:bg-green-600 hover:text-white rounded-xl transition-all font-black text-[10px] uppercase tracking-widest shadow-sm border border-green-100/50">
                 <i class="bi bi-arrow-counterclockwise mr-2"></i>
                 Restaurer
@@ -120,7 +120,32 @@
           </tr>
         </tbody>
       </table>
-      
+
+      <!-- Pagination Controls -->
+      <div class="flex items-center justify-between p-6 border-t border-secondary-100" *ngIf="totalPages > 1">
+          <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1"
+                  class="px-4 py-2 rounded-xl bg-white border border-secondary-100 text-secondary-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary-50 transition-all font-black text-[10px] uppercase tracking-wider shadow-sm flex items-center">
+              <i class="bi bi-chevron-left mr-1"></i> Précédent
+          </button>
+
+          <div class="flex gap-2">
+              <button *ngFor="let page of pages" (click)="changePage(page)"
+                      [class.bg-primary-600]="currentPage === page"
+                      [class.text-white]="currentPage === page"
+                      [class.bg-white]="currentPage !== page"
+                      [class.text-secondary-600]="currentPage !== page"
+                      class="w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs transition-all shadow-sm border border-secondary-100"
+                      [ngClass]="currentPage === page ? 'border-primary-600' : 'hover:bg-secondary-50'">
+                  {{ page }}
+              </button> 
+          </div>
+
+          <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages"
+                  class="px-4 py-2 rounded-xl bg-white border border-secondary-100 text-secondary-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary-50 transition-all font-black text-[10px] uppercase tracking-wider shadow-sm flex items-center">
+              Suivant <i class="bi bi-chevron-right ml-1"></i>
+          </button>
+      </div>
+
       <!-- Empty State -->
       <div *ngIf="!filteredProduits.length" class="py-24 text-center bg-secondary-50/20">
         <div class="w-20 h-20 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-6 text-secondary-300">
@@ -132,43 +157,62 @@
           Réinitialiser la recherche
         </button>
       </div>
+      
     </div>
   </div>
 
   <!-- Top Products Section (Optional/Gallery Style) -->
   <div class="space-y-6">
+
     <div class="flex items-center justify-between">
       <h3 class="text-lg font-bold text-secondary-900">Top Vente des Produits</h3>
       <div class="p-2 bg-primary-50 rounded-lg text-primary-700 text-xs font-bold uppercase tracking-wider ring-1 ring-inset ring-primary-700/10">
         Performances Globales
       </div>
     </div>
-    
+
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div *ngFor="let vente of topVente | slice:0:4" 
-        class="bg-white p-5 rounded-3xl shadow-elegant border border-secondary-100 hover:shadow-elegant-lg transition-all group">
-        <div  [routerLink]="['../detail', vente.produit.id]" class="relative mb-4 aspect-square rounded-2xl bg-secondary-50 overflow-hidden border border-secondary-100">
-          <img [src]="vente.produit.image" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-          <div class="absolute top-3 right-3 px-2 py-1 bg-white/90 backdrop-blur-md rounded-lg text-[10px] font-black text-primary-700 shadow-sm border border-secondary-100">
-            TOP
-          </div>
-        </div>
-        <div>
-          <h4 class="font-bold text-secondary-900 line-clamp-1 h-5 group-hover:text-primary-700 transition-colors">{{vente.produit.nom}}</h4>
-          <p class="text-xs text-secondary-400 mt-1 truncate">{{vente.produit.description}}</p>
-          <div class="mt-4 flex items-center justify-between">
-            <div class="text-left">
-              <p class="text-[10px] font-bold text-secondary-400 uppercase tracking-tighter">Total Vendu</p>
-              <p class="text-base font-black text-secondary-900">{{vente.total_quantite}}</p>
-            </div>
-            <div class="text-right">
-              <p class="text-[10px] font-bold text-secondary-400 uppercase tracking-tighter">Revenue</p>
-              <p class="text-base font-black text-green-600">{{vente.prix_unitaire * vente.total_quantite | number:'1.0'}} <span class="text-[10px]">F</span></p>
+
+      <ng-container *ngIf="topVente.length > 0">
+        <div *ngFor="let vente of topVente | slice:0:4"
+          class="bg-white p-5 rounded-3xl shadow-elegant border border-secondary-100 hover:shadow-elegant-lg transition-all group">
+          <div  [routerLink]="['../detail', vente.produit.id || 0]" class="relative mb-4 aspect-square rounded-2xl bg-secondary-50 overflow-hidden border border-secondary-100">
+            <img [src]="vente.produit.image" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+            <div class="absolute top-3 right-3 px-2 py-1 bg-white/90 backdrop-blur-md rounded-lg text-[10px] font-black text-primary-700 shadow-sm border border-secondary-100">
+              TOP
             </div>
           </div>
+          <div>
+            <h4 class="font-bold text-secondary-900 line-clamp-1 h-5 group-hover:text-primary-700 transition-colors">{{vente.produit.nom}}</h4>
+            <p class="text-xs text-secondary-400 mt-1 truncate">{{vente.produit.description}}</p>
+            <div class="mt-4 flex items-center justify-between">
+              <div class="text-left">
+                <p class="text-[10px] font-bold text-secondary-400 uppercase tracking-tighter">Total Vendu</p>
+                <p class="text-base font-black text-secondary-900">{{vente.total_quantite}}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-[10px] font-bold text-secondary-400 uppercase tracking-tighter">Revenue</p>
+                <p class="text-base font-black text-green-600">{{vente.prix_unitaire * vente.total_quantite | number:'1.0'}} <span class="text-[10px]">F</span></p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </ng-container>
+      <ng-container *ngIf="topVente.length == 0">
+        <div class="py-24 text-center bg-secondary-50/20">
+          <div class="w-20 h-20 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-6 text-secondary-300">
+            <i class="bi bi-search text-4xl"></i>
+          </div>
+          <h4 class="text-lg font-bold text-secondary-900">Aucun produit trouvé</h4>
+          <p class="text-sm text-secondary-500 mt-2 max-w-sm mx-auto">Nous n'avons trouvé aucun résultat pour "{{searchTerm}}". Essayez avec un autre mot-clé.</p>
+          <button (click)="searchTerm=''; filteredProduits=produits" class="mt-6 text-primary-600 font-bold text-xs uppercase tracking-widest hover:text-primary-700 transition-colors">
+            Réinitialiser la recherche
+          </button>
+        </div>
+      </ng-container>
+
     </div>
+
   </div>
 
   <!-- Delete Confirmation Modal -->
@@ -190,7 +234,7 @@
         </div>
         <div class="flex items-center justify-center p-6 space-x-4 bg-secondary-50/50 border-t border-secondary-100">
           <button (click)="isDeleteModalOpen = false" class="px-8 py-3 bg-white border border-secondary-200 text-secondary-600 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-secondary-50 transition-all shadow-sm">Annuler</button>
-          <button (click)="confirmDelete()" 
+          <button (click)="confirmDelete()"
             class="px-8 py-3 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-red-700 shadow-elegant transition-all active:scale-95">Placer en Corbeille</button>
         </div>
       </div>
@@ -213,28 +257,27 @@
           </div>
           <div class="text-center">
             <p class="text-secondary-600 font-medium font-bold">Quantité à ajouter au stock</p>
-            <p class="text-xs text-secondary-400 mt-1">Laissez à 0 pour conserver le stock actuel.</p>
+            <p class="text-xs text-secondary-400 mt-1">Stock actuel dans la corbeille : {{restoreQuantity}} <span class="text-[10px] font-mono text-secondary-400"></span></p>
           </div>
           <div class="relative">
-            <input type="number" [(ngModel)]="restoreQuantity" 
+            <input type="number" [(ngModel)]="restoreQuantity" (input)="verifyRestoreQuantity()"
               class="block w-full px-4 py-4 bg-secondary-50 border border-secondary-200 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-center text-xl font-black text-secondary-900 transition-all">
           </div>
         </div>
         <div class="flex items-center justify-center p-6 space-x-4 bg-secondary-50/50 border-t border-secondary-100">
           <button (click)="isRestoreModalOpen = false" class="px-8 py-3 bg-white border border-secondary-200 text-secondary-600 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-secondary-50 transition-all shadow-sm">Annuler</button>
-          <button (click)="confirmRestore()" 
+          <button (click)="confirmRestore()"
             class="px-8 py-3 bg-green-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-green-700 shadow-elegant transition-all active:scale-95">Confirmer la Restauration</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Form Modal (Create / Edit) -->
   <!-- Form Modal (CSV Import Redesign) -->
   <div [ngClass]="{'hidden': !isFormModalOpen}" class="fixed inset-0 z-[60] overflow-y-auto bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
     <div class="relative w-full max-w-2xl animate-fade-in-up">
       <div class="bg-white rounded-[2.5rem] shadow-2xl border border-white/20 overflow-hidden">
-        
+
         <!-- Modal Header -->
         <div class="relative bg-secondary-900 px-8 py-10 text-white overflow-hidden shrink-0">
           <div class="relative z-10">
@@ -244,7 +287,7 @@
           <button (click)="isFormModalOpen = false" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all z-20">
             <i class="bi bi-x-lg"></i>
           </button>
-          
+
           <!-- Abstract Background Shape -->
           <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-primary-500/20 rounded-full blur-3xl"></div>
         </div>
@@ -257,12 +300,12 @@
             </div>
             <div>
               <p class="text-[11px] font-black text-blue-800 uppercase tracking-wider mb-1">Format Attendu (Semicolon ;)</p>
-              <code class="text-[10px] text-blue-600 font-mono bg-white/50 px-2 py-1 rounded">nom;prix_achat;prix_vente;quantite;description</code>
+              <code class="text-[10px] text-blue-600 font-mono bg-white/50 px-2 py-1 rounded">nom;reference;prix_achat;prix_vente;prix_master;quantite;description</code>
             </div>
           </div>
 
           <form [formGroup]="produitForm" (ngSubmit)="valider()" class="space-y-6">
-            
+
             <!-- Step 1: Category Selection -->
             <div class="space-y-3">
               <label class="text-[10px] font-black text-secondary-400 uppercase tracking-widest px-1">1. Choisir la catégorie commune</label>
@@ -284,22 +327,22 @@
             <!-- Step 2: File Upload -->
             <div class="space-y-3">
               <label class="text-[10px] font-black text-secondary-400 uppercase tracking-widest px-1">2. Fichier CSV des produits</label>
-              
+
               <div class="relative">
                 <input type="file" #fileImportInput (change)="onFileSelected($event)" accept=".csv" class="hidden">
-                
-                <div (click)="fileImportInput.click()" 
+
+                <div (click)="fileImportInput.click()"
                   class="group cursor-pointer border-2 border-dashed border-secondary-200 hover:border-primary-500 hover:bg-primary-50/30 rounded-3xl p-10 transition-all flex flex-col items-center justify-center text-center">
-                  
+
                   <div class="w-16 h-16 bg-secondary-50 group-hover:bg-primary-100/50 text-secondary-400 group-hover:text-primary-600 rounded-2xl flex items-center justify-center mb-4 transition-colors">
                     <i class="bi bi-cloud-arrow-up text-3xl" [ngClass]="{'bi-check-circle-fill text-green-500': selectedFile}"></i>
                   </div>
-                  
+
                   <div *ngIf="!selectedFile">
                     <p class="text-sm font-black text-secondary-900">Cliquez pour téléverser votre fichier</p>
                     <p class="text-xs text-secondary-400 mt-1 font-medium">Ou glissez-déposez le fichier ici (.csv uniquement)</p>
                   </div>
-                  
+
                   <div *ngIf="selectedFile" class="animate-fade-in text-center">
                     <p class="text-sm font-black text-green-600 flex items-center justify-center gap-2">
                       <i class="bi bi-file-earmark-check"></i>
@@ -313,7 +356,7 @@
 
             <!-- Action Buttons -->
             <div class="flex items-center gap-4 pt-4 shrink-0">
-              <button type="button" (click)="isFormModalOpen = false" 
+              <button type="button" (click)="isFormModalOpen = false"
                 class="flex-1 py-4 bg-secondary-50 text-secondary-500 hover:text-secondary-700 hover:bg-secondary-100 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all">
                 Annuler
               </button>

@@ -24,6 +24,13 @@ export class CreditDetailComponent implements OnInit {
     showPaymentForm: boolean = false;
     date = new Date();
     isProforma: boolean = false;
+    history: any[] = [];
+    paginatedHistory: any[] = [];
+    historyPage: number = 1;
+    historyItemsPerPage: number = 5;
+    historyTotalPages: number = 0;
+    historyPages: number[] = [];
+
     // UI State for Modal
     isConfirmModalVisible: boolean = false;
     confirmConfig: { title: string, message: string, action: () => void } = {
@@ -57,7 +64,11 @@ export class CreditDetailComponent implements OnInit {
                 this.isProforma = res.type_paiement === 'proforma' || res.statut === 'proforma';
                 this.paymentAmount = res.montant_restant;
 
+                this.isProforma = res.type_paiement === 'proforma' || res.statut === 'proforma';
+                this.paymentAmount = res.montant_restant;
+
                 // If converted, we might want to refresh type_paiement
+                this.loadHistory(id);
                 this.spinner.hide();
             },
             error: (err: any) => {
@@ -65,6 +76,33 @@ export class CreditDetailComponent implements OnInit {
                 this.toast.error("Erreur de chargement des détails");
             }
         });
+    }
+
+    loadHistory(id: number): void {
+        this.data.getById(Env.CREDIT_STATEMENT, id + '/history').subscribe({
+            next: (res: any) => {
+                this.history = res;
+                this.updateHistoryPagination();
+            },
+            error: (err) => {
+                console.error("Erreur chargement historique", err);
+            }
+        });
+    }
+
+    updateHistoryPagination(): void {
+        this.historyTotalPages = Math.ceil(this.history.length / this.historyItemsPerPage);
+        this.historyPages = Array(this.historyTotalPages).fill(0).map((x, i) => i + 1);
+        
+        const startIndex = (this.historyPage - 1) * this.historyItemsPerPage;
+        const endIndex = startIndex + this.historyItemsPerPage;
+        this.paginatedHistory = this.history.slice(startIndex, endIndex);
+    }
+
+    changeHistoryPage(page: number): void {
+        if (page < 1 || page > this.historyTotalPages) return;
+        this.historyPage = page;
+        this.updateHistoryPagination();
     }
 
     openConfirm(title: string, message: string, action: () => void) {
@@ -132,6 +170,8 @@ export class CreditDetailComponent implements OnInit {
             notes: this.paymentNotes
         };
 
+        console.log(payload);
+
         this.spinner.show();
         this.data.add(Env.CREDIT_PAYMENTS, payload).subscribe({
             next: (res: any) => {
@@ -149,11 +189,14 @@ export class CreditDetailComponent implements OnInit {
     }
 
     printStatement(): void {
-        this.exportService.printElement('#printable-credit');
+        // Use bordereau for proforma, recu_credit for credit sales
+        const type = this.isProforma ? 'bordereau' : 'recu_credit';
+        this.exportService.printPdf(type, this.vente.id);
     }
 
     exportPDF(): void {
-        const filename = `Credit_${this.vente?.reference || this.vente?.id}_${new Date().toISOString().split('T')[0]}`;
-        this.exportService.exportToPdf('#printable-credit', filename);
+        const type = this.isProforma ? 'bordereau' : 'recu_credit';
+        const filename = `${type}_${this.vente?.id}_${new Date().toISOString().split('T')[0]}.pdf`;
+        this.exportService.downloadPdf(type, this.vente.id, filename);
     }
 }
