@@ -29,9 +29,11 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy dist to VPS
+      - name: Deploy frontend
         run: |
-          rsync -avz --delete dist/ deploy@${{ secrets.VPS_HOST }}:/var/www/maboutique/frontend
+          rsync -avz --delete \
+            --no-owner --no-group \
+            dist/ deploy@${{ secrets.SERVER_IP }}:/var/www/maboutique/frontend
 
 # name: "publish"
 
