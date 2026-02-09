@@ -1,54 +1,38 @@
-name: Ma Boutique Release Correctif
+name: Tauri Release
 
 on:
   push:
     tags:
-      - "v*"
+      - "*.*.*"
 
 jobs:
   build:
-    permissions:
-      contents: write
     strategy:
-      fail-fast: false
       matrix:
         os: [macos-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
-      - name: Fix npm version
-        run: npm config set git-tag-version false
+      - uses: dtolnay/rust-toolchain@stable
 
       - name: Install dependencies
+        working-directory: Front_Boutique
         run: npm install
 
-      - name: Build Angular
-        run: npm run build
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: "src-tauri -> target"
-
-      - name: Build Tauri
+      - name: Build Tauri + Release
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_PRIVATE_KEY_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: "MaBoutique ${{ github.ref_name }}"
-          includeUpdaterJson: true
+          projectPath: Front_Boutique
+          releaseDraft: false
+          prerelease: false
