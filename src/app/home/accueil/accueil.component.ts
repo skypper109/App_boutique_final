@@ -10,6 +10,7 @@ import { ToastrService } from 'ngx-toastr';
 import tinymce from '../../../assets/vendor/tinymce/tinymce';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { LoginService } from '../../login/Guard/login.service';
+import { check } from '@tauri-apps/plugin-updater';
 declare var $: any;
 
 @Component({
@@ -81,6 +82,22 @@ export class AccueilComponent {
     }
   }
 
+  async checkAppUpdate() {
+    try {
+      const update = await check();
+      if (update) {
+        console.log(`Update found: ${update.version}`);
+        this.toast.info(`Mise à jour disponible: ${update.version}`, 'Mise à jour');
+        
+        await update.downloadAndInstall();
+        
+        this.toast.success('Mise à jour installée. Redémarrage requis.', 'Succès');
+        // await relaunch(); // Requires @tauri-apps/plugin-process
+      }
+    } catch (error) {
+      this.toast.error('Failed to check for updates: ' + error);
+    }
+  }
   private updateMenuState(url: string) {
     if (url.includes('/produits/')) {
       this.stockOpen = true;
