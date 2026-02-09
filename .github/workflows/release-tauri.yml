@@ -1,4 +1,5 @@
 name: Ma Boutique Release
+
 on:
   push:
     tags:
@@ -6,34 +7,49 @@ on:
 
 jobs:
   build:
+    permissions:
+      contents: write
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm install
+      - name: Install dependencies
+        working-directory: app-final
+        run: |
+          npm install
 
       - name: Build Angular frontend
-        working-directory: frontend
+        working-directory: app-final
         run: npm run build
 
-      - name: Build Tauri app
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "app-final/src-tauri -> target"
+
+      - name: Build Tauri app (Release + Updater)
         uses: tauri-apps/tauri-action@v0
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_PRIVATE_KEY_PASSWORD }}
         with:
-          projectPath: frontend
+          projectPath: app-final
           tagName: ${{ github.ref_name }}
           releaseName: "MaBoutique ${{ github.ref_name }}"
           releaseDraft: false
