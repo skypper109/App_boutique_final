@@ -17,21 +17,18 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Install dependencies
-        working-directory: app-final
-        run: |
-          npm install
+        run: npm install
 
-      - name: Build Angular frontend
-        working-directory: app-final
+      - name: Build Angular
         run: npm run build
 
       - name: Setup Rust
@@ -40,18 +37,15 @@ jobs:
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: "app-final/src-tauri -> target"
+          workspaces: "src-tauri -> target"
 
-      - name: Build Tauri app (Release + Updater)
+      - name: Build Tauri
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_PRIVATE_KEY_PASSWORD }}
         with:
-          projectPath: app-final
           tagName: ${{ github.ref_name }}
           releaseName: "MaBoutique ${{ github.ref_name }}"
-          releaseDraft: false
-          prerelease: false
           includeUpdaterJson: true
