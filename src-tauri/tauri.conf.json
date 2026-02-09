@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Ma Boutique",
-  "version": "2.0.3",
+  "version": "2.0.5",
   "identifier": "com.maboutique.desktop",
   "build": {
     "frontendDist": "../dist/front-boutique/browser",
@@ -43,7 +43,7 @@
     "updater": {
       "active": true,
       "endpoints": [
-        "https://github.com/skypper109/Ma-boutique/releases/latest/download/latest.json"
+        "https://github.com/skypper109/App_boutique_final/releases/latest/download/latest.json"
       ],
       "dialog": true,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEM4NUE3NkVGRDc1NDI1MzAKUldRd0pWVFg3M1pheU90Z2hKZFpoZUFPNE0rRktMU3JGY2daelZKN2dkMTdVVWdXekEwek95WEMK"
