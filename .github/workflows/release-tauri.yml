@@ -44,7 +44,7 @@ jobs:
 
       # Installer les dépendances
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       # Build frontend
       - name: Build frontend
