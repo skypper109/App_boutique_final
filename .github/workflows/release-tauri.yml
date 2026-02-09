@@ -1,5 +1,4 @@
-name: Ma boutique Release
-
+name: Ma Boutique Release
 on:
   push:
     tags:
