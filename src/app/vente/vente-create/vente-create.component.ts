@@ -323,6 +323,7 @@ export class VenteCreateComponent implements OnInit {
     } else {
       this.produits = this.produitsOriginal.filter(p =>
         p.nom.toLowerCase().includes(filterValue) ||
+        p.reference.toLowerCase().includes(filterValue) ||
         p.description?.toLowerCase().includes(filterValue) ||
         p.categorie.nom.toLowerCase().includes(filterValue)
       );

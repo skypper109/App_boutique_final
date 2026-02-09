@@ -4,6 +4,7 @@ import { DataService } from '../../services/data.service';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule, isPlatformBrowser, SlicePipe } from '@angular/common';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
+import { LoginService } from '../../login/Guard/login.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -30,6 +31,7 @@ export class DashboardComponent implements OnInit {
   complet: any;
   filtre2: String = 'Les 5 Meilleurs Ventes';
   produits: any[] = [];
+  userRole: string | null = null;
   topProduits: any[] = [];
 
   // Dropdown states
@@ -49,10 +51,12 @@ export class DashboardComponent implements OnInit {
   selectedBoutiqueId: string | null = null;
   isInitialLoading = true;
 
-  constructor(private data: DataService, private router: Router, private spinne: NgxSpinnerService) {
+  constructor(private data: DataService, private router: Router, private spinne: NgxSpinnerService,
+      private dataLog: LoginService) {
   }
 
   ngOnInit(): void {
+    this.userRole = this.dataLog.getRole();
     if (isPlatformBrowser(this.data.platformId)) {
       this.selectedBoutiqueId = localStorage.getItem('boutique_id');
 
@@ -222,5 +226,22 @@ export class DashboardComponent implements OnInit {
     } else {
       this.filtre3 = 'En fonction de Année'
     }
+  }
+
+
+  get isAdmin(): boolean {
+    return this.userRole?.toLowerCase() === 'admin';
+  }
+
+  get isVendeur(): boolean {
+    return this.userRole?.toLowerCase() === 'vendeur';
+  }
+
+  get isComptable(): boolean {
+    return this.userRole?.toLowerCase() === 'comptable';
+  }
+
+  get isGestionnaire(): boolean {
+    return this.userRole?.toLowerCase() === 'gestionnaire';
   }
 }

@@ -15,7 +15,7 @@
         <div class="p-1.5 bg-white rounded-lg shadow-sm border border-secondary-100 group-hover:scale-110 transition-transform duration-300">
           <img src="logo.svg" alt="Logo" class="h-8 w-auto">
         </div>
-        <span class="text-xl font-bold text-secondary-900 tracking-tight hidden lg:block">Ma <span class="text-primary-600">Boutique</span></span>
+        <span class="text-xl font-bold text-secondary-900 tracking-tight hidden lg:block"><span class="text-primary-600">{{boutiqueNom}}</span></span>
       </a>
       <button (click)="toggleSidebar()" class="p-2 rounded-xl text-secondary-630 hover:bg-secondary-100 hover:text-primary-600 transition-all duration-200">
         <i class="bi bi-list text-2xl"></i>
@@ -122,7 +122,7 @@
       <div>
         <h3 class="px-3 text-[10px] font-bold text-secondary-400 uppercase tracking-widest mb-4">Principal</h3>
         <ul class="space-y-1">
-          <li *ngIf="isAdmin || isGestionnaire || isVendeur || isComptable">
+          <li *ngIf="isAdmin || isGestionnaire || isComptable">
             <a [routerLink]="['accueil']" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm" [routerLinkActiveOptions]="{exact: true}"
               class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all group">
               <i class="bi bi-grid-fill mr-3 transition-transform group-hover:scale-110"></i>

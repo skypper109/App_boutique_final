@@ -96,7 +96,7 @@ export class AccueilComponent {
   get isAdmin(): boolean {
     return this.userRole?.toLowerCase() === 'admin';
   }
-
+ 
   get isVendeur(): boolean {
     return this.userRole?.toLowerCase() === 'vendeur';
   }
