@@ -1,4 +1,4 @@
-name: Release Desktop App
+name: Tauri Release
 
 on:
   push:
@@ -9,7 +9,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [macos-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -20,10 +20,14 @@ jobs:
         with:
           node-version: 18
 
-      - run: npm install
-      - run: npm run build
+      - name: Install dependencies
+        run: npm install
 
-      - uses: tauri-apps/tauri-action@v0
+      - name: Build frontend
+        run: npm run build
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_PRIVATE_KEY_PASSWORD }}
