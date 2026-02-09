@@ -1,4 +1,4 @@
-name: Ma Boutique Release
+name: Ma Boutique Release Correctif
 
 on:
   push:
@@ -24,6 +24,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Fix npm version
+        run: npm config set git-tag-version false
 
       - name: Install dependencies
         run: npm install
