@@ -20,8 +20,7 @@ jobs:
       # Installer Node.js avec cache npm
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: "npm"
+          node-version: 20
 
       # Vérifier le package.json (debug)
       - name: Check package.json
