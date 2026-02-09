@@ -136,16 +136,16 @@ export class AccueilComponent {
     }
   }
 
-  async openAdminPanel() {
-    try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('open_admin_panel');
-    } catch (error) {
-      console.error('Failed to open admin panel:', error);
-      // Fallback: window.open as a last resort if running in browser
-      window.open('http://127.0.0.1:8000/loginAdmin', '_blank');
-    }
-  }
+  // async openAdminPanel() {
+  //   try {
+  //     const { invoke } = await import('@tauri-apps/api/core');
+  //     await invoke('open_admin_panel');
+  //   } catch (error) {
+  //     console.error('Failed to open admin panel:', error);
+  //     // Fallback: window.open as a last resort if running in browser
+  //     window.open('http://127.0.0.1:8000/loginAdmin', '_blank');
+  //   }
+  // }
 
   logout() {
     if (isPlatformBrowser(this.platformId)) {
