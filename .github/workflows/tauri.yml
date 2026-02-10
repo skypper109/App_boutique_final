@@ -7,7 +7,10 @@ on:
 
 jobs:
   build:
+    permissions:
+      contents: write
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, windows-latest]
 
@@ -16,23 +19,34 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
+          cache: "npm"
 
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
 
       - name: Install dependencies
-        working-directory: ./
-        run: cd App_boutique_final/ && npm install
+        run: |
+          npm install -g npm@latest
+          npm install
 
-      - name: Build Tauri + Release
+      - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          projectPath: Front_Boutique
+          tagName: ${{ github.ref_name }}
+          releaseName: "Ma Boutique v${{ github.ref_name }}"
           releaseDraft: false
           prerelease: false
+          includeUpdaterJson: true
