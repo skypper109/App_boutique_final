@@ -35,7 +35,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install -g npm@latest
+          rm -f package-lock.json
           npm install
 
       - name: Build Tauri app
