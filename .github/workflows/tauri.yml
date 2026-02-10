@@ -24,7 +24,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./
-        run: npm install
+        run: cd App_boutique_final/ && npm install
 
       - name: Build Tauri + Release
         uses: tauri-apps/tauri-action@v0
