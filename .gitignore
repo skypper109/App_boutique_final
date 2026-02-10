@@ -56,3 +56,6 @@ Thumbs.db
 *.map
 src/assets/vendor/echarts/
 public/assets/img/bg/
+
+# Package lock - regenerated in CI
+package-lock.json
