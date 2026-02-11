@@ -1,0 +1,172 @@
+
+<div class="space-y-8 animate-fade-in mb-12">
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div>
+      <h1 class="text-2xl font-black text-secondary-900 tracking-tight">Rapports Journaliers</h1>
+      <nav class="flex mt-1 text-sm text-secondary-500 font-medium font-outfit">
+        <a [routerLink]="['/accueil']" class="hover:text-primary-600 transition-colors">Accueil</a>
+        <span class="mx-2 text-secondary-300">/</span>
+        <span class="text-secondary-900 font-bold tracking-tight">Comptabilité</span>
+        <span class="mx-2 text-secondary-300">/</span>
+        <span class="text-secondary-400 font-bold uppercase tracking-widest text-[10px]">Rapports</span>
+      </nav>
+    </div>
+    
+    <button (click)="navigateToGenerate()" 
+       class="px-5 py-3 bg-primary-600 text-white hover:bg-primary-700 rounded-2xl shadow-elegant-primary font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 group flex items-center">
+      <i class="bi bi-plus-lg mr-2.5 text-white/80 group-hover:scale-110 transition-transform"></i>
+      Générer un Rapport
+    </button>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="bg-white rounded-[2.5rem] p-8 shadow-elegant border border-secondary-100">
+    <div class="flex flex-wrap items-end gap-6">
+      <div class="space-y-2 flex-1 min-w-[200px]">
+        <label class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] ml-1">Date de début</label>
+        <input type="date" [(ngModel)]="startDate" 
+          class="w-full px-5 py-4 bg-secondary-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:bg-white transition-all text-sm font-bold text-secondary-700">
+      </div>
+      <div class="space-y-2 flex-1 min-w-[200px]">
+        <label class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] ml-1">Date de fin</label>
+        <input type="date" [(ngModel)]="endDate" 
+          class="w-full px-5 py-4 bg-secondary-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:bg-white transition-all text-sm font-bold text-secondary-700">
+      </div>
+      
+      <div class="flex gap-3">
+        <button (click)="filterByDateRange()" 
+          class="px-6 py-4 bg-secondary-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-elegant-dark">
+          Filtrer
+        </button>
+        <button (click)="clearFilters()" 
+          class="px-6 py-4 bg-secondary-100 text-secondary-600 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-secondary-200 transition-all">
+          Reset
+        </button>
+      </div>
+
+      <div class="flex-1 min-w-[250px] space-y-2">
+        <label class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] ml-1">Recherche rapide</label>
+        <div class="relative">
+          <i class="bi bi-search absolute left-5 top-1/2 -translate-y-1/2 text-secondary-400"></i>
+          <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="applyFilter()" 
+            placeholder="Rechercher par date ou boutique..."
+            class="w-full pl-12 pr-5 py-4 bg-secondary-50 border-none rounded-2xl focus:ring-2 focus:ring-primary-500/20 focus:bg-white transition-all text-sm font-bold text-secondary-700">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reports Table -->
+  <div class="bg-white rounded-[2.5rem] shadow-elegant border border-secondary-100 overflow-hidden" *ngIf="!isLoading">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left font-outfit">
+        <thead>
+          <tr class="bg-secondary-50/50">
+            <th class="px-8 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-widest">Date & Boutique</th>
+            <th class="px-6 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-widest text-right">Ventes</th>
+            <th class="px-6 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-widest text-right">Dépenses</th>
+            <th class="px-6 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-widest text-right">Bénéfice Net</th>
+            <th class="px-6 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-widest text-center">Transactions</th>
+            <th class="px-6 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-widest text-center">Statut</th>
+            <th class="px-6 py-5 text-[10px] font-black text-secondary-400 uppercase tracking-widest text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-secondary-50">
+          <tr *ngFor="let rapport of filteredRapports" class="hover:bg-primary-50/10 transition-colors group">
+            <td class="px-8 py-5">
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-secondary-900 rounded-xl flex items-center justify-center text-white text-xs shadow-sm">
+                  <i class="bi bi-calendar3"></i>
+                </div>
+                <div>
+                  <p class="text-sm font-black text-secondary-900">{{ formatDate(rapport.date) }}</p>
+                  <p class="text-[10px] text-primary-600 font-bold uppercase tracking-widest">{{ rapport.boutique?.nom || 'N/A' }}</p>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-5 text-right">
+              <span class="text-sm font-black text-secondary-700">{{ formatCurrency(rapport.total_ventes, rapport.boutique?.devise) }}</span>
+            </td>
+            <td class="px-6 py-5 text-right">
+              <span class="text-sm font-black text-red-500">{{ formatCurrency(rapport.total_depenses, rapport.boutique?.devise) }}</span>
+            </td>
+            <td class="px-6 py-5 text-right">
+              <span class="text-sm font-black font-mono" [class.text-green-600]="rapport.benefice_net >= 0" [class.text-red-600]="rapport.benefice_net < 0">
+                {{ formatCurrency(rapport.benefice_net, rapport.boutique?.devise) }}
+              </span>
+            </td>
+            <td class="px-6 py-5 text-center">
+              <div class="flex items-center justify-center gap-2">
+                <span class="px-2 py-1 bg-green-50 text-green-600 rounded-lg text-[10px] font-black">{{ rapport.nombre_ventes }} ventes</span>
+                <span class="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-black">{{ rapport.nombre_depenses }} dép.</span>
+              </div>
+            </td>
+            <td class="px-6 py-5 text-center">
+              <span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest inline-flex items-center gap-2"
+                [ngClass]="rapport.sent_at ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600'">
+                <i class="bi" [ngClass]="rapport.sent_at ? 'bi-check-circle-fill' : 'bi-clock-history'"></i>
+                {{ rapport.sent_at ? 'Envoyé' : 'Attente' }}
+              </span>
+            </td>
+            <td class="px-6 py-5 text-center">
+              <div class="flex items-center justify-center gap-2">
+                <button (click)="downloadPdf(rapport)" [disabled]="downloadingId === rapport.id" title="Télécharger PDF"
+                  class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center hover:bg-primary-600 hover:text-white transition-all shadow-sm">
+                  <i class="bi" [ngClass]="downloadingId === rapport.id ? 'bi-arrow-repeat animate-spin' : 'bi-file-earmark-pdf'"></i>
+                </button>
+                <button (click)="sendEmail(rapport)" [disabled]="sendingEmailId === rapport.id" title="Envoyer par email"
+                  class="w-10 h-10 rounded-xl bg-secondary-900 border border-secondary-800 text-white flex items-center justify-center hover:bg-black transition-all shadow-sm">
+                  <i class="bi" [ngClass]="sendingEmailId === rapport.id ? 'bi-arrow-repeat animate-spin' : 'bi-envelope-at'"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="filteredRapports.length === 0">
+            <td colspan="7" class="px-8 py-20 text-center">
+              <div class="flex flex-col items-center justify-center">
+                <div class="w-20 h-20 bg-secondary-50 rounded-full flex items-center justify-center text-secondary-200 mb-4 text-3xl">
+                  <i class="bi bi-inbox"></i>
+                </div>
+                <p class="text-sm font-black text-secondary-500 uppercase tracking-widest">Aucun rapport trouvé</p>
+                <p class="text-xs text-secondary-400 mt-1 font-medium italic">Essayez d'ajuster vos filtres de recherche.</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="flex flex-col items-center justify-center py-20 bg-white rounded-[2.5rem] shadow-elegant border border-secondary-100" *ngIf="isLoading">
+    <div class="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mb-4"></div>
+    <p class="text-sm font-black text-secondary-500 uppercase tracking-widest">Chargement des rapports...</p>
+  </div>
+
+  <!-- Pagination -->
+  <div class="flex flex-col md:flex-row items-center justify-between gap-6 px-8 py-6 bg-white rounded-[2.5rem] shadow-elegant border border-secondary-100 mt-8" *ngIf="totalPages > 1 && !isLoading">
+    <div class="flex items-center gap-2">
+      <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1" 
+        class="w-10 h-10 rounded-xl bg-secondary-50 text-secondary-500 flex items-center justify-center hover:bg-secondary-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <div class="flex items-center gap-1">
+        <button *ngFor="let page of paginationPages" (click)="goToPage(page)"
+          class="w-10 h-10 rounded-xl text-xs font-black transition-all"
+          [ngClass]="page === currentPage ? 'bg-secondary-900 text-white shadow-elegant-dark' : 'bg-secondary-50 text-secondary-500 hover:bg-secondary-100'">
+          {{ page }}
+        </button>
+      </div>
+      <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages" 
+        class="w-10 h-10 rounded-xl bg-secondary-50 text-secondary-500 flex items-center justify-center hover:bg-secondary-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+    <p class="text-xs font-black text-secondary-400 uppercase tracking-widest">
+      Page {{ currentPage }} / <span class="text-secondary-900">{{ totalPages }}</span> 
+      <span class="mx-3 text-secondary-200">|</span> 
+      Total <span class="text-primary-600">{{ totalItems }}</span> rapports
+    </p>
+  </div>
+</div>

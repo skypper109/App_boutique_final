@@ -1,8 +1,8 @@
-import { environment } from "../../environments/environment.prod";
+import { environment } from "../../environments/environment";
 
 export class Env {
   public static API_URL = environment.apiUrl;
-  public static API_URL2 = environment.apiUrl;
+  // public static API_URL2 = environment.apiUrl;
 
   public static PRODUITS = Env.API_URL + '/produits';
   public static CATEGORIES = Env.API_URL + '/categories';

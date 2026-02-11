@@ -19,6 +19,8 @@ import { ProfilsComponent } from './home/profils/profils.component';
 import { GestionRoutes } from './gestion/routes';
 import { BoutiqueSelectionComponent } from './admin/boutique-selection/boutique-selection.component';
 import { ExpensesRoutingModule } from './expenses/expenses-routing.module';
+import { RapportsListComponent } from './rapports/rapports-list/rapports-list.component';
+import { RapportGenerateComponent } from './rapports/rapport-generate/rapport-generate.component';
 
 export const routes: Routes = [
   // Pour la page d'accueil :
@@ -44,6 +46,21 @@ export const routes: Routes = [
         { path: 'annee', component: AnneeCreateComponent, data: { roles: ['admin'] } },
         { path: 'profils', component: ProfilsComponent, data: { roles: ['admin', 'gestionnaire', 'vendeur', 'comptable'] } },
         ...GestionRoutes.routes,
+        {
+          path: 'rapports',
+          children: [
+            {
+              path: '',
+              component: RapportsListComponent,
+              data: { roles: ['admin', 'gestionnaire'] }
+            },
+            {
+              path: 'generer',
+              component: RapportGenerateComponent,
+              data: { roles: ['admin', 'gestionnaire'] }
+            }
+          ]
+        },
 
       ],
     canActivate: [loginGuard, roleGuard]

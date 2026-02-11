@@ -1,0 +1,115 @@
+
+<div class="space-y-8 animate-fade-in-up max-w-4xl mx-auto py-12 px-4">
+  <!-- Page Header -->
+  <div class="text-center space-y-4 mb-12">
+    <div class="w-20 h-20 bg-primary-600 rounded-[2rem] flex items-center justify-center text-white shadow-elegant-primary mx-auto mb-6 transform hover:rotate-6 transition-transform">
+      <i class="bi bi-file-earmark-check text-3xl"></i>
+    </div>
+    <h1 class="text-3xl font-black text-secondary-900 tracking-tight">Générer un Rapport Journalier</h1>
+    <p class="text-secondary-500 font-medium max-w-md mx-auto">
+      Créez un document d'audit complet regroupant les ventes et les dépenses pour une journée précise.
+    </p>
+  </div>
+
+  <!-- Main Action Card -->
+  <div class="bg-white rounded-[3rem] shadow-elegant overflow-hidden border border-secondary-100 relative group">
+    <!-- Decorative element -->
+    <div class="absolute -top-12 -right-12 w-48 h-48 bg-primary-50 rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
+    
+    <div class="p-10 md:p-12 relative z-10 space-y-10">
+      
+      <!-- Info Box -->
+      <div class="flex items-start gap-6 p-6 bg-secondary-900 rounded-[2rem] text-white shadow-elegant-dark">
+        <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-primary-400 shrink-0">
+          <i class="bi bi-info-circle-fill text-xl"></i>
+        </div>
+        <div>
+          <h4 class="text-sm font-black uppercase tracking-widest text-primary-400 mb-1">Information Audit</h4>
+          <p class="text-xs text-white/70 leading-relaxed font-medium">
+            Le système va agréger automatiquement toutes les transactions (cash, crédit) et les dépenses pour calculer le bénéfice net de la période sélectionnée.
+          </p>
+        </div>
+      </div>
+
+      <!-- Form Control -->
+      <div class="space-y-4">
+        <label class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.3em] ml-1">Date du rapport journalier</label>
+        <div class="relative group">
+          <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+            <i class="bi bi-calendar-event text-secondary-400 group-focus-within:text-primary-600 transition-colors"></i>
+          </div>
+          <input 
+            type="date" 
+            [(ngModel)]="selectedDate" 
+            [max]="maxDate"
+            [disabled]="isGenerating"
+            class="w-full pl-14 pr-6 py-5 bg-secondary-50 border-none rounded-3xl focus:ring-4 focus:ring-primary-500/10 focus:bg-white transition-all text-base font-black text-secondary-900 shadow-sm border border-transparent hover:border-secondary-100">
+        </div>
+        <p class="text-[10px] text-secondary-400 font-bold italic ml-2">* Vous pouvez générer des rapports pour toute date égale ou antérieure à aujourd'hui.</p>
+      </div>
+
+      <!-- Preview State -->
+      <div *ngIf="selectedDate" class="animate-fade-in-up bg-primary-50/30 rounded-[2rem] p-8 border border-primary-100/50">
+        <div class="flex items-center justify-between mb-6">
+          <h4 class="text-[10px] font-black text-primary-600 uppercase tracking-widest">Configuration du Document</h4>
+          <span class="px-3 py-1 bg-primary-600 text-white rounded-full text-[8px] font-black uppercase tracking-tighter">Prêt</span>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
+          <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-secondary-900 shadow-sm">
+              <i class="bi bi-calendar-check"></i>
+            </div>
+            <div>
+              <p class="text-[9px] font-black text-secondary-400 uppercase mb-0.5">Période</p>
+              <p class="text-xs font-black text-secondary-900">{{ selectedDate | date:'fullDate':'':'fr' | uppercase }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-secondary-900 shadow-sm">
+              <i class="bi bi-file-earmark-pdf"></i>
+            </div>
+            <div>
+              <p class="text-[9px] font-black text-secondary-400 uppercase mb-0.5">Format de Sortie</p>
+              <p class="text-xs font-black text-secondary-900">PDF AUDIT (A4 PORTRAIT)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col md:flex-row gap-4 pt-6">
+        <button (click)="cancel()" [disabled]="isGenerating"
+          class="flex-1 py-5 px-8 bg-secondary-50 text-secondary-600 rounded-[1.5rem] text-[11px] font-black uppercase tracking-widest hover:bg-secondary-100 transition-all active:scale-95">
+          <i class="bi bi-arrow-left mr-2"></i>
+          Retour à la liste
+        </button>
+        <button (click)="generateRapport()" [disabled]="!selectedDate || isGenerating"
+          class="flex-[2] py-5 px-8 bg-primary-600 text-white rounded-[1.5rem] text-[11px] font-black uppercase tracking-widest shadow-elegant-primary hover:bg-primary-700 transition-all active:scale-95 disabled:bg-secondary-200 disabled:text-secondary-400 disabled:shadow-none flex items-center justify-center gap-3">
+          <i class="bi" [ngClass]="isGenerating ? 'bi-arrow-repeat animate-spin' : 'bi-lightning-fill'"></i>
+          {{ isGenerating ? 'Génération du PDF...' : 'Lancer la Génération' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div *ngIf="isGenerating" class="absolute inset-0 bg-white/95 backdrop-blur-sm z-20 flex flex-col items-center justify-center text-center p-12 animate-fade-in">
+       <div class="w-24 h-24 mb-8 relative">
+         <div class="absolute inset-0 border-4 border-primary-100 rounded-full"></div>
+         <div class="absolute inset-0 border-4 border-primary-600 rounded-full border-t-transparent animate-spin"></div>
+         <div class="absolute inset-0 flex items-center justify-center text-primary-600">
+           <i class="bi bi-file-pdf text-3xl"></i>
+         </div>
+       </div>
+       <h3 class="text-2xl font-black text-secondary-900 tracking-tight mb-2">Audit en cours...</h3>
+       <p class="text-secondary-500 font-medium max-w-xs">
+         Nous récupérons les statistiques de ventes et collectons les données de dépenses.
+       </p>
+       <div class="mt-8 flex items-center gap-3">
+         <span class="px-4 py-2 bg-secondary-50 rounded-xl text-[10px] font-black text-secondary-400 uppercase">Step 1: Data Mining</span>
+         <i class="bi bi-arrow-right text-secondary-200"></i>
+         <span class="px-4 py-2 bg-primary-50 rounded-xl text-[10px] font-black text-primary-600 uppercase">Step 2: PDF Build</span>
+       </div>
+    </div>
+  </div>
+</div>
