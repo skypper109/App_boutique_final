@@ -54,99 +54,75 @@
   </div>
 
   <!-- KPI Board -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <!-- KPI 1: Volumétrie Entrante -->
-    <div class="bg-white rounded-[2.5rem] p-8 shadow-elegant border border-secondary-100 group hover:border-green-200 transition-all">
-      <div class="flex items-start justify-between mb-6">
-        <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 transition-transform group-hover:scale-110">
-          <i class="bi bi-box-arrow-in-down text-2xl"></i>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- KPI 1: Flux Entrants -->
+    <div class="bg-white rounded-[2rem] p-6 shadow-elegant border border-secondary-100 group hover:border-green-200 transition-all">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 transition-transform group-hover:scale-110">
+          <i class="bi bi-box-arrow-in-down text-xl"></i>
         </div>
         <div class="text-right">
-          <span class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Flux Entrants</span>
-          <span class="text-sm font-black text-green-600">+ {{ stats.totalEntrees }} Unités</span>
+          <span class="block text-[9px] font-black text-secondary-400 uppercase tracking-widest">Entrées</span>
+          <span class="text-xs font-black text-green-600">+ {{ stats.totalEntrees }} Unités</span>
         </div>
       </div>
       <div class="space-y-1">
-        <h4 class="text-2xl font-black text-secondary-900 tracking-tighter">{{ stats.valeurAchatEntrante | number:'1.0' }} <small class="text-xs text-secondary-300">FCFA</small></h4>
-        <p class="text-[10px] font-bold text-secondary-400 uppercase tracking-widest italic">Valeur d'Acquisition</p>
+        <h4 class="text-xl font-black text-secondary-900 tracking-tighter">{{ stats.valeurAchatEntrante | number:'1.0' }} <small class="text-[10px] text-secondary-300">FCFA</small></h4>
+        <p class="text-[9px] font-bold text-secondary-400 uppercase tracking-widest italic">Acquisition</p>
       </div>
     </div>
 
-    <!-- KPI 2: Volumétrie Sortante -->
-    <div class="bg-white rounded-[2.5rem] p-8 shadow-elegant border border-secondary-100 group hover:border-orange-200 transition-all">
-      <div class="flex items-start justify-between mb-6">
-        <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 transition-transform group-hover:scale-110">
-          <i class="bi bi-box-arrow-up text-2xl"></i>
+    <!-- KPI 2: Flux Sortants -->
+    <div class="bg-white rounded-[2rem] p-6 shadow-elegant border border-secondary-100 group hover:border-orange-200 transition-all">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 transition-transform group-hover:scale-110">
+          <i class="bi bi-box-arrow-up text-xl"></i>
         </div>
         <div class="text-right">
-          <span class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Flux Sortants</span>
-          <span class="text-sm font-black text-orange-600">- {{ stats.totalSorties }} Unités</span>
+          <span class="block text-[9px] font-black text-secondary-400 uppercase tracking-widest">Sorties</span>
+          <span class="text-xs font-black text-orange-600">- {{ stats.totalSorties }} Unités</span>
         </div>
       </div>
       <div class="space-y-1">
-        <h4 class="text-2xl font-black text-secondary-900 tracking-tighter">{{ stats.valeurVenteSortante | number:'1.0' }} <small class="text-xs text-secondary-300">FCFA</small></h4>
-        <p class="text-[10px] font-bold text-secondary-400 uppercase tracking-widest italic">C.A. de Sortie</p>
+        <h4 class="text-xl font-black text-secondary-900 tracking-tighter">{{ stats.valeurVenteSortante | number:'1.0' }} <small class="text-[10px] text-secondary-300">FCFA</small></h4>
+        <p class="text-[9px] font-bold text-secondary-400 uppercase tracking-widest italic">Chiffre d'Affaires</p>
       </div>
     </div>
 
-    <!-- KPI 3: Mouvement Net -->
-    <div class="bg-white rounded-[2.5rem] p-8 shadow-elegant border border-secondary-100 group hover:border-primary-200 transition-all">
-      <div class="flex items-start justify-between mb-6">
-        <div class="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center text-primary-600 transition-transform group-hover:scale-110">
-          <i class="bi bi-layers text-2xl"></i>
+    <!-- KPI 3: Bénéfice Mouvements -->
+    <div class="bg-white rounded-[2rem] p-6 shadow-elegant border border-secondary-100 group hover:border-primary-200 transition-all">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-12 h-12 bg-primary-50 rounded-2xl flex items-center justify-center text-primary-600 transition-transform group-hover:scale-110">
+          <i class="bi bi-graph-up-arrow text-xl"></i>
         </div>
         <div class="text-right">
-          <span class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Variation de Stock</span>
-          <span class="text-sm font-black" [ngClass]="stats.netMouvement >= 0 ? 'text-primary-600' : 'text-red-500'">
-            {{ stats.netMouvement > 0 ? '+' : '' }}{{ stats.netMouvement }} Unités
-          </span>
+          <span class="block text-[9px] font-black text-secondary-400 uppercase tracking-widest">Performance</span>
+          <span class="text-xs font-black text-primary-600">Bénéfice Flux</span>
         </div>
       </div>
       <div class="space-y-1">
-        <h4 class="text-2xl font-black text-secondary-900 tracking-tighter">
-          {{ (stats.valeurVenteSortante - stats.valeurAchatEntrante) | number:'1.0' }} <small class="text-xs text-secondary-300">FCFA</small>
-        </h4>
-        <p class="text-[10px] font-bold text-secondary-400 uppercase tracking-widest italic">Différence de Flux</p>
+        <h4 class="text-xl font-black text-secondary-900 tracking-tighter">{{ stats.beneficeTheorique | number:'1.0' }} <small class="text-[10px] text-secondary-300">FCFA</small></h4>
+        <p class="text-[9px] font-bold text-secondary-400 uppercase tracking-widest italic text-primary-500">Marge Brute</p>
       </div>
     </div>
 
-    </div>
-
-    <!-- KPI 4 (New): Recettes Crédit -->
-    <div class="bg-white rounded-[2.5rem] p-8 shadow-elegant border border-secondary-100 group hover:border-amber-200 transition-all">
-      <div class="flex items-start justify-between mb-6">
-        <div class="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 transition-transform group-hover:scale-110">
-          <i class="bi bi-cash-coin text-2xl"></i>
+    <!-- KPI 4: Recouvrement -->
+    <div class="bg-white rounded-[2rem] p-6 shadow-elegant border border-secondary-100 group hover:border-amber-200 transition-all">
+      <div class="flex items-start justify-between mb-4">
+        <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 transition-transform group-hover:scale-110">
+          <i class="bi bi-cash-coin text-xl"></i>
         </div>
         <div class="text-right">
-          <span class="block text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em]">Recouvrement</span>
-          <span class="text-sm font-black text-amber-600">Recettes Crédit</span>
+          <span class="block text-[9px] font-black text-secondary-400 uppercase tracking-widest">Recouvrement</span>
+          <span class="text-xs font-black text-amber-600">Crédits</span>
         </div>
       </div>
       <div class="space-y-1">
-        <h4 class="text-2xl font-black text-secondary-900 tracking-tighter">{{ stats.recettesCredit | number:'1.0' }} <small class="text-xs text-secondary-300">FCFA</small></h4>
-        <p class="text-[10px] font-bold text-secondary-400 uppercase tracking-widest italic">Encaissements</p>
+        <h4 class="text-xl font-black text-secondary-900 tracking-tighter">{{ stats.recettesCredit | number:'1.0' }} <small class="text-[10px] text-secondary-300">FCFA</small></h4>
+        <p class="text-[9px] font-bold text-secondary-400 uppercase tracking-widest italic">Encaissements</p>
       </div>
     </div>
 
-    <!-- KPI 4: Activité Auditée -->
-    <div class="bg-secondary-900 rounded-[2.5rem] p-8 shadow-elegant-dark text-white group overflow-hidden relative">
-      <div class="relative z-10 flex items-start justify-between mb-6">
-        <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-primary-400">
-          <i class="bi bi-activity text-2xl"></i>
-        </div>
-        <div class="text-right">
-          <span class="block text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Volume d'Audit</span>
-          <span class="text-sm font-black text-primary-400">{{ filteredInventaires.length }} Opérations</span>
-        </div>
-      </div>
-      <div class="relative z-10 space-y-1">
-        <h4 class="text-2xl font-black tracking-tighter">{{ stats.totalEntrees + stats.totalSorties | number }}</h4>
-        <p class="text-[10px] font-bold text-white/40 uppercase tracking-widest italic">Articles Manipulés</p>
-      </div>
-      <!-- Background Abstract Decor -->
-      <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-primary-500/10 rounded-full blur-2xl"></div>
-    </div>
   </div>
 
   <!-- Advanced Control Center -->
@@ -171,6 +147,7 @@
           <option value="all">Tous les flux</option>
           <option value="ajout">Entrées (Approvisionnements)</option>
           <option value="retrait">Sorties (Ventes / Pertes)</option>
+          <option value="retrait">Retours (Clients)</option>
         </select>
       </div>
 
@@ -226,144 +203,317 @@
           <tr class="bg-secondary-50/30">
             <th class="pl-10 pr-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50">Référence / Date</th>
             <th class="px-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50">Produit / Catégorie</th>
-            <th class="px-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50">Nature Mutation</th>
+            <th class="px-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50">Nature</th>
             <th class="px-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50 text-center">Quantité</th>
             <th class="px-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50 text-right">Val. Unitaire</th>
+            <th class="px-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50 text-right">Remise</th>
             <th class="pr-10 pl-4 py-6 text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] border-b border-secondary-50 text-right">Impact Net</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-secondary-50">
           
-          <tr *ngFor="let detail of paginatedInventaires" class="group hover:bg-primary-50/20 transition-all duration-300">
-            <!-- Payment Row Special Style -->
-            <ng-container *ngIf="detail.type === 'paiement'; else inventoryRow">
-               <!-- Ref & Date -->
-               <td class="pl-10 pr-4 py-6">
-                 <div class="flex flex-col">
-                   <span class="text-xs font-black text-amber-900 tracking-tighter uppercase mb-0.5">PAY-{{ detail.id | number:'4.0' }}</span>
-                   <span class="text-[10px] text-amber-500 font-bold">{{ detail.date_paiement | date: 'dd/MM/yyyy' }}</span>
-                 </div>
-               </td>
-
-               <!-- User/Client Info -->
-               <td class="px-4 py-6">
-                 <div class="flex items-center gap-4">
-                   <div class="w-12 h-12 rounded-xl border border-amber-100 overflow-hidden bg-amber-50 flex items-center justify-center flex-shrink-0 text-amber-500">
-                     <i class="bi bi-wallet2 text-xl"></i>
-                   </div>
-                   <div class="flex flex-col">
-                     <span class="text-sm font-black text-amber-900">{{ detail.vente?.client?.nom || 'Client' }}</span>
-                     <span class="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Règlement Crédit</span>
-                   </div>
-                 </div>
-               </td>
-
-               <!-- Description -->
-               <td class="px-4 py-6">
-                 <div class="flex flex-col gap-1">
-                   <div class="inline-flex items-center gap-2">
-                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                     <span class="text-xs font-black text-amber-900">Vente #{{ detail.vente_id }} - {{ detail.mode_paiement }}</span>
-                   </div>
-                   <div class="flex items-center gap-1.5 ml-3.5">
-                      <span class="text-[9px] font-bold text-amber-400 uppercase tracking-widest">Caissier</span>
-                      <span class="text-[10px] font-black text-amber-600 underline decoration-amber-200 decoration-2 underline-offset-2">{{ detail.user?.name }}</span>
-                   </div>
-                 </div>
-               </td>
-
-               <!-- Quantity (Empty for payment) -->
-               <td class="px-4 py-6 text-center">
-                 <span class="text-xs font-black text-amber-300">-</span>
-               </td>
-
-               <!-- Unit Value (Empty) -->
-               <td class="px-4 py-6 text-right">
-                  <span class="text-xs font-black text-amber-300">-</span>
-               </td>
-
-               <!-- Amount -->
-               <td class="pr-10 pl-4 py-6 text-right">
-                 <div class="flex flex-col items-end">
-                   <span class="text-sm font-black text-amber-600 tracking-tight">
-                     +{{ detail.montant | number:'1.0' }}
-                   </span>
-                   <span class="text-[9px] font-black text-amber-300 uppercase tracking-widest">FCFA</span>
-                 </div>
-               </td>
-            </ng-container>
-
-            <!-- Regular Inventory Row -->
-            <ng-template #inventoryRow>
-                <!-- Ref & Date -->
+          <ng-container *ngFor="let detail of paginatedInventaires">
+            <!-- GROUPED TRANSACTION ROW (Sale or Return) -->
+            <tr *ngIf="detail.isGroup" class="group border-l-4 transition-all cursor-pointer"
+                [ngClass]="detail.isReturn ? 'border-orange-500 bg-orange-50/20 hover:bg-orange-50/30' : 'border-primary-500 bg-primary-50/10 hover:bg-primary-50/20'"
+                (click)="detail.showDetails = !detail.showDetails">
+                <!-- Date & Ref -->
                 <td class="pl-10 pr-4 py-6">
                   <div class="flex flex-col">
-                    <span class="text-xs font-black text-secondary-900 tracking-tighter uppercase mb-0.5">MOV-{{ detail.id | number:'4.0' }}</span>
-                    <span class="text-[10px] text-secondary-400 font-bold">{{ detail.created_at | date: 'dd/MM/yyyy • HH:mm' }}</span>
+                    <span class="text-xs font-black tracking-tighter uppercase mb-0.5"
+                      [ngClass]="detail.isReturn ? 'text-orange-900 group-hover:text-orange-700' : 'text-primary-900 group-hover:text-primary-700'">
+                      {{ detail.isReturn ? 'RET' : 'TRANS' }}-{{ detail.vente_id | number:'4.0' }}
+                    </span>
+                    <span class="text-[10px] font-black" [ngClass]="detail.isReturn ? 'text-orange-500' : 'text-primary-500'">
+                      {{ detail.date | date: 'dd/MM/yyyy • HH:mm' }}
+                    </span>
                   </div>
                 </td>
                 
-                <!-- Product Info -->
+                <!-- Summary Info -->
                 <td class="px-4 py-6">
                   <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl border border-secondary-100 overflow-hidden bg-secondary-50 flex-shrink-0">
-                      <img [src]="detail.produit?.image" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm transition-transform group-hover:scale-110"
+                      [ngClass]="detail.isReturn ? 'bg-orange-100 text-orange-600' : 'bg-primary-100 text-primary-600'">
+                        <i class="bi text-xl" [ngClass]="detail.isReturn ? 'bi-arrow-left-right' : 'bi-stack'"></i>
                     </div>
                     <div class="flex flex-col">
-                      <span class="text-sm font-black text-secondary-900 group-hover:text-primary-600 transition-colors">{{ detail.produit?.nom }}</span>
-                      <span class="text-[10px] font-bold text-secondary-400 uppercase tracking-widest">{{ detail.produit?.categorie?.nom }}</span>
+                      <span class="text-sm font-black transition-colors" [ngClass]="detail.isReturn ? 'text-orange-900 group-hover:text-orange-600' : 'text-primary-900 group-hover:text-primary-600'">
+                        {{ detail.description }}
+                      </span>
+                      <span class="text-[10px] font-bold uppercase tracking-widest" [ngClass]="detail.isReturn ? 'text-orange-400' : 'text-primary-400'">
+                        Transaction {{ detail.isReturn ? 'de Retour' : 'Groupée' }}
+                      </span>
                     </div>
                   </div>
                 </td>
     
-                <!-- Nature Mutation -->
+                <!-- User & Nature -->
                 <td class="px-4 py-6">
                   <div class="flex flex-col gap-1">
                     <div class="inline-flex items-center gap-2">
-                      <span class="w-1.5 h-1.5 rounded-full" [ngClass]="detail.type === 'retrait' ? 'bg-orange-500' : 'bg-green-500'"></span>
-                      <span class="text-xs font-black text-secondary-900">{{ detail.description }}</span>
+                        <span class="px-2 py-0.5 text-white text-[9px] font-black rounded uppercase"
+                          [ngClass]="detail.isReturn ? 'bg-orange-500' : 'bg-primary-500'">
+                          {{ detail.items.length }} Articles
+                        </span>
+                        <i class="bi" [ngClass]="detail.showDetails ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
                     </div>
-                    <div class="flex items-center gap-1.5 ml-3.5">
+                    <div class="flex items-center gap-1.5 ml-0.5">
                       <span class="text-[9px] font-bold text-secondary-400 uppercase tracking-widest">Par</span>
-                      <span class="text-[10px] font-black text-primary-500 underline decoration-primary-200 decoration-2 underline-offset-2">{{ detail.user?.name }}</span>
+                      <span class="text-[10px] font-black underline decoration-2 underline-offset-2"
+                        [ngClass]="detail.isReturn ? 'text-orange-500 decoration-orange-200' : 'text-primary-500 decoration-primary-200'">
+                        {{ detail.user?.name }}
+                      </span>
                     </div>
                   </div>
                 </td>
     
-                <!-- Quantity -->
+                <!-- Quantity Transacted -->
                 <td class="px-4 py-6 text-center">
-                  <span class="px-3 py-1.5 rounded-xl text-xs font-black tracking-widest transition-all"
-                    [ngClass]="detail.type === 'retrait' ? 'bg-orange-50 text-orange-600 group-hover:bg-orange-600 group-hover:text-white' : 'bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white'">
-                    {{ detail.type === 'retrait' ? '-' : '+' }}{{ detail.quantite }}
+                  <span class="px-3 py-1.5 rounded-xl text-xs font-black tracking-widest text-white"
+                    [ngClass]="detail.isReturn ? 'bg-orange-600' : 'bg-primary-600'">
+                    {{ detail.isReturn ? '-' : '' }}{{ detail.totalQuantite }}
                   </span>
                 </td>
     
-                <!-- Unit Value -->
+                <!-- Unit Value (Average) -->
                 <td class="px-4 py-6 text-right">
-                  <div class="flex flex-col items-end">
-                    <span class="text-xs font-bold text-secondary-500 tracking-tight">
-                       {{ (detail.type === 'retrait' ? detail.produit?.stock?.prix_vente : detail.produit?.stock?.prix_achat) | number:'1.0' }}
-                    </span>
-                    <span class="text-[9px] font-black text-secondary-300 uppercase tracking-[0.2em]">P.{{ detail.type === 'retrait' ? 'Vente' : 'Achat' }}</span>
+                  <div class="flex flex-col items-end opacity-50">
+                    <span class="text-[9px] font-black text-secondary-300 uppercase tracking-[0.2em]">Transaction Multi-produits</span>
+                    <span class="text-[10px] font-bold italic text-secondary-400">---</span>
                   </div>
+                </td>
+
+                <!-- Remise Globale -->
+                <td class="px-4 py-6 text-right">
+                    <ng-container *ngIf="!detail.isReturn">
+                        <span class="text-sm font-black text-primary-600">
+                            {{ (detail.totalRemise || 0) | number }}
+                        </span>
+                        <p class="text-[9px] font-black text-primary-400 uppercase">Remise</p>
+                    </ng-container>
+                    <span *ngIf="detail.isReturn" class="text-xs font-bold text-secondary-300">N/A</span>
                 </td>
     
-                <!-- Impact Net -->
+                <!-- Impact Net (Profit) -->
                 <td class="pr-10 pl-4 py-6 text-right">
                   <div class="flex flex-col items-end">
-                    <span class="text-sm font-black tracking-tight" [ngClass]="detail.type === 'retrait' ? 'text-secondary-900 font-black' : 'text-primary-600'">
-                      {{ (detail.quantite * (detail.type === 'retrait' ? (detail.produit?.stock?.prix_vente || 0) : (detail.produit?.stock?.prix_achat || 0))) | number:'1.0' }}
+                    <span class="text-base font-black tracking-tight" [ngClass]="(detail.impactNet < 0 || detail.isReturn) ? 'text-orange-600' : 'text-emerald-600'">
+                      {{ (detail.isReturn && detail.impactNet > 0) ? '-' : '' }}{{ detail.impactNet | number:'1.0' }}
                     </span>
-                    <span class="text-[9px] font-black text-secondary-300 uppercase tracking-widest">FCFA</span>
+                    <span class="text-[9px] font-black uppercase tracking-widest" [ngClass]="(detail.impactNet < 0 || detail.isReturn) ? 'text-orange-400' : 'text-emerald-400'">
+                      {{ (detail.impactNet < 0 || detail.isReturn) ? 'Déficit Net' : 'Bénéfice Net' }}
+                    </span>
                   </div>
                 </td>
-            </ng-template>
-          </tr>
+            </tr>
+
+            <!-- SUB-ITEMS (VISIBLE IF EXPANDED) -->
+            <ng-container *ngIf="detail.isGroup && detail.showDetails">
+                <tr *ngFor="let item of detail.items" class="animate-fade-in" [ngClass]="detail.isReturn ? 'bg-orange-50/30' : 'bg-secondary-50'">
+                    <td class="pl-16 py-4 opacity-50">
+                        <span class="text-[9px] font-bold" [ngClass]="detail.isReturn ? 'text-orange-400' : 'text-secondary-400'">Réf/Code {{ item.produit?.reference || '....' }}</span>
+                    </td>
+                    <td class="px-4 py-4">
+                        <div class="flex items-center gap-3">
+                            <i class="bi bi-arrow-return-right text-secondary-300"></i>
+                            <span class="text-xs font-bold" [ngClass]="detail.isReturn ? 'text-orange-900 font-black' : 'text-secondary-600'">{{ item.produit?.nom }}</span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4 text-[10px] italic text-secondary-400">
+                        {{ item.description }}
+                    </td>
+                    <td class="px-4 py-4 text-center">
+                        <span class="text-xs font-black" [ngClass]="detail.isReturn ? 'text-orange-600' : 'text-secondary-500'">
+                          {{ detail.isReturn ? '+' : '-' }}{{ item.quantite }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-4 text-right">
+                        <span class="text-[10px] font-bold text-secondary-400">{{ (item.prix_vente ?? item.produit?.stock?.prix_vente) | number }} F</span>
+                    </td>
+                    <td class="px-4 py-4 text-right">
+                        <span class="text-[9px] text-secondary-300">Prorata N/A</span>
+                    </td>
+                    <td class="pr-10 py-4 text-right">
+                        <span class="text-xs font-bold" [ngClass]="detail.isReturn ? 'text-red-500' : 'text-secondary-500'">
+                          {{ detail.isReturn ? '-' : '' }}{{ (item.quantite * ((item.prix_vente ?? (item.produit?.stock?.prix_vente || 0)) - (item.prix_achat ?? (item.produit?.stock?.prix_achat || 0)))) | number }} F
+                        </span>
+                    </td>
+                </tr>
+            </ng-container>
+
+            <!-- INDIVIDUAL ROW (PAYMENT OR SINGLE ITEM) -->
+            <tr *ngIf="!detail.isGroup" class="group hover:bg-primary-50/20 transition-all duration-300">
+                <!-- Payment Row Special Style -->
+                <ng-container *ngIf="detail.type === 'paiement'; else inventoryRow">
+                   <!-- Ref & Date -->
+                   <td class="pl-10 pr-4 py-6">
+                     <div class="flex flex-col">
+                       <span class="text-xs font-black text-amber-900 tracking-tighter uppercase mb-0.5">PAY-{{ detail.id | number:'4.0' }}</span>
+                       <span class="text-[10px] text-amber-500 font-bold">{{ detail.date_paiement | date: 'dd/MM/yyyy' }}</span>
+                     </div>
+                   </td>
+    
+                   <!-- User/Client Info -->
+                   <td class="px-4 py-6">
+                     <div class="flex items-center gap-4">
+                       <div class="w-12 h-12 rounded-xl border overflow-hidden flex items-center justify-center flex-shrink-0"
+                            [ngClass]="detail.vente?.statut === 'en_attente' ? 'border-indigo-100 bg-indigo-50 text-indigo-500' : 'border-amber-100 bg-amber-50 text-amber-500'">
+                         <i class="bi bi-wallet2 text-xl"></i>
+                       </div>
+                       <div class="flex flex-col">
+                         <span class="text-sm font-black" [ngClass]="detail.vente?.statut === 'en_attente' ? 'text-indigo-900' : 'text-amber-900'">{{ detail.vente?.client?.nom || 'Client' }}</span>
+                         <span class="text-[10px] font-bold uppercase tracking-widest" [ngClass]="detail.vente?.statut === 'en_attente' ? 'text-indigo-400' : 'text-amber-400'">Règlement Crédit</span>
+                       </div>
+                     </div>
+                   </td>
+    
+                   <!-- Description -->
+                   <td class="px-4 py-6">
+                     <div class="flex flex-col gap-1">
+                       <div class="inline-flex items-center gap-2">
+                         <span class="w-1.5 h-1.5 rounded-full" [ngClass]="detail.vente?.statut === 'en_attente' ? 'bg-indigo-500' : 'bg-amber-500'"></span>
+                         <span class="text-xs font-black" [ngClass]="detail.vente?.statut === 'en_attente' ? 'text-indigo-900' : 'text-amber-900'">Vente #{{ detail.vente_id }} - {{ detail.mode_paiement }}</span>
+                       </div>
+                       <div class="flex items-center gap-1.5 ml-3.5">
+                          <span class="text-[9px] font-bold uppercase tracking-widest" [ngClass]="detail.vente?.statut === 'en_attente' ? 'text-indigo-400' : 'text-amber-400'">Caissier</span>
+                          <span class="text-[10px] font-black underline decoration-2 underline-offset-2" 
+                                [ngClass]="detail.vente?.statut === 'en_attente' ? 'text-indigo-600 decoration-indigo-200' : 'text-amber-600 decoration-amber-200'">{{ detail.user?.name }}</span>
+                       </div>
+                     </div>
+                   </td>
+    
+                   <!-- Quantity (Empty for payment) -->
+                   <td class="px-4 py-6 text-center">
+                     <span class="text-xs font-black text-amber-300">-</span>
+                   </td>
+    
+                   <!-- Unit Value (Empty) -->
+                   <td class="px-4 py-6 text-right">
+                      <span class="text-xs font-black text-amber-300">-</span>
+                   </td>
+
+                   <!-- Remise (Empty) -->
+                   <td class="px-4 py-6 text-right">
+                       <span class="text-xs font-black text-amber-300">-</span>
+                   </td>
+    
+                   <!-- Amount -->
+                   <td class="pr-10 pl-4 py-6 text-right">
+                     <div class="flex flex-col items-end">
+                       <span class="text-sm font-black tracking-tight" [ngClass]="detail.vente?.statut === 'en_attente' ? 'text-indigo-600' : 'text-amber-600'">
+                         +{{ detail.montant | number:'1.0' }}
+                       </span>
+                       <span class="text-[9px] font-black uppercase tracking-widest" [ngClass]="detail.vente?.statut === 'en_attente' ? 'text-indigo-300' : 'text-amber-300'">Encaissement</span>
+                     </div>
+                   </td>
+                </ng-container>
+    
+                <!-- Regular Inventory Row (Single Item) -->
+                <ng-template #inventoryRow>
+                    <!-- Ref & Date -->
+                    <td class="pl-10 pr-4 py-6">
+                      <div class="flex flex-col">
+                        <span class="text-xs font-black text-secondary-900 tracking-tighter uppercase mb-0.5">MOV-{{ detail.id | number:'4.0' }}</span>
+                        <span class="text-[10px] text-secondary-400 font-bold">{{ detail.created_at | date: 'dd/MM/yyyy • HH:mm' }}</span>
+                      </div>
+                    </td>
+                    
+                    <!-- Product Info -->
+                    <td class="px-4 py-6">
+                      <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl border border-secondary-100 overflow-hidden bg-secondary-50 flex-shrink-0">
+                          <img [src]="detail.produit?.image" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all">
+                        </div>
+                        <div class="flex flex-col">
+                          <span class="text-sm font-black text-secondary-900 group-hover:text-primary-600 transition-colors">{{ detail.produit?.nom }}</span>
+                          <span class="text-[10px] font-bold text-secondary-400 uppercase tracking-widest">{{ detail.produit?.categorie?.nom }}</span>
+                        </div>
+                      </div>
+                    </td>
+        
+                    <!-- Nature Mutation -->
+                    <td class="px-4 py-6">
+                      <div class="flex flex-col gap-1">
+                        <div class="inline-flex items-center gap-2">
+                          <span class="w-1.5 h-1.5 rounded-full" [ngClass]="detail.type === 'retrait' ? 'bg-orange-500' : 'bg-green-500'"></span>
+                          <span class="text-xs font-black text-secondary-900">{{ detail.description }}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 ml-3.5">
+                          <span class="text-[9px] font-bold text-secondary-400 uppercase tracking-widest">Par</span>
+                          <span class="text-[10px] font-black text-primary-500 underline decoration-primary-200 decoration-2 underline-offset-2">{{ detail.user?.name }}</span>
+                        </div>
+                      </div>
+                    </td>
+        
+                    <!-- Quantity -->
+                    <td class="px-4 py-6 text-center">
+                      <span class="px-3 py-1.5 rounded-xl text-xs font-black tracking-widest transition-all"
+                        [ngClass]="detail.type === 'retrait' ? 'bg-orange-50 text-orange-600 group-hover:bg-orange-600 group-hover:text-white' : 'bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white'">
+                        {{ detail.type === 'retrait' ? '-' : '+' }}{{ detail.quantite }}
+                      </span>
+                    </td>
+        
+                    <!-- Unit Value -->
+                    <td class="px-4 py-6 text-right">
+                      <div class="flex flex-col items-end">
+                        <span class="text-xs font-bold text-secondary-500 tracking-tight">
+                           {{ (detail.prix_vente ?? detail.prix_achat ?? (detail.type === 'retrait' ? detail.produit?.stock?.prix_vente : detail.produit?.stock?.prix_achat)) | number:'1.0' }}
+                        </span>
+                        <span class="text-[9px] font-black text-secondary-300 uppercase tracking-[0.2em]">P.{{ detail.type === 'retrait' ? 'Vente' : 'Achat' }}</span>
+                      </div>
+                    </td>
+    
+                    <!-- Remise -->
+                    <td class="px-4 py-6 text-right">
+                        <span class="text-xs font-black" [ngClass]="detail.remise > 0 ? 'text-primary-500' : 'text-secondary-300'">
+                            {{ (detail.remise || 0) | number }}
+                        </span>
+                    </td>
+        
+                    <!-- Impact Net (Profit) -->
+                    <td class="pr-10 pl-4 py-6 text-right">
+                      <div class="flex flex-col items-end">
+                        <span class="text-sm font-black tracking-tight" [ngClass]="detail.impactNet < 0 ? 'text-red-600' : 'text-emerald-600'">
+                          {{ detail.impactNet | number:'1.0' }}
+                        </span>
+                        <span class="text-[9px] font-black text-secondary-300 uppercase tracking-widest">{{ detail.type === 'retrait' ? 'Profit Net' : 'Valorisation' }}</span>
+                      </div>
+                    </td>
+                </ng-template>
+            </tr>
+
+            <!-- DETAIL ROWS (Only for Grouped Transactions) -->
+            <tr *ngIf="detail.isGroup && detail.showDetails" class="bg-secondary-50/10 border-l-4 border-primary-500/50">
+                <td colspan="7" class="px-4 py-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div *ngFor="let item of detail.items" class="flex items-center gap-4 p-3 bg-white rounded-xl shadow-sm border border-secondary-100">
+                            <div class="w-10 h-10 rounded-lg overflow-hidden bg-secondary-50 flex-shrink-0">
+                                <img [src]="item.produit?.image" class="w-full h-full object-cover">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-black text-secondary-900 truncate">{{ item.produit?.nom }}</span>
+                                    <span class="text-[10px] font-bold text-secondary-400">{{ item.produit?.reference }}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] font-bold text-secondary-500">{{ item.quantite }} x {{ item.prix_vente | number:'1.0' }}</span>
+                                    <span class="text-xs font-black text-primary-600">{{ item.total | number:'1.0' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+          </ng-container>
+          
         </tbody>
         
         <!-- Table Footer: Expert Recap -->
         <tfoot *ngIf="filteredInventaires.length > 0" class="bg-secondary-900 shadow-2xl relative overflow-hidden">
-          <tr class="relative z-10 border-t border-white/5">
+          <tr class="relative z-10 border-t border-white/7">
+
             <td colspan="4" class="pl-10 pr-4 py-12">
               <div class="flex items-center gap-10">
                 <div class="space-y-1">
@@ -377,14 +527,16 @@
                 </div>
               </div>
             </td>
-            <td colspan="2" class="pr-10 pl-4 py-12 text-right">
+            <td colspan="4" class="pr-10 pl-4 py-12 text-right">
               <span class="block text-[10px] font-black text-white/40 uppercase tracking-[0.3em] mb-1">Marge de Mouvement (théorique)</span>
               <span class="text-4xl font-black text-white tracking-tightest">
                 {{ (stats.valeurVenteSortante - stats.valeurAchatEntrante) | number:'1.0' }}
                 <span class="text-sm font-bold text-primary-500 ml-1 tracking-widest uppercase">FCFA</span>
               </span>
             </td>
+
           </tr>
+
         </tfoot>
       </table>
     </div>
@@ -463,6 +615,7 @@
         <th class="p-2 border border-secondary-200 text-left uppercase">Nature / Motif</th>
         <th class="p-2 border border-secondary-200 text-center uppercase">Qté</th>
         <th class="p-2 border border-secondary-200 text-right uppercase">Val. Unit</th>
+        <th class="p-2 border border-secondary-200 text-right uppercase">Remise</th>
         <th class="p-2 border border-secondary-200 text-right uppercase font-black">Impact</th>
       </tr>
     </thead>
@@ -475,10 +628,13 @@
           {{ item.type === 'retrait' ? '-' : '+' }}{{ item.quantite }}
         </td>
         <td class="p-2 border-r border-secondary-200 text-right">
-          {{ (item.type === 'retrait' ? item.produit?.stock?.prix_vente : item.produit?.stock?.prix_achat) | number:'1.0' }}
+          {{ (item.prix_vente ?? item.prix_achat ?? (item.type === 'retrait' ? item.produit?.stock?.prix_vente : item.produit?.stock?.prix_achat)) | number:'1.0' }}
+        </td>
+        <td class="p-2 border-r border-secondary-200 text-right">
+          {{ (item.remise || 0) | number }}
         </td>
         <td class="p-2 border-r border-secondary-200 text-right font-bold text-secondary-900">
-          {{ (item.quantite * (item.type === 'retrait' ? (item.produit?.stock?.prix_vente || 0) : (item.produit?.stock?.prix_achat || 0))) | number:'1.0' }}
+          {{ item.impactNet | number:'1.0' }}
         </td>
       </tr>
     </tbody>

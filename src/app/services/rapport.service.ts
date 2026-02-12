@@ -104,4 +104,8 @@ export class RapportService {
   sendEmail(id: number): Observable<{ success: boolean; message: string }> {
     return this.http.post<any>(`${this.apiUrl}/${id}/envoyer`, {}, { headers: this.getHeaders() });
   }
+
+  sendWhatsApp(id: number): Observable<{ success: boolean; message: string }> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/whatsapp`, {}, { headers: this.getHeaders() });
+  }
 }

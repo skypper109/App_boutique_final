@@ -159,10 +159,11 @@ export class ReapproIndexComponent implements OnInit {
       this.produits = [...this.produitsOriginal];
     } else {
       // Filtrer les produits selon le filtre
-      this.produitTri = this.produitsOriginal.filter((produit: { nom: string; description: string; categorie: any }) =>
+      this.produitTri = this.produitsOriginal.filter((produit: { nom: string; description: string; categorie: any, reference: string }) =>
         produit.nom.toLowerCase().includes(filterValue) || 
         (produit.description && produit.description.toLowerCase().includes(filterValue)) || 
-        (produit.categorie && produit.categorie.nom.toLowerCase().includes(filterValue))
+        (produit.categorie && produit.categorie.nom.toLowerCase().includes(filterValue)) ||
+        (produit.reference && produit.reference.toLowerCase().includes(filterValue))
       );
 
       // Mettez à jour la liste affichée

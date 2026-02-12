@@ -28,7 +28,8 @@ export class ProdFactureComponent {
     private exportService: ExportService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
-
+  
+  idVente: any;
   ventes: any;
   nomClient: any;
   montant_total: any;
@@ -45,13 +46,14 @@ export class ProdFactureComponent {
   ngOnInit(): void {
     // Pour recuperer les produits de la vente atravers l'id de la facture de l'url
     this.spinne.show();
-    let idVente = this.route.snapshot.params['idVente'];
-    console.log(idVente);
-    this.data.getById(Env.FACTURE, idVente).subscribe(
+    this.idVente = this.route.snapshot.params['idVente'];
+    console.log('Facture ID:', this.idVente);
+    this.data.getById(Env.FACTURE, this.idVente).subscribe(
       (data: any) => {
+        console.log('Facture Data received:', data);
         if (data && data.length > 0) {
           const item = data[0];
-          this.produitAcheter = item.produitAchat;
+          this.produitAcheter = item.produitAchat || [];
           this.nomClient = item.nomClient;
           this.numeroClient = item.numeroClient;
           this.dateFacture = item.dateFacture;
@@ -61,7 +63,7 @@ export class ProdFactureComponent {
           this.nomBoutique = item.nomBoutique || 'Ma Boutique';
           this.adresseBoutique = item.adresseBoutique || '-----';
           this.telBoutique = item.telephoneBoutique || '-----';
-          this.idFacture = idVente + "-" + new Date().getFullYear();
+          this.idFacture = this.idVente + "-" + new Date().getFullYear();
         }
         this.spinne.hide();
       },
@@ -73,13 +75,13 @@ export class ProdFactureComponent {
   }
 
   print() {
-    const venteId = this.route.snapshot.params['idVente'];
-    this.exportService.printPdf('facture', venteId);
+    this.exportService.printPdf('facture', this.idVente);
   }
 
+
   exportPDF() {
-    const venteId = this.route.snapshot.params['idVente'];
-    this.exportService.downloadPdf('facture', venteId, `Facture_${this.idFacture}.pdf`);
+    const filename = `Facture_${this.idFacture || this.idVente}_du_${this.dateFacture}.pdf`;
+    this.exportService.downloadPdf('facture', this.idVente, filename);
   }
 
 }

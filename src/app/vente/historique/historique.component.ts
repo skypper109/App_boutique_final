@@ -1,5 +1,5 @@
 import { CommonModule, registerLocaleData } from '@angular/common';
-import { Component, CUSTOM_ELEMENTS_SCHEMA, LOCALE_ID, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, LOCALE_ID, numberAttribute, OnInit } from '@angular/core';
 import { DataService } from '../../services/data.service';
 import { Env } from '../../services/env';
 import localeFr from '@angular/common/locales/fr';
@@ -48,6 +48,7 @@ export class HistoriqueComponent implements OnInit {
   change: boolean = false;
   selectedMois: boolean = false;
   isModalVisible: boolean = false;
+  isDetailsVisible: boolean = false;
   isConfirmModalVisible: boolean = false;
 
   // Confirmation state
@@ -68,6 +69,10 @@ export class HistoriqueComponent implements OnInit {
   originalProduitsVente: any[] = [];
   montantTotal: number = 0;
   selectedVenteId: number = 0;
+  selectedVenteDetails: any = null;
+  remise: number = 0;
+  originalRemise: number = 0;
+  selectedMontantTotal: number = 0;
 
   constructor(private data: DataService, private toastr: ToastrService, private spinne: NgxSpinnerService) { }
 
@@ -230,6 +235,9 @@ export class HistoriqueComponent implements OnInit {
       next: (data: any) => {
         this.produitsVente = JSON.parse(JSON.stringify(data[0].detail_ventes));
         this.originalProduitsVente = JSON.parse(JSON.stringify(data[0].detail_ventes));
+        this.remise = Number(data[0].remise || 0); // Vente might have total remise
+        // Or if remise is per detail, we might need a different logic, but usually it's per vente
+        this.originalRemise = this.remise;
         this.calculateTotal();
         this.isModalVisible = true;
         this.spinne.hide();
@@ -285,6 +293,7 @@ export class HistoriqueComponent implements OnInit {
         quantite: p.quantite
       })),
       montant_total: this.montantTotal,
+      remise: this.remise,
       date: new Date().toISOString(),
     };
 
@@ -324,4 +333,17 @@ export class HistoriqueComponent implements OnInit {
   }
 
   closeModal() { this.isModalVisible = false; }
+
+  openDetails(vente: any) {
+    this.selectedVenteDetails = vente;
+    this.isDetailsVisible = true;
+    this.selectedMontantTotal = Number(vente.montant_total) + Number(vente.remise);
+    console.log(this.selectedMontantTotal);
+    console.log(this.selectedVenteDetails);
+  }
+
+  closeDetails() {
+    this.isDetailsVisible = false;
+    this.selectedVenteDetails = null;
+  }
 }

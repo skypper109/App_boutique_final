@@ -38,6 +38,7 @@ export class ComptaCAComponent implements OnInit, AfterViewInit {
 
   totalCA: number = 0;
   totalQtv: number = 0;
+  totalBenefice: number = 0;
 
   constructor(private data: DataService, private spinne: NgxSpinnerService) { }
 
@@ -46,10 +47,16 @@ export class ComptaCAComponent implements OnInit, AfterViewInit {
       this.spinne.show();
       this.data.getAll(Env.CHIFFREDAFFAIRE).subscribe({
         next: (res: any) => {
-          this.annees = res.par_annee || [];
+          this.annees = res.par_annee || []; 
           this.chiffres = res.par_mois || [];
           this.annee = res.annee_actuelle || this.currentYear;
-          this.totalCa();
+          
+          if (res.annual_stats) {
+            this.totalCA = res.annual_stats.total_ca;
+            this.totalQtv = res.annual_stats.total_qtv;
+            this.totalBenefice = res.annual_stats.total_benefice;
+          }
+          
           this.updateChart();
           this.spinne.hide();
         },
@@ -70,9 +77,15 @@ export class ComptaCAComponent implements OnInit, AfterViewInit {
     this.annee = annee;
     this.spinne.show();
     this.data.getByAnnee(Env.CHIFFREDAFFAIRE, annee).subscribe({
-      next: (data: any) => {
-        this.chiffres = data;
-        this.totalCa();
+      next: (res: any) => {
+        this.chiffres = res.par_mois || [];
+        
+        if (res.annual_stats) {
+          this.totalCA = res.annual_stats.total_ca;
+          this.totalQtv = res.annual_stats.total_qtv;
+          this.totalBenefice = res.annual_stats.total_benefice;
+        }
+        
         this.updateChart();
         this.spinne.hide();
       },
@@ -85,17 +98,6 @@ export class ComptaCAComponent implements OnInit, AfterViewInit {
 
   getMonthName(num: number): string {
     return this.monthNames[num - 1] || 'Inconnu';
-  }
-
-  totalCa() {
-    this.totalCA = 0;
-    this.totalQtv = 0;
-    if (this.chiffres) {
-      for (let item of this.chiffres) {
-        this.totalCA += Number(item.ca || 0);
-        this.totalQtv += Number(item.qtv || 0);
-      }
-    }
   }
 
   initChart() {

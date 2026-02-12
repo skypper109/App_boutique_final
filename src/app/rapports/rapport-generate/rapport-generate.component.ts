@@ -42,7 +42,7 @@ export class RapportGenerateComponent {
         }
 
         setTimeout(() => {
-          this.router.navigate(['/accueil/rapports']);
+          this.router.navigate(['/accueil/comptabilite/rapports']);
         }, 1500);
       },
       error: (error) => {
@@ -66,13 +66,14 @@ export class RapportGenerateComponent {
       },
       error: (error) => {
         console.error('Erreur lors du téléchargement:', error);
+        toastr.error('Rapport généré mais erreur lors du téléchargement automatique');
         this.isGenerating = false;
       }
     });
   }
 
   cancel(): void {
-    this.router.navigate(['/accueil/rapports']);
+    this.router.navigate(['/accueil/comptabilite/rapports']);
   }
 
   get maxDate(): string {

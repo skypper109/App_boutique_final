@@ -28,7 +28,9 @@ export class RapportsListComponent implements OnInit {
 
   isLoading = false;
   sendingEmailId: number | null = null;
+  sendingWhatsAppId: number | null = null;
   downloadingId: number | null = null;
+  regeneratingId: number | null = null;
 
   constructor(
     private rapportService: RapportService,
@@ -122,6 +124,38 @@ export class RapportsListComponent implements OnInit {
         console.error('Erreur lors de l\'envoi de l\'email:', error);
         toastr.error('Erreur lors de l\'envoi de l\'email');
         this.sendingEmailId = null;
+      }
+    });
+  }
+
+  sendWhatsApp(rapport: DailyReport): void {
+    this.sendingWhatsAppId = rapport.id;
+    this.rapportService.sendWhatsApp(rapport.id).subscribe({
+      next: (response) => {
+        toastr.success(response.message || 'Message WhatsApp envoyé');
+        this.sendingWhatsAppId = null;
+        this.loadRapports();
+      },
+      error: (error) => {
+        console.error('Erreur lors de l\'envoi WhatsApp:', error);
+        toastr.error('Erreur lors de l\'envois WhatsApp');
+        this.sendingWhatsAppId = null;
+      }
+    });
+  }
+
+  regenerateReport(rapport: DailyReport): void {
+    this.regeneratingId = rapport.id;
+    this.rapportService.generateRapport(rapport.date).subscribe({
+      next: (response) => {
+        toastr.success(response.message || 'Rapport mis à jour');
+        this.regeneratingId = null;
+        this.loadRapports();
+      },
+      error: (error) => {
+        console.error('Erreur lors de la régénération:', error);
+        toastr.error('Erreur lors de la mise à jour du rapport');
+        this.regeneratingId = null;
       }
     });
   }

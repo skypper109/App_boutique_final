@@ -153,6 +153,10 @@
             <!-- Actions -->
             <td class="pr-10 pl-4 py-8">
               <div class="flex items-center justify-center gap-2">
+                <button (click)="openDetails(v)"
+                  class="w-10 h-10 flex items-center justify-center bg-white border border-secondary-100 rounded-xl text-primary-500 hover:bg-primary-500 hover:text-white transition-all shadow-sm">
+                  <i class="bi bi-eye-fill"></i>
+                </button>
                 <button (click)="retourVente(v.id)"
                   class="w-10 h-10 flex items-center justify-center bg-white border border-secondary-100 rounded-xl text-orange-500 hover:bg-orange-500 hover:text-white transition-all shadow-sm">
                   <i class="bi bi-arrow-counterclockwise"></i>
@@ -302,32 +306,53 @@
 
       <!-- Modal Footer Recap -->
       <div
-        class="px-12 py-10 bg-secondary-900 text-white relative flex flex-col sm:flex-row items-center justify-between gap-10">
-        <div class="flex items-center gap-8 relative z-10">
-          <div class="space-y-1">
-            <p class="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] italic">
-              Valeur de l'Avoir Ré-émis
+        class="px-6 lg:px-12 py-6 lg:py-10 bg-secondary-900 text-white relative flex flex-col items-center justify-between gap-6 lg:gap-10">
+        <div class="flex flex-col lg:flex-row items-center gap-4 lg:gap-8 relative z-10 w-full">
+          <div class="space-y-1 text-center lg:text-left">
+            <p class="text-[9px] lg:text-[10px] font-black text-white/40 uppercase tracking-[0.3em] italic">
+              Valeur Brute
             </p>
-            <div class="flex items-baseline gap-2">
-              <span class="text-4xl font-black tracking-tightest text-primary-400">{{ montantTotal | number: "1.0"
+            <div class="flex items-baseline justify-center lg:justify-start gap-2">
+              <span class="text-2xl lg:text-4xl font-black tracking-tightest text-white">{{ montantTotal | number: "1.0"
                 }}</span>
-              <span class="text-xs font-black text-white/60 uppercase">FCFA</span>
+              <span class="text-[10px] lg:text-xs font-black text-white/60 uppercase">FCFA</span>
             </div>
           </div>
-          <div class="w-px h-12 bg-white/10 hidden lg:block"></div>
-          <p class="text-[10px] text-white/30 hidden lg:block max-w-[200px] italic">
-            L'envoi de cette correction mettra à jour instantanément les stocks
-            physiques et les balances comptables.
-          </p>
+          
+          <div class="hidden lg:block w-px h-12 bg-white/10"></div>
+
+          <!-- Remise Adjustment -->
+          <div class="space-y-1 w-full lg:w-auto">
+            <p class="text-[9px] lg:text-[10px] font-black text-primary-400 uppercase tracking-[0.3em] italic text-center lg:text-left">
+               Remise / Réduction
+            </p>
+            <div class="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-2xl border border-white/10 focus-within:border-primary-500 transition-all justify-center">
+                <input type="number" [(ngModel)]="remise"
+                       class="w-20 lg:w-24 bg-transparent border-none text-lg lg:text-xl font-black text-primary-400 outline-none text-center" />
+                <span class="text-[9px] font-black text-white/40 uppercase tracking-widest">FCFA</span>
+            </div>
+          </div>
+
+          <div class="hidden lg:block w-px h-12 bg-white/10"></div>
+
+          <div class="space-y-1 text-center lg:text-left">
+            <p class="text-[9px] lg:text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em] italic">
+              Total à Payer
+            </p>
+            <div class="flex items-baseline justify-center lg:justify-start gap-2">
+                <span class="text-2xl lg:text-4xl font-black tracking-tightest text-emerald-400 truncate max-w-[180px]">{{ (montantTotal - remise) | number: "1.0" }}</span>
+                <span class="text-[10px] lg:text-xs font-black text-white/60 uppercase">FCFA</span>
+            </div>
+          </div>
         </div>
 
-        <div class="flex items-center gap-4 w-full sm:w-auto relative z-10">
+        <div class="flex flex-col sm:flex-row items-center gap-4 w-full relative z-10">
           <button (click)="closeModal()"
-            class="h-14 px-8 text-xs font-black text-white/60 hover:text-white uppercase tracking-widest transition-all">
+            class="w-full sm:w-auto h-14 px-8 text-xs font-black text-white/60 hover:text-white uppercase tracking-widest transition-all">
             Interrompre
           </button>
           <button (click)="onUpdateProd()"
-            class="h-16 px-12 bg-primary-600 text-white rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.2em] shadow-[0_20px_50px_rgba(2,132,199,0.3)] hover:bg-primary-500 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center min-w-[240px] border border-primary-400/20">
+            class="w-full sm:flex-1 h-16 px-8 lg:px-12 bg-primary-600 text-white rounded-[1.5rem] text-[10px] lg:text-[11px] font-black uppercase tracking-[0.2em] shadow-[0_20px_50px_rgba(2,132,199,0.3)] hover:bg-primary-500 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center border border-primary-400/20">
             <i class="bi bi-shield-check mr-3 text-lg"></i>
             Valider Rectification
           </button>
@@ -336,6 +361,93 @@
         <!-- Background Abstract -->
         <div
           class="absolute inset-0 bg-gradient-to-r from-primary-500/10 to-transparent pointer-events-none opacity-40">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transaction Details Modal (Premium View) -->
+  <div *ngIf="isDetailsVisible"
+    class="fixed inset-0 z-[120] flex items-center justify-center p-4 lg:p-12 overflow-hidden">
+    <div (click)="closeDetails()"
+      class="absolute inset-0 bg-secondary-950/90 backdrop-blur-2xl animate-fade-in transition-all"></div>
+
+    <div
+      class="relative bg-white rounded-[3rem] lg:rounded-[4rem] shadow-2xl w-full max-w-4xl overflow-hidden animate-scale-in flex flex-col max-h-[90vh]">
+      <!-- Header -->
+      <div class="px-8 lg:px-12 py-8 lg:py-10 border-b border-secondary-50 flex items-center justify-between bg-secondary-50/30">
+        <div class="flex items-center gap-4 lg:gap-6">
+          <div class="w-14 lg:w-16 h-14 lg:h-16 bg-primary-50 rounded-2xl flex items-center justify-center text-primary-600">
+            <i class="bi bi-receipt-cutoff text-2xl lg:text-3xl"></i>
+          </div>
+          <div>
+            <h3 class="text-xl lg:text-2xl font-black text-secondary-900 tracking-tight">Vente #{{ selectedVenteDetails?.id }}</h3>
+            <p class="text-[10px] text-secondary-500 font-bold uppercase tracking-widest">{{ selectedVenteDetails?.date_vente | date:'fullDate' }}</p>
+          </div>
+        </div>
+        <button (click)="closeDetails()" class="w-12 h-12 rounded-2xl bg-white border border-secondary-100 flex items-center justify-center text-secondary-400 hover:text-secondary-900 transition-all">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="flex-1 overflow-y-auto px-6 lg:px-12 py-8 space-y-6">
+        <!-- Info Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-6 bg-secondary-50 rounded-3xl border border-secondary-100">
+            <p class="text-[9px] font-black text-secondary-400 uppercase tracking-widest mb-3">Client</p>
+            <p class="text-sm font-bold text-secondary-900">{{ selectedVenteDetails?.client?.nom || 'Client Anonyme' }}</p>
+            <p class="text-xs text-secondary-500">{{ selectedVenteDetails?.client?.telephone || 'No phone' }}</p>
+          </div>
+          <div class="p-6 bg-secondary-50 rounded-3xl border border-secondary-100">
+            <p class="text-[9px] font-black text-secondary-400 uppercase tracking-widest mb-3">Vendeur / Statut</p>
+            <p class="text-sm font-bold text-secondary-900">{{ selectedVenteDetails?.user?.name }}</p>
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-lg text-[9px] font-black uppercase mt-1">
+              {{ selectedVenteDetails?.statut }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Products Table -->
+        <div class="space-y-4">
+          <h4 class="text-xs font-black text-secondary-900 uppercase tracking-widest border-l-4 border-primary-500 pl-3">Articles détaillés</h4>
+          <div class="space-y-3">
+            <div *ngFor="let item of selectedVenteDetails?.detail_ventes" 
+                 class="flex items-center justify-between p-4 bg-white border border-secondary-100 rounded-2xl hover:border-primary-200 transition-colors">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-secondary-50 rounded-xl flex items-center justify-center font-black text-secondary-400 italic">
+                  {{ item.produit?.nom?.substring(0,1) }}
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-secondary-900">{{ item.produit?.nom }}</p>
+                  <p class="text-[10px] text-secondary-400 font-bold uppercase tracking-widest">
+                    {{ item.quantite }} x {{ item.prix_unitaire | number }} F
+                  </p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-black text-secondary-900">{{ item.montant_total | number }} <small class="text-[9px]">F</small></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-8 lg:px-12 py-8 bg-secondary-50 border-t border-secondary-100 flex flex-col lg:flex-row items-center justify-between gap-6">
+        <div class="flex flex-wrap items-center justify-center lg:justify-start gap-8">
+          <div>
+            <p class="text-[9px] font-black text-secondary-400 uppercase tracking-widest mb-1">Montant Brut</p>
+            <p class="text-lg font-black text-secondary-900">{{ selectedMontantTotal | number }} F</p>
+          </div>
+          <div>
+            <p class="text-[9px] font-black text-primary-500 uppercase tracking-widest mb-1">Remise Totale</p>
+            <p class="text-lg font-black text-primary-600">- {{ selectedVenteDetails?.remise || 0 | number }} F</p>
+          </div>
+        </div>
+        <div class="text-center lg:text-right">
+          <p class="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-1">Net à Payer</p>
+          <p class="text-3xl font-black text-emerald-600 tracking-tighter">{{ selectedVenteDetails?.montant_total | number }} <small class="text-sm">FCFA</small></p>
         </div>
       </div>
     </div>

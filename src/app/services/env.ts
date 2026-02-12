@@ -35,7 +35,7 @@ export class Env {
  
   public static CLIENT = Env.API_URL + '/clients';
   public static FACTURATION = Env.API_URL + '/facturations';
-  public static FACTURATIONDATE = Env.API_URL + '/facturations/';
+  public static FACTURATIONDATE = Env.API_URL + '/facturations';
   public static CLIENTFIDELE = Env.API_URL + '/clientsfidele';
   public static CLIENTCOUNT = Env.API_URL + '/clientcount';
   public static SUMMARY = Env.API_URL + '/summary';

@@ -23,7 +23,7 @@ export class ExportService {
   /**
    * Download PDF from backend
    */
-  async downloadPdf(type: 'facture' | 'bordereau' | 'recu_credit' | 'inventaire', id: number, filename?: string) {
+  async downloadPdf(type: 'facture' | 'bordereau' | 'recu_credit' | 'inventaire' | 'rapport_journalier', id: any, filename?: string, filters: any = {}) {
     if (!isPlatformBrowser(this.platformId)) return;
 
     this.spinner.show();
@@ -33,7 +33,7 @@ export class ExportService {
       const response = await firstValueFrom(
         this.http.post(
           `${Env.API_URL}/pdf/generate`,
-          { type, id },
+          { type, id, ...filters },
           {
             headers: this.dataService.getHeaders(),
             responseType: 'blob'
@@ -53,12 +53,7 @@ export class ExportService {
       this.toastr.success('PDF téléchargé avec succès', 'Succès');
     } catch (error: any) {
       console.error('PDF download error:', error);
-      // Try to read the blob error if possible
-      if (error.error instanceof Blob) {
-        const text = await error.error.text();
-        console.error('Backend error (text):', text);
-      }
-      this.toastr.error('Erreur lors de la génération du PDF. Vérifiez la console.', 'Erreur');
+      this.toastr.error('Erreur lors de la génération du PDF.', 'Erreur');
     } finally {
       this.spinner.hide();
     }
@@ -67,7 +62,7 @@ export class ExportService {
   /**
    * Print PDF from backend
    */
-  async printPdf(type: 'facture' | 'bordereau' | 'recu_credit' | 'inventaire', id: number) {
+  async printPdf(type: 'facture' | 'bordereau' | 'recu_credit' | 'inventaire' | 'rapport_journalier', id: any, filters: any = {}) {
     if (!isPlatformBrowser(this.platformId)) return;
 
     this.spinner.show();
@@ -77,7 +72,7 @@ export class ExportService {
       const response = await firstValueFrom(
         this.http.post(
           `${Env.API_URL}/pdf/generate`,
-          { type, id },
+          { type, id, ...filters },
           {
             headers: this.dataService.getHeaders(),
             responseType: 'blob'
