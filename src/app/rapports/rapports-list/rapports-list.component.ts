@@ -200,4 +200,36 @@ export class RapportsListComponent implements OnInit {
       day: 'numeric' 
     });
   }
+
+  get isSessionClosable(): boolean {
+    const now = new Date();
+    return now.getHours() >= 19;
+  }
+
+  closeSession(): void {
+    if (!this.isSessionClosable) {
+      toastr.warning('La session ne peut être fermée qu\'à partir de 19h');
+      return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const confirm = window.confirm('Voulez-vous vraiment fermer la session pour aujourd\'hui (' + this.formatDate(today) + ') ? Cela générera le rapport journalier.');
+
+    if (confirm) {
+      this.isLoading = true;
+      this.rapportService.generateRapport(today).subscribe({
+        next: (response) => {
+          toastr.success('Session fermée avec succès. Rapport généré.');
+          this.isLoading = false;
+          this.loadRapports();
+        },
+        error: (error) => {
+          console.error('Erreur lors de la fermeture de session:', error);
+          toastr.error('Erreur lors de la génération du rapport');
+          this.isLoading = false;
+        }
+      });
+    }
+  }
+
 }

@@ -13,11 +13,21 @@
       </nav>
     </div>
     
-    <button (click)="navigateToGenerate()" 
-       class="px-5 py-3 bg-primary-600 text-white hover:bg-primary-700 rounded-2xl shadow-elegant-primary font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 group flex items-center">
-      <i class="bi bi-plus-lg mr-2.5 text-white/80 group-hover:scale-110 transition-transform"></i>
-      Générer un Rapport
-    </button>
+    <div class="flex items-center gap-3">
+
+      <button (click)="navigateToGenerate()" 
+         class="px-5 py-3 bg-primary-600 text-white hover:bg-primary-700 rounded-2xl shadow-elegant-primary font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 group flex items-center">
+        <i class="bi bi-plus-lg mr-2.5 text-white/80 group-hover:scale-110 transition-transform"></i>
+        Générer un Rapport
+      </button>
+
+      <button *ngIf="isSessionClosable" (click)="closeSession()" 
+         class="px-5 py-3 bg-red-600 text-white hover:bg-red-700 rounded-2xl shadow-elegant-danger font-black text-xs uppercase tracking-[0.2em] transition-all transform active:scale-95 group flex items-center animate-pulse">
+        <i class="bi bi-door-closed-fill mr-2.5 text-white/90 group-hover:scale-110 transition-transform"></i>
+        Fermer la Session
+      </button>
+
+    </div>
   </div>
 
   <!-- Filters Section -->

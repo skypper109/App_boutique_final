@@ -45,10 +45,15 @@ export class ComptaCAComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     if (isPlatformBrowser(this.data.platformId)) {
       this.spinne.show();
+      this.loadData();
+      this.spinne.hide();
+    }
+  }
+  loadData(){    
       this.data.getAll(Env.CHIFFREDAFFAIRE).subscribe({
         next: (res: any) => {
           this.annees = res.par_annee || []; 
-          this.chiffres = res.par_mois || [];
+          this.chiffres = res.par_mois.reverse() || [];
           this.annee = res.annee_actuelle || this.currentYear;
           
           if (res.annual_stats) {
@@ -56,17 +61,12 @@ export class ComptaCAComponent implements OnInit, AfterViewInit {
             this.totalQtv = res.annual_stats.total_qtv;
             this.totalBenefice = res.annual_stats.total_benefice;
           }
-          
           this.updateChart();
-          this.spinne.hide();
         },
         error: (err) => {
           console.error('Error loading CA data:', err);
-          this.spinne.hide();
         }
       });
-      this.spinne.hide();
-    }
   }
 
   ngAfterViewInit() {
@@ -79,7 +79,7 @@ export class ComptaCAComponent implements OnInit, AfterViewInit {
     this.spinne.show();
     this.data.getByAnnee(Env.CHIFFREDAFFAIRE, annee).subscribe({
       next: (res: any) => {
-        this.chiffres = res.par_mois || [];
+        this.chiffres = res.par_mois.reverse() || [];
         
         if (res.annual_stats) {
           this.totalCA = res.annual_stats.total_ca;
@@ -95,7 +95,6 @@ export class ComptaCAComponent implements OnInit, AfterViewInit {
         this.spinne.hide();
       }
     });
-    this.spinne.hide();
   }
 
   getMonthName(num: number): string {
@@ -190,6 +189,7 @@ export class ComptaCAComponent implements OnInit, AfterViewInit {
       });
     }
     this.chart.data.datasets[0].data = chartData;
+    
     this.chart.update();
   }
 

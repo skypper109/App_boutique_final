@@ -42,7 +42,7 @@ export class RapportGenerateComponent {
         }
 
         setTimeout(() => {
-          this.router.navigate(['/accueil/comptabilite/rapports']);
+          this.router.navigate(['/rapports']);
         }, 1500);
       },
       error: (error) => {
@@ -73,12 +73,15 @@ export class RapportGenerateComponent {
   }
 
   cancel(): void {
-    this.router.navigate(['/accueil/comptabilite/rapports']);
+    this.router.navigate(['/rapports']);
   }
 
   get maxDate(): string {
     const today = new Date();
-    today.setDate(today.getDate() - 1);
+    // Si l'heure est avant 19h, on ne peut pas générer le rapport d'aujourd'hui
+    if (today.getHours() < 19) {
+      today.setDate(today.getDate() - 1);
+    }
     return today.toISOString().split('T')[0];
   }
 }
