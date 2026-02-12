@@ -1,4 +1,4 @@
-import { environment } from "../../environments/environment";
+import { environment } from "../../environments/environment.prod";
 
 export class Env {
   public static API_URL = environment.apiUrl;

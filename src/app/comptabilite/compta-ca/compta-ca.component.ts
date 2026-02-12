@@ -65,6 +65,7 @@ export class ComptaCAComponent implements OnInit, AfterViewInit {
           this.spinne.hide();
         }
       });
+      this.spinne.hide();
     }
   }
 
@@ -94,6 +95,7 @@ export class ComptaCAComponent implements OnInit, AfterViewInit {
         this.spinne.hide();
       }
     });
+    this.spinne.hide();
   }
 
   getMonthName(num: number): string {
