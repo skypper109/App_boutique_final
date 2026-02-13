@@ -29,11 +29,12 @@ export class VenteCreateComponent implements OnInit {
   reduction: number = 0;
   reduit: boolean = false;
   montantInter: number = 0;
-  date: string = new Date().toISOString() || '';
+  date: string = new Date().toISOString().slice(0, 19).replace('T', ' ');
+  extraReduction: number = 0;
 
   typePaiement: string = 'contant';
   montantAvance: number = 0;
-  pricingMode: 'detail' | 'gros' = 'detail'; // New state for pricing mode
+  pricingMode: 'detail' | 'gros' = 'detail'; 
 
   // UI State Controls
   isCartModalVisible: boolean = false;
@@ -137,7 +138,6 @@ export class VenteCreateComponent implements OnInit {
     }
   }
 
-  // Helper to get price based on mode
   getPrice(product: any): number {
     if (this.pricingMode === 'gros') {
       return product.prix_master || product.stock?.prix_vente || 0;
@@ -147,10 +147,11 @@ export class VenteCreateComponent implements OnInit {
 
   changePricingMode(mode: 'detail' | 'gros'): void {
     this.pricingMode = mode;
-    // Recalculate all items in cart
     this.produitsVente.forEach(item => {
-      item.prix = this.getPrice(item.produits);
-      item.montant = item.prix; // base unit price stored in monto? actually item.montant seemed unused or redundant in push below
+      const basePrice = this.getPrice(item.produits);
+      item.prix = basePrice;
+      item.prix_vendu = basePrice;
+      item.montant = basePrice;
     });
     this.calculateTotal();
     this.toast.info(`Mode tarification : ${mode === 'gros' ? 'Grossiste' : 'Détail'}`);
@@ -172,6 +173,25 @@ export class VenteCreateComponent implements OnInit {
       }
     }
 
+    this.calculateTotal();
+  }
+
+  onPriceChange(item: any, newPrice: number): void {
+    const basePrice = item.prix; 
+    if (newPrice < basePrice) {
+      this.toast.warning(`Le prix ne peut pas être inférieur au prix de base (${basePrice} FCFA)`);
+      item.prix_vendu = basePrice;
+    }
+    this.calculateTotal();
+  }
+
+  onDiscountChange(): void {
+    this.calculateTotal();
+  }
+
+  onGlobalReductionChange(newTotalReduction: number): void {
+    const lineRemises = this.produitsVente.reduce((acc, item) => acc + (item.remise_unitaire * item.quantite), 0);
+    this.extraReduction = Math.max(0, newTotalReduction - lineRemises);
     this.calculateTotal();
   }
 
@@ -204,7 +224,9 @@ export class VenteCreateComponent implements OnInit {
         const price = this.getPrice(produit);
         this.produitsVente.push({
           produits: produit,
-          prix: price,
+          prix: price, 
+          prix_vendu: price, 
+          remise_unitaire: 0,
           quantite: 1,
           montant: price
         });
@@ -217,14 +239,25 @@ export class VenteCreateComponent implements OnInit {
   }
 
   calculateTotal(): void {
-    this.montantTotal = this.produitsVente.reduce((acc, item) => acc + (item.prix * item.quantite), 0);
+    const lineRemises = this.produitsVente.reduce((acc, item) => {
+      return acc + (item.remise_unitaire * item.quantite);
+    }, 0);
+    
+    this.reduction = lineRemises + this.extraReduction;
+
+    const grossTotal = this.produitsVente.reduce((acc, item) => {
+      return acc + (item.prix_vendu * item.quantite);
+    }, 0);
+
+    this.montantTotal = grossTotal - this.reduction;
+
     this.updateReduction();
   }
 
   updateReduction(): void {
     if (this.reduction > 0) {
       this.reduit = true;
-      this.montantInter = this.montantTotal - this.reduction;
+      this.montantInter = this.montantTotal; 
     } else {
       this.reduit = false;
       this.montantInter = this.montantTotal;
@@ -243,7 +276,7 @@ export class VenteCreateComponent implements OnInit {
       montant_total: this.reduit ? this.montantInter : this.montantTotal,
       date: this.date,
       remise: this.reduction,
-      client_nom: this.factureInformation.value.client_nom || 'Anonyme',
+      client_nom: this.factureInformation.value.client_nom || 'ANONYME',
       client_numero: this.factureInformation.value.numero,
       adresse: this.factureInformation.value.adresse,
       type_paiement: this.typePaiement,

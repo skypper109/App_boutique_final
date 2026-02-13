@@ -68,7 +68,7 @@ export class ComptaInventaireComponent implements OnInit {
       this.filteredInventaires = [...this.inventairesData];
       this.stats = res.stats;
       this.boutiqueInfo = res.boutique || this.boutiqueInfo;
-      
+      this.sortDataOnFiltered(); // Sort after loading
       this.updatePagination();
       this.spinne.hide();
     });
@@ -113,8 +113,11 @@ export class ComptaInventaireComponent implements OnInit {
 
   sortDataOnFiltered(): void {
     this.filteredInventaires.sort((a, b) => {
-      const dateA = new Date(a.date || a.date_paiement || a.created_at || 0).getTime();
-      const dateB = new Date(b.date || b.date_paiement || b.created_at || 0).getTime();
+      // Prioritize created_at for precision, fallback to date/date_paiement
+      const dateA = new Date(a.created_at || a.date_paiement || a.date || 0).getTime();
+      const dateB = new Date(b.created_at || b.date_paiement || b.date || 0).getTime();
+      
+      if (isNaN(dateA) || isNaN(dateB)) return 0;
       return dateB - dateA;
     });
   }

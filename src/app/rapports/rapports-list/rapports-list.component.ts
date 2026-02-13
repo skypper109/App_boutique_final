@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RapportService, DailyReport, ReportsResponse } from '../../services/rapport.service';
 import { Router, RouterLink } from '@angular/router';
 
-declare var toastr: any;
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-rapports-list',
@@ -34,7 +34,8 @@ export class RapportsListComponent implements OnInit {
 
   constructor(
     private rapportService: RapportService,
-    private router: Router
+    private router: Router,
+    private toast: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -57,7 +58,7 @@ export class RapportsListComponent implements OnInit {
         },
         error: (error) => {
           console.error('Erreur lors du chargement des rapports:', error);
-          toastr.error('Erreur lors du chargement des rapports');
+          this.toast.error('Erreur lors du chargement des rapports');
           this.isLoading = false;
         }
       });
@@ -102,11 +103,11 @@ export class RapportsListComponent implements OnInit {
         link.click();
         window.URL.revokeObjectURL(url);
         this.downloadingId = null;
-        toastr.success('PDF téléchargé avec succès');
+        this.toast.success('PDF téléchargé avec succès');
       },
       error: (error) => {
         console.error('Erreur lors du téléchargement:', error);
-        toastr.error('Erreur lors du téléchargement du PDF');
+        this.toast.error('Erreur lors du téléchargement du PDF');
         this.downloadingId = null;
       }
     });
@@ -116,13 +117,13 @@ export class RapportsListComponent implements OnInit {
     this.sendingEmailId = rapport.id;
     this.rapportService.sendEmail(rapport.id).subscribe({
       next: (response) => {
-        toastr.success(response.message || 'Email envoyé avec succès');
+        this.toast.success(response.message || 'Email envoyé avec succès');
         this.sendingEmailId = null;
         this.loadRapports();
       },
       error: (error) => {
         console.error('Erreur lors de l\'envoi de l\'email:', error);
-        toastr.error('Erreur lors de l\'envoi de l\'email');
+        this.toast.error('Erreur lors de l\'envoi de l\'email');
         this.sendingEmailId = null;
       }
     });
@@ -132,13 +133,13 @@ export class RapportsListComponent implements OnInit {
     this.sendingWhatsAppId = rapport.id;
     this.rapportService.sendWhatsApp(rapport.id).subscribe({
       next: (response) => {
-        toastr.success(response.message || 'Message WhatsApp envoyé');
+        this.toast.success(response.message || 'Message WhatsApp envoyé');
         this.sendingWhatsAppId = null;
         this.loadRapports();
       },
       error: (error) => {
         console.error('Erreur lors de l\'envoi WhatsApp:', error);
-        toastr.error('Erreur lors de l\'envois WhatsApp');
+        this.toast.error('Erreur lors de l\'envois WhatsApp');
         this.sendingWhatsAppId = null;
       }
     });
@@ -148,13 +149,13 @@ export class RapportsListComponent implements OnInit {
     this.regeneratingId = rapport.id;
     this.rapportService.generateRapport(rapport.date).subscribe({
       next: (response) => {
-        toastr.success(response.message || 'Rapport mis à jour');
+        this.toast.success(response.message || 'Rapport mis à jour');
         this.regeneratingId = null;
         this.loadRapports();
       },
       error: (error) => {
         console.error('Erreur lors de la régénération:', error);
-        toastr.error('Erreur lors de la mise à jour du rapport');
+        this.toast.error('Erreur lors de la mise à jour du rapport');
         this.regeneratingId = null;
       }
     });
@@ -208,7 +209,7 @@ export class RapportsListComponent implements OnInit {
 
   closeSession(): void {
     if (!this.isSessionClosable) {
-      toastr.warning('La session ne peut être fermée qu\'à partir de 19h');
+      this.toast.warning('La session ne peut être fermée qu\'à partir de 19h');
       return;
     }
 
@@ -219,13 +220,13 @@ export class RapportsListComponent implements OnInit {
       this.isLoading = true;
       this.rapportService.generateRapport(today).subscribe({
         next: (response) => {
-          toastr.success('Session fermée avec succès. Rapport généré.');
+          this.toast.success('Session fermée avec succès. Rapport généré.');
           this.isLoading = false;
           this.loadRapports();
         },
         error: (error) => {
           console.error('Erreur lors de la fermeture de session:', error);
-          toastr.error('Erreur lors de la génération du rapport');
+          this.toast.error('Erreur lors de la génération du rapport');
           this.isLoading = false;
         }
       });

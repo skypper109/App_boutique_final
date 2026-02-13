@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RapportService } from '../../services/rapport.service';
 
-declare var toastr: any;
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-rapport-generate',
@@ -16,38 +16,49 @@ declare var toastr: any;
 export class RapportGenerateComponent {
   selectedDate: string = '';
   isGenerating = false;
+  maxDateValue: string = '';
 
   constructor(
     private rapportService: RapportService,
-    private router: Router
+    private router: Router,
+    private toast: ToastrService
   ) {
+    this.calculateMaxDate();
     const today = new Date();
     today.setDate(today.getDate() - 1);
     this.selectedDate = today.toISOString().split('T')[0];
   }
 
+  calculateMaxDate(): void {
+    const today = new Date();
+    // Si l'heure est avant 15h, on ne peut pas générer le rapport d'aujourd'hui
+    if (today.getHours() < 15) {
+      today.setDate(today.getDate() - 1);
+    }
+    this.maxDateValue = today.toISOString().split('T')[0];
+  }
+
   generateRapport(): void {
     if (!this.selectedDate) {
-      toastr.warning('Veuillez sélectionner une date');
+      this.toast.warning('Veuillez sélectionner une date');
       return;
     }
 
     this.isGenerating = true;
     this.rapportService.generateRapport(this.selectedDate).subscribe({
       next: (response) => {
-        toastr.success(response.message || 'Rapport généré avec succès');
+        this.toast.success(response.message || 'Rapport généré avec succès');
         
         if (response.report && response.report.id) {
           this.downloadGeneratedPdf(response.report.id);
+        } else {
+          this.isGenerating = false;
+          this.router.navigateByUrl('/rapports');
         }
-
-        setTimeout(() => {
-          this.router.navigate(['/rapports']);
-        }, 1500);
       },
       error: (error) => {
         console.error('Erreur lors de la génération:', error);
-        toastr.error(error.error?.message || 'Erreur lors de la génération du rapport');
+        this.toast.error(error.error?.message || 'Erreur lors de la génération du rapport');
         this.isGenerating = false;
       }
     });
@@ -62,26 +73,23 @@ export class RapportGenerateComponent {
         link.download = `rapport-${this.selectedDate}.pdf`;
         link.click();
         window.URL.revokeObjectURL(url);
-        this.isGenerating = false;
+        
+        // Reset state and navigate after download initiated
+        setTimeout(() => {
+          this.isGenerating = false;
+          this.router.navigateByUrl('/rapports');
+        }, 1000);
       },
       error: (error) => {
         console.error('Erreur lors du téléchargement:', error);
-        toastr.error('Rapport généré mais erreur lors du téléchargement automatique');
+        this.toast.error('Rapport généré mais erreur lors du téléchargement automatique');
         this.isGenerating = false;
+        this.router.navigateByUrl('/rapports');
       }
     });
   }
 
   cancel(): void {
-    this.router.navigate(['/rapports']);
-  }
-
-  get maxDate(): string {
-    const today = new Date();
-    // Si l'heure est avant 19h, on ne peut pas générer le rapport d'aujourd'hui
-    if (today.getHours() < 19) {
-      today.setDate(today.getDate() - 1);
-    }
-    return today.toISOString().split('T')[0];
+    this.router.navigateByUrl('/rapports');
   }
 }

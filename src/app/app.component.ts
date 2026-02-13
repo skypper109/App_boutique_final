@@ -43,14 +43,12 @@ export class AppComponent {
         // await relaunch(); // Requires @tauri-apps/plugin-process
       }
     } catch (error) {
-      this.toast.error('Failed to check for updates: ' + error);
+      this.toast.error('Erreur de verification de nouvelle mise a jour');
     }
   }
 
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-
-    // Check internet connectivity at startup
     this.checkAppUpdate();
     this.networkService.checkInitialStatus();
   }

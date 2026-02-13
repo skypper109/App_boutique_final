@@ -243,9 +243,13 @@
                 class="w-full bg-green-500/5 border border-green-500/20 rounded-2xl px-6 py-4 text-lg font-black text-green-400 outline-none focus:border-green-500 transition-all">
             </div>
             <div *ngIf="typePaiement === 'contant'" class="space-y-2">
-              <label class="text-[10px] font-black text-primary-500 uppercase tracking-widest ml-4">Réduction / Remise</label>
-              <input type="number" [(ngModel)]="reduction" [ngModelOptions]="{standalone: true}" (input)="calculateTotal()" placeholder="0 FCFA"
-                class="w-full bg-primary-500/5 border border-primary-500/20 rounded-2xl px-6 py-4 text-lg font-black text-primary-400 outline-none focus:border-primary-500 transition-all">
+              <label class="text-[10px] font-black text-primary-500 uppercase tracking-widest ml-4">Réduction / Remise Globale</label>
+              <div class="relative">
+                <input type="number" [(ngModel)]="reduction" (input)="onGlobalReductionChange(reduction)" [ngModelOptions]="{standalone: true}"
+                  class="w-full bg-primary-500/5 border border-primary-500/20 rounded-2xl px-6 py-4 text-lg font-black text-primary-400 outline-none focus:border-primary-500 transition-all"
+                  placeholder="0 FCFA">
+                <span class="absolute right-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-primary-500/40 uppercase tracking-widest">FCFA</span>
+              </div>
             </div>
           </div>
         </form>
@@ -300,8 +304,33 @@
             <div class="flex-1 min-w-0">
               <div class="flex justify-between items-start mb-4">
                 <div class="space-y-1">
-                  <p class="text-lg font-black text-white leading-tight truncate pr-4">{{ item.produits.nom }} ({{ item.produits.reference }})</p>
-                  <p class="text-[10px] text-secondary-500 font-black uppercase tracking-widest italic leading-none">{{ item.prix | number:'1.0' }} <small>FCFA / unité</small></p>
+                  <p class="text-lg font-black text-white leading-tight truncate pr-4">{{ item.produits.nom }} ({{ item.produits.reference || 'REF' }})</p>
+                  
+                  <div class="flex flex-wrap gap-4 mt-3">
+                    <!-- Price Adjustment -->
+                    <div class="space-y-1">
+                      <label class="text-[8px] font-black text-secondary-500 uppercase tracking-widest block ml-1">Prix de Vente</label>
+                      <div class="relative">
+                        <input type="number" 
+                          [(ngModel)]="item.prix_vendu" 
+                          (input)="onPriceChange(item, item.prix_vendu)"
+                          class="w-32 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs font-black text-primary-400 focus:bg-white/10 focus:ring-1 focus:ring-primary-500/30 outline-none transition-all">
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-black text-secondary-500">F</span>
+                      </div>
+                    </div>
+
+                    <!-- Line Discount -->
+                    <div class="space-y-1">
+                      <label class="text-[8px] font-black text-secondary-500 uppercase tracking-widest block ml-1">Remise / Unité</label>
+                      <div class="relative">
+                        <input type="number" 
+                          [(ngModel)]="item.remise_unitaire" 
+                          (input)="onDiscountChange()"
+                          class="w-32 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs font-black text-red-400 focus:bg-white/10 focus:ring-1 focus:ring-red-500/30 outline-none transition-all">
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-black text-secondary-500">F</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <button (click)="onDelete(item.produits)" class="w-10 h-10 flex items-center justify-center text-secondary-600 hover:text-red-400 transition-colors">
                   <i class="bi bi-trash-fill text-lg"></i>

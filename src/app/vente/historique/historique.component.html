@@ -33,32 +33,40 @@
   <div class="bg-white rounded-[2.5rem] p-8 shadow-elegant border border-secondary-100 space-y-6">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
       <!-- Search -->
-      <div class="lg:col-span-4 relative group">
+      <div class="lg:col-span-3 relative group">
         <label class="block text-[9px] font-black text-secondary-400 uppercase tracking-[0.2em] mb-2 px-1">Recherche
           Globale</label>
         <div class="relative">
           <input type="text" [(ngModel)]="searchTerm" (input)="applyAdvancedFilters()"
-            placeholder="ID, Client, Vendeur ou Produit..."
+            placeholder="ID, Client, Vendeur..."
             class="w-full pl-11 pr-4 py-3.5 bg-secondary-50 border-none rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:bg-white transition-all text-sm font-bold text-secondary-700" />
           <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-secondary-400"></i>
         </div>
       </div>
 
       <!-- Date Range -->
-      <div class="lg:col-span-5">
+      <div class="lg:col-span-4">
         <label class="block text-[9px] font-black text-secondary-400 uppercase tracking-[0.2em] mb-2 px-1">Période
           d'Audit</label>
-        <div class="flex items-center gap-3">
-          <div class="relative flex-1">
-            <input type="date" [(ngModel)]="startDate" (change)="applyAdvancedFilters()"
-              class="w-full px-4 py-3.5 bg-secondary-50 border-none rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:bg-white transition-all text-sm font-bold text-secondary-700" />
-          </div>
+        <div class="flex items-center gap-2">
+          <input type="date" [(ngModel)]="startDate" (change)="applyAdvancedFilters()"
+            class="flex-1 px-3 py-3.5 bg-secondary-50 border-none rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:bg-white transition-all text-sm font-bold text-secondary-700" />
           <span class="text-secondary-300 font-black">→</span>
-          <div class="relative flex-1">
-            <input type="date" [(ngModel)]="endDate" (change)="applyAdvancedFilters()"
-              class="w-full px-4 py-3.5 bg-secondary-50 border-none rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:bg-white transition-all text-sm font-bold text-secondary-700" />
-          </div>
+          <input type="date" [(ngModel)]="endDate" (change)="applyAdvancedFilters()"
+            class="flex-1 px-3 py-3.5 bg-secondary-50 border-none rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:bg-white transition-all text-sm font-bold text-secondary-700" />
         </div>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="lg:col-span-2">
+        <label class="block text-[9px] font-black text-secondary-400 uppercase tracking-[0.2em] mb-2 px-1">Statut</label>
+        <select [(ngModel)]="statusFilter" (change)="applyAdvancedFilters()"
+          class="w-full px-4 py-3.5 bg-secondary-50 border-none rounded-2xl focus:ring-4 focus:ring-primary-500/10 focus:bg-white transition-all text-sm font-bold text-secondary-700 appearance-none">
+          <option value="">Tous les status</option>
+          <option value="payee">Payée / Validée</option>
+          <option value="credit">Vente à Crédit</option>
+          <option value="proforma">Pro-forma</option>
+        </select>
       </div>
 
       <!-- Legacy Date Nav -->
@@ -271,13 +279,24 @@
                   (item.produit?.nom || "A").substring(0, 1) | uppercase
                   }}</span>
               </div>
-              <div class="space-y-1">
+              <div class="space-y-3">
                 <p class="text-lg font-black text-secondary-900 tracking-tight">
                   {{ item.produit?.nom }}
                 </p>
-                <p class="text-[10px] font-black text-secondary-400 uppercase tracking-[0.2em] italic">
-                  Val. Originale : {{ item.prix_unitaire | number: "1.0" }} CFA
-                </p>
+                <div class="flex flex-wrap gap-4">
+                  <!-- Price Adjustment -->
+                  <div class="space-y-1">
+                    <label class="text-[8px] font-black text-secondary-400 uppercase tracking-widest block ml-1">Prix Unitaire</label>
+                    <input type="number" [(ngModel)]="item.prix_unitaire" (change)="calculateTotal()"
+                      class="w-28 bg-white border border-secondary-200 rounded-xl px-3 py-1.5 text-xs font-black text-secondary-900 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all">
+                  </div>
+                  <!-- Line Remise -->
+                  <div class="space-y-1">
+                    <label class="text-[8px] font-black text-secondary-400 uppercase tracking-widest block ml-1">Remise Totale Art.</label>
+                    <input type="number" [(ngModel)]="item.remise" (change)="calculateTotal()"
+                      class="w-28 bg-white border border-secondary-200 rounded-xl px-3 py-1.5 text-xs font-black text-red-500 focus:ring-2 focus:ring-red-500/20 outline-none transition-all">
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -285,14 +304,12 @@
               class="flex items-center gap-10 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-secondary-100 pt-6 md:pt-0">
               <div class="text-right space-y-2">
                 <p class="text-[10px] font-black text-secondary-500 uppercase tracking-widest px-1">
-                  Réviser Quantité
+                  Quantité
                 </p>
                 <div
                   class="flex items-center gap-4 bg-white px-2 py-2 rounded-2xl border border-secondary-200 focus-within:ring-4 focus-within:ring-primary-500/10 focus-within:border-primary-500 transition-all">
                   <input type="number" [value]="item.quantite" (input)="updateQuantity(item, $event)"
-                    class="w-24 bg-transparent border-none text-center font-black text-secondary-900 text-lg outline-none" />
-                  <span
-                    class="text-[9px] font-black text-secondary-300 uppercase tracking-widest pr-4 border-l border-secondary-50 pl-4">Lot(s)</span>
+                    class="w-20 bg-transparent border-none text-center font-black text-secondary-900 text-lg outline-none" />
                 </div>
               </div>
               <button (click)="onDelete(item.id)"
@@ -310,7 +327,7 @@
         <div class="flex flex-col lg:flex-row items-center gap-4 lg:gap-8 relative z-10 w-full">
           <div class="space-y-1 text-center lg:text-left">
             <p class="text-[9px] lg:text-[10px] font-black text-white/40 uppercase tracking-[0.3em] italic">
-              Valeur Brute
+              Total Brut
             </p>
             <div class="flex items-baseline justify-center lg:justify-start gap-2">
               <span class="text-2xl lg:text-4xl font-black tracking-tightest text-white">{{ montantTotal | number: "1.0"
@@ -324,11 +341,11 @@
           <!-- Remise Adjustment -->
           <div class="space-y-1 w-full lg:w-auto">
             <p class="text-[9px] lg:text-[10px] font-black text-primary-400 uppercase tracking-[0.3em] italic text-center lg:text-left">
-               Remise / Réduction
+               Remise / Réduction Globale
             </p>
             <div class="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-2xl border border-white/10 focus-within:border-primary-500 transition-all justify-center">
-                <input type="number" [(ngModel)]="remise"
-                       class="w-20 lg:w-24 bg-transparent border-none text-lg lg:text-xl font-black text-primary-400 outline-none text-center" />
+                <input type="number" [(ngModel)]="remise" (input)="onGlobalReductionChange(remise)"
+                       class="w-20 lg:w-32 bg-transparent border-none text-lg lg:text-xl font-black text-primary-400 outline-none text-center" />
                 <span class="text-[9px] font-black text-white/40 uppercase tracking-widest">FCFA</span>
             </div>
           </div>
@@ -337,7 +354,7 @@
 
           <div class="space-y-1 text-center lg:text-left">
             <p class="text-[9px] lg:text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em] italic">
-              Total à Payer
+              Net après Audit
             </p>
             <div class="flex items-baseline justify-center lg:justify-start gap-2">
                 <span class="text-2xl lg:text-4xl font-black tracking-tightest text-emerald-400 truncate max-w-[180px]">{{ (montantTotal - remise) | number: "1.0" }}</span>
@@ -349,12 +366,12 @@
         <div class="flex flex-col sm:flex-row items-center gap-4 w-full relative z-10">
           <button (click)="closeModal()"
             class="w-full sm:w-auto h-14 px-8 text-xs font-black text-white/60 hover:text-white uppercase tracking-widest transition-all">
-            Interrompre
+            Abandonner
           </button>
           <button (click)="onUpdateProd()"
             class="w-full sm:flex-1 h-16 px-8 lg:px-12 bg-primary-600 text-white rounded-[1.5rem] text-[10px] lg:text-[11px] font-black uppercase tracking-[0.2em] shadow-[0_20px_50px_rgba(2,132,199,0.3)] hover:bg-primary-500 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center border border-primary-400/20">
             <i class="bi bi-shield-check mr-3 text-lg"></i>
-            Valider Rectification
+            Confirmer Rectification
           </button>
         </div>
 
@@ -418,15 +435,18 @@
                 <div class="w-12 h-12 bg-secondary-50 rounded-xl flex items-center justify-center font-black text-secondary-400 italic">
                   {{ item.produit?.nom?.substring(0,1) }}
                 </div>
-                <div>
+                <div class="space-y-1">
                   <p class="text-sm font-bold text-secondary-900">{{ item.produit?.nom }}</p>
-                  <p class="text-[10px] text-secondary-400 font-bold uppercase tracking-widest">
+                  <p class="text-[10px] text-secondary-400 font-bold uppercase tracking-widest flex items-center gap-2">
                     {{ item.quantite }} x {{ item.prix_unitaire | number }} F
+                    <span *ngIf="item.remise > 0" class="text-red-500 bg-red-50 px-2 py-0.5 rounded-full text-[8px] border border-red-100">
+                      -{{ item.remise | number }} F Remise
+                    </span>
                   </p>
                 </div>
               </div>
               <div class="text-right">
-                <p class="text-sm font-black text-secondary-900">{{ item.montant_total | number }} <small class="text-[9px]">F</small></p>
+                <p class="text-sm font-black text-secondary-900">{{ (item.prix_unitaire * item.quantite) - (item.remise || 0) | number }} <small class="text-[9px]">F</small></p>
               </div>
             </div>
           </div>
@@ -437,12 +457,12 @@
       <div class="px-8 lg:px-12 py-8 bg-secondary-50 border-t border-secondary-100 flex flex-col lg:flex-row items-center justify-between gap-6">
         <div class="flex flex-wrap items-center justify-center lg:justify-start gap-8">
           <div>
-            <p class="text-[9px] font-black text-secondary-400 uppercase tracking-widest mb-1">Montant Brut</p>
+            <p class="text-[9px] font-black text-secondary-400 uppercase tracking-widest mb-1">Total Brut</p>
             <p class="text-lg font-black text-secondary-900">{{ selectedMontantTotal | number }} F</p>
           </div>
           <div>
-            <p class="text-[9px] font-black text-primary-500 uppercase tracking-widest mb-1">Remise Totale</p>
-            <p class="text-lg font-black text-primary-600">{{ selectedVenteDetails.remise !== null ? -selectedVenteDetails.remise : 0 | number }} F</p>
+            <p class="text-[9px] font-black text-primary-500 uppercase tracking-widest mb-1">Réduction Totale</p>
+            <p class="text-lg font-black text-primary-600">-{{ selectedVenteDetails?.remise || 0 | number }} F</p>
           </div>
         </div>
         <div class="text-center lg:text-right">

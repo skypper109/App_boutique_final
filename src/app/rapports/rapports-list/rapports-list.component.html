@@ -129,12 +129,12 @@
                   class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-600 hover:text-white transition-all shadow-sm">
                   <i class="bi" [ngClass]="regeneratingId === rapport.id ? 'bi-arrow-repeat animate-spin' : 'bi-arrow-clockwise'"></i>
                 </button>
-                <button (click)="sendEmail(rapport)" [disabled]="sendingEmailId === rapport.id" title="Email"
-                  class="w-10 h-10 rounded-xl bg-secondary-900 border border-secondary-800 text-white flex items-center justify-center hover:bg-black transition-all shadow-sm">
+                <button (click)="sendEmail(rapport)" [disabled]="true" title="Email"
+                  class="w-10 h-10 rounded-xl bg-secondary-900 border border-secondary-800 text-white flex items-center justify-center hover:bg-black transition-all shadow-sm cursor-not-allowed">
                   <i class="bi" [ngClass]="sendingEmailId === rapport.id ? 'bi-arrow-repeat animate-spin' : 'bi-envelope-at'"></i>
                 </button>
-                <button (click)="sendWhatsApp(rapport)" [disabled]="sendingWhatsAppId === rapport.id" title="WhatsApp"
-                  class="w-10 h-10 rounded-xl bg-green-500 text-white flex items-center justify-center hover:bg-green-600 transition-all shadow-sm">
+                <button (click)="sendWhatsApp(rapport)" [disabled]="true" title="WhatsApp"
+                  class="w-10 h-10 rounded-xl bg-green-500 text-white flex items-center justify-center hover:bg-green-600 transition-all shadow-sm cursor-not-allowed">
                   <i class="bi" [ngClass]="sendingWhatsAppId === rapport.id ? 'bi-arrow-repeat animate-spin' : 'bi-whatsapp'"></i>
                 </button>
               </div>

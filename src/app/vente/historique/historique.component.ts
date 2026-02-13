@@ -32,8 +32,9 @@ export class HistoriqueComponent implements OnInit {
 
   // Advanced Filters
   searchTerm: string = '';
-  startDate: string = '';
-  endDate: string = '';
+  startDate: string = new Date().toISOString().split('T')[0];
+  endDate: string = new Date().toISOString().split('T')[0];
+  statusFilter: string = '';
   annee: any;
   mois: any;
 
@@ -71,6 +72,7 @@ export class HistoriqueComponent implements OnInit {
   selectedVenteId: number = 0;
   selectedVenteDetails: any = null;
   remise: number = 0;
+  extraReduction: number = 0;
   originalRemise: number = 0;
   selectedMontantTotal: number = 0;
 
@@ -92,10 +94,8 @@ export class HistoriqueComponent implements OnInit {
     this.data.getAll(Env.VENTEHISTORIQUE).subscribe({
       next: (data) => {
         this.ventes = data;
-        this.filteredVentes = [...data];
+        this.applyAdvancedFilters(); // Apply today's filter immediately
         this.venteDate();
-        this.currentPage = 1;
-        this.updatePagination();
         this.spinne.hide();
       },
       error: (err) => {
@@ -128,6 +128,11 @@ export class HistoriqueComponent implements OnInit {
       const end = new Date(this.endDate);
       end.setHours(23, 59, 59); // End of day
       result = result.filter(v => new Date(v.date_vente) <= end);
+    }
+
+    // Status Filter
+    if (this.statusFilter) {
+      result = result.filter(v => v.statut === this.statusFilter);
     }
 
     this.filteredVentes = result;
@@ -235,8 +240,9 @@ export class HistoriqueComponent implements OnInit {
       next: (data: any) => {
         this.produitsVente = JSON.parse(JSON.stringify(data[0].detail_ventes));
         this.originalProduitsVente = JSON.parse(JSON.stringify(data[0].detail_ventes));
-        this.remise = Number(data[0].remise || 0); // Vente might have total remise
-        // Or if remise is per detail, we might need a different logic, but usually it's per vente
+        const totalLineRemises = this.produitsVente.reduce((acc, item) => acc + (Number(item.remise) || 0), 0);
+        this.remise = Number(data[0].remise || 0);
+        this.extraReduction = Math.max(0, this.remise - totalLineRemises);
         this.originalRemise = this.remise;
         this.calculateTotal();
         this.isModalVisible = true;
@@ -250,7 +256,27 @@ export class HistoriqueComponent implements OnInit {
   }
 
   calculateTotal() {
-    this.montantTotal = this.produitsVente.reduce((acc, item) => acc + (item.prix_unitaire * item.quantite), 0);
+    const grossTotal = this.produitsVente.reduce((acc, item) => {
+      return acc + (item.prix_unitaire * item.quantite);
+    }, 0);
+
+    const lineRemises = this.produitsVente.reduce((acc, item) => {
+      if (item.quantite <= 0) return acc;
+      return acc + (Number(item.remise) || 0);
+    }, 0);
+
+    this.remise = lineRemises + this.extraReduction;
+    this.montantTotal = grossTotal; 
+    // Usually montantTotal in this component is the GROSS total used for the display "Valeur Brute"
+  }
+
+  onGlobalReductionChange(newTotalReduction: number): void {
+    const lineRemises = this.produitsVente.reduce((acc, item) => {
+      if (item.quantite <= 0) return acc;
+      return acc + (Number(item.remise) || 0);
+    }, 0);
+    this.extraReduction = Math.max(0, newTotalReduction - lineRemises);
+    this.calculateTotal();
   }
 
   updateQuantity(item: any, event: any) {
@@ -266,6 +292,7 @@ export class HistoriqueComponent implements OnInit {
       event.target.value = 0;
     } else {
       item.quantite = val;
+      if (val === 0) item.remise = 0; // Reset remise if quantity is 0
     }
     this.calculateTotal();
   }
@@ -278,6 +305,7 @@ export class HistoriqueComponent implements OnInit {
         const index = this.produitsVente.findIndex(p => p.id === id);
         if (index > -1) {
           this.produitsVente[index].quantite = 0;
+          this.produitsVente[index].remise = 0; // Reset remise for deleted item
           this.calculateTotal();
         }
       }
@@ -290,7 +318,9 @@ export class HistoriqueComponent implements OnInit {
       vente_id: this.selectedVenteId,
       produits: this.produitsVente.map(p => ({
         produit: { id: p.produit_id },
-        quantite: p.quantite
+        quantite: p.quantite,
+        prix_unitaire: p.prix_unitaire,
+        remise: p.remise // sending per-item remise
       })),
       montant_total: this.montantTotal,
       remise: this.remise,
@@ -337,9 +367,10 @@ export class HistoriqueComponent implements OnInit {
   openDetails(vente: any) {
     this.selectedVenteDetails = vente;
     this.isDetailsVisible = true;
-    this.selectedMontantTotal = Number(vente.montant_total) + Number(vente.remise);
-    console.log(this.selectedMontantTotal);
-    console.log(this.selectedVenteDetails);
+    // selectedMontantTotal is the gross total before any discounts
+    this.selectedMontantTotal = vente.detail_ventes.reduce((acc: number, item: any) => {
+      return acc + (Number(item.prix_unitaire) * Number(item.quantite));
+    }, 0);
   }
 
   closeDetails() {

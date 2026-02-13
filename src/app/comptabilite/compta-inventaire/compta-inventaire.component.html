@@ -329,7 +329,7 @@
                         <span class="text-[10px] font-bold text-secondary-400">{{ (item.prix_vente ?? item.produit?.stock?.prix_vente) | number }} F</span>
                     </td>
                     <td class="px-4 py-4 text-right">
-                        <span class="text-[9px] text-secondary-300">N/A</span>
+                        <span class="text-[9px] text-secondary-300">{{item.remise}} FCFA</span>
                     </td>
                     <td class="pr-10 py-4 text-right">
                         <span class="text-xs font-bold" [ngClass]="detail.isReturn ? 'text-red-500' : 'text-secondary-500'">
