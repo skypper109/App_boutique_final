@@ -62,11 +62,20 @@ export class BoutiqueListComponent implements OnInit {
     }
 
     loadUserLimit() {
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-            this.currentUser = JSON.parse(userStr);
-            this.boutiqueLimit = this.currentUser.boutique_limit || 2;
-        }
+        this.data.getAll(Env.CHECK_USER_STATUS).subscribe({
+            next: (res: any) => {
+                this.boutiqueLimit = res.boutique_limit || 2;
+            },
+            error: (err) => {
+                console.error("Erreur lors de la vérification du quota", err);
+                // Fallback to localStorage if API fails
+                const userStr = localStorage.getItem('user');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    this.boutiqueLimit = user.boutique_limit || 2;
+                }
+            }
+        });
     }
 
     fetchGlobalReports() {
