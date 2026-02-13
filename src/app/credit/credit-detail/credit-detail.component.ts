@@ -169,7 +169,7 @@ export class CreditDetailComponent implements OnInit {
             mode_paiement: this.paymentMode,
             notes: this.paymentNotes
         };
-
+ 
         console.log(payload);
 
         this.spinner.show();
