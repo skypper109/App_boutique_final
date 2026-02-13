@@ -6,6 +6,7 @@ import { DataService } from '../../services/data.service';
 import { Env } from '../../services/env';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
+import { LoginService } from '../../login/Guard/login.service';
 
 @Component({
     selector: 'app-user-create',
@@ -19,14 +20,9 @@ export class UserCreateComponent implements OnInit {
     userForm: FormGroup;
     isEdit = false;
     userId: any;
+  userRole: string | null = null;
 
-    roles = [
-        // { value: 'admin', label: 'Administrateur' },
-        { value: 'vendeur', label: 'Vendeur' },
-        { value: 'comptable', label: 'Comptable' },
-        { value: 'gestionnaire', label: 'Gestionnaire' }
-    ];
-
+    roles: any[] = [];
     boutiques: any[] = [];
 
     constructor(
@@ -35,7 +31,8 @@ export class UserCreateComponent implements OnInit {
         private spinner: NgxSpinnerService,
         private toast: ToastrService,
         private router: Router,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
+            private dataLog: LoginService
     ) {
         this.userForm = this.fb.group({
             name: ['', Validators.required],
@@ -47,6 +44,8 @@ export class UserCreateComponent implements OnInit {
     }
 
     ngOnInit(): void {
+    this.userRole = this.dataLog.getRole();
+    this.initRoles();
         this.fetchBoutiques();
         this.userId = this.route.snapshot.paramMap.get('id');
         if (this.userId) {
@@ -58,6 +57,14 @@ export class UserCreateComponent implements OnInit {
             this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
         }
     }
+
+  get isAdmin(): boolean {
+    return this.userRole?.toLowerCase() === 'admin';
+  }
+
+  get isGestionnaire(): boolean {
+    return this.userRole?.toLowerCase() === 'gestionnaire';
+  }
 
     fetchBoutiques() {
         this.data.getAll(Env.BOUTIQUES).subscribe(
@@ -108,5 +115,19 @@ export class UserCreateComponent implements OnInit {
                 this.spinner.hide();
             }
         );
+    }
+
+    initRoles() {
+        this.roles = [
+            { value: 'vendeur', label: 'Vendeur' },
+            { value: 'comptable', label: 'Comptable' }
+        ];
+
+        if (this.isAdmin) {
+            this.roles.push(
+                { value: 'admin', label: 'Administrateur' },
+                { value: 'gestionnaire', label: 'Gestionnaire' }
+            );
+        }
     }
 }

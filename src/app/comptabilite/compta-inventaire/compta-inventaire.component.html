@@ -284,15 +284,12 @@
                   </div>
                 </td>
 
-                <!-- Remise Globale -->
+                <!-- Remise -->
                 <td class="px-4 py-6 text-right">
-                    <ng-container *ngIf="!detail.isReturn">
-                        <span class="text-sm font-black text-primary-600">
-                            {{ (detail.totalRemise || 0) | number }}
-                        </span>
-                        <p class="text-[9px] font-black text-primary-400 uppercase">Remise</p>
-                    </ng-container>
-                    <span *ngIf="detail.isReturn" class="text-xs font-bold text-secondary-300">N/A</span>
+                    <span class="text-sm font-black" [ngClass]="(detail.totalRemise || 0) > 0 ? 'text-primary-600' : 'text-secondary-300'">
+                        {{ (detail.totalRemise || 0) | number }}
+                    </span>
+                    <p class="text-[9px] font-black text-primary-400 uppercase">Remise</p>
                 </td>
     
                 <!-- Impact Net (Profit) -->
@@ -332,7 +329,7 @@
                         <span class="text-[10px] font-bold text-secondary-400">{{ (item.prix_vente ?? item.produit?.stock?.prix_vente) | number }} F</span>
                     </td>
                     <td class="px-4 py-4 text-right">
-                        <span class="text-[9px] text-secondary-300">Prorata N/A</span>
+                        <span class="text-[9px] text-secondary-300">N/A</span>
                     </td>
                     <td class="pr-10 py-4 text-right">
                         <span class="text-xs font-bold" [ngClass]="detail.isReturn ? 'text-red-500' : 'text-secondary-500'">

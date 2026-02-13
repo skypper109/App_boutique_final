@@ -317,7 +317,7 @@ export class HistoriqueComponent implements OnInit {
       "Cette action est irréversible. Restaurer tout le stock de cette vente ?",
       () => {
         this.spinne.show();
-        this.data.delete(Env.VENTES, id).subscribe({
+        this.data.getById(Env.ANNULEVENTE, id).subscribe({
           next: () => {
             this.spinne.hide();
             this.toastr.success("Vente annulée avec succès");
@@ -327,7 +327,7 @@ export class HistoriqueComponent implements OnInit {
             this.spinne.hide();
             this.toastr.error("Erreur annulation");
           }
-        });
+        }); 
       }
     );
   }

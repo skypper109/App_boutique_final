@@ -24,6 +24,8 @@ export class BoutiqueListComponent implements OnInit {
     showModal = false;
     activeBoutiqueId: string | null = null;
     globalReports: any[] = [];
+    boutiqueLimit: number = 2;
+    currentUser: any = null;
 
     constructor(
         private data: DataService,
@@ -56,6 +58,15 @@ export class BoutiqueListComponent implements OnInit {
         this.fetchBoutiques();
         this.fetchGlobalReports();
         this.activeBoutiqueId = localStorage.getItem('boutique_id');
+        this.loadUserLimit();
+    }
+
+    loadUserLimit() {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+            this.currentUser = JSON.parse(userStr);
+            this.boutiqueLimit = this.currentUser.boutique_limit || 2;
+        }
     }
 
     fetchGlobalReports() {
@@ -123,7 +134,8 @@ export class BoutiqueListComponent implements OnInit {
                 this.closeModal();
             },
             (error) => {
-                this.toast.error("Erreur lors de l'enregistrement", "Erreur");
+                const message = error.error?.message || "Erreur lors de l'enregistrement";
+                this.toast.error(message, "Erreur");
                 this.spinner.hide();
             }
         );

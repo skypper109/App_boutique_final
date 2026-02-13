@@ -42,12 +42,18 @@ export class ProdFactureComponent {
   adresseBoutique: string = '-----';
   telBoutique: string = '-----';
   produitAcheter: any[] = [];
+  typePaiement: any;
 
   ngOnInit(): void {
     // Pour recuperer les produits de la vente atravers l'id de la facture de l'url
     this.spinne.show();
     this.idVente = this.route.snapshot.params['idVente'];
     console.log('Facture ID:', this.idVente);
+    this.loadData();
+  }
+
+  loadData(){
+
     this.data.getById(Env.FACTURE, this.idVente).subscribe(
       (data: any) => {
         console.log('Facture Data received:', data);
@@ -64,6 +70,7 @@ export class ProdFactureComponent {
           this.adresseBoutique = item.adresseBoutique || '-----';
           this.telBoutique = item.telephoneBoutique || '-----';
           this.idFacture = this.idVente + "-" + new Date().getFullYear();
+          this.typePaiement = item.statut || 'CASH / RÉGLÉ';
         }
         this.spinne.hide();
       },
