@@ -96,6 +96,10 @@ export class AccueilComponent {
   }
 
   async checkAppUpdate() {
+    if (!(window as any).__TAURI_INTERNALS__) {
+      this.toast.warning('La mise à jour n\'est disponible que dans l\'application bureau.', 'Environnement non supporté');
+      return;
+    }
     try {
       const update = await check();
       if (update) {

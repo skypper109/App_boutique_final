@@ -31,6 +31,9 @@ export class AppComponent {
   ) { }
 
   async checkAppUpdate() {
+    if (!(window as any).__TAURI_INTERNALS__) {
+      return;
+    }
     try {
       const update = await check();
       if (update) {

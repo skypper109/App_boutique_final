@@ -26,6 +26,8 @@ jobs:
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
@@ -47,3 +49,4 @@ jobs:
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: true
+          args: ${{ matrix.os == 'macos-latest' && '--target universal-apple-darwin' || '' }}
