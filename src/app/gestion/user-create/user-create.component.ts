@@ -39,7 +39,7 @@ export class UserCreateComponent implements OnInit {
             email: ['', [Validators.required, Validators.email]],
             password: ['', [Validators.minLength(6)]],
             role: ['vendeur', Validators.required],
-            boutique_id: ['', Validators.required]
+            boutique_id: ["", Validators.required]
         });
     }
 
@@ -125,7 +125,7 @@ export class UserCreateComponent implements OnInit {
 
         if (this.isAdmin) {
             this.roles.push(
-                { value: 'admin', label: 'Administrateur' },
+                { value: 'admin1', label: 'Administrateur' },
                 { value: 'gestionnaire', label: 'Gestionnaire' }
             );
         }

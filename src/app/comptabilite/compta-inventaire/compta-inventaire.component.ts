@@ -64,13 +64,13 @@ export class ComptaInventaireComponent implements OnInit {
     this.spinne.show();
     this.data.getAll(Env.INVENTAIRE).subscribe((res: any) => {
       this.inventairesData = res.items || [];
+      this.spinne.hide();
       this.sortData();
       this.filteredInventaires = [...this.inventairesData];
       this.stats = res.stats;
       this.boutiqueInfo = res.boutique || this.boutiqueInfo;
       this.sortDataOnFiltered(); // Sort after loading
       this.updatePagination();
-      this.spinne.hide();
     });
 
     this.data.getAll(Env.ANNEEVENTE).subscribe((data: any) => {
@@ -79,6 +79,7 @@ export class ComptaInventaireComponent implements OnInit {
   }
 
   applyFilters(): void {
+    this.spinne.show();
     let result = [...this.inventairesData];
 
     // Client-side search and type filtering remains for UI reactivity
@@ -101,6 +102,7 @@ export class ComptaInventaireComponent implements OnInit {
     this.sortDataOnFiltered();
     this.currentPage = 1;
     this.updatePagination();
+    this.spinne.hide();
   }
 
   sortData(): void {

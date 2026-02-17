@@ -1,6 +1,6 @@
 
 <ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true">
-  <p class="text-white mt-4 font-medium italic">Chargement...</p>
+  <!-- <p class="text-white mt-4 font-medium italic">Chargement...</p> -->
 </ngx-spinner>
 
 <div class="min-h-screen bg-secondary-50 font-sans antialiased">
@@ -128,14 +128,14 @@
       <div>
         <h3 class="px-3 text-[10px] font-bold text-secondary-400 uppercase tracking-widest mb-4">Principal</h3>
         <ul class="space-y-1">
-          <li *ngIf="isAdmin || isGestionnaire || isComptable">
+          <li *ngIf="isAdmin || isGestionnaire || isComptable || isAdmin1">
             <a [routerLink]="['accueil']" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm" [routerLinkActiveOptions]="{exact: true}"
               class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all group">
               <i class="bi bi-grid-fill mr-3 transition-transform group-hover:scale-110"></i>
               <span>Tableau de bord</span>
             </a>
           </li>
-          <li *ngIf="isVendeur ||isGestionnaire">
+          <li *ngIf="isVendeur ||isGestionnaire || isAdmin1">
             <a [routerLink]="['/ventes/new']" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm"
               class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all group">
               <i class="bi bi-plus-circle-fill mr-3 transition-transform group-hover:scale-110"></i>
@@ -146,10 +146,10 @@
       </div>
 
       <!-- Inventory Section -->
-      <div *ngIf="isAdmin || isGestionnaire || isVendeur">
+      <div *ngIf="isAdmin || isGestionnaire || isVendeur || isAdmin1">
         <h3 class="px-3 text-[10px] font-bold text-secondary-400 uppercase tracking-widest mb-4">Stock & Boutique</h3>
         <ul class="space-y-1">
-          <li *ngIf="isAdmin || isGestionnaire">
+          <li *ngIf="isAdmin || isGestionnaire || isAdmin1">
             <div class="relative">
               <div class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all cursor-pointer"
                    (click)="toggleMenu('stock', $event)">
@@ -174,13 +174,13 @@
                 <i class="bi bi-chevron-down ml-auto text-xs transition-transform duration-200" [ngClass]="{'rotate-180': venteOpen}"></i>
               </div>
               <ul class="mt-1 ml-4 border-l border-secondary-100 space-y-1 hidden" [ngClass]="{'!block': venteOpen}">
-                <li *ngIf="isVendeur || isAdmin"><a [routerLink]="['/ventes/new']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Nouvelle vente</a></li>
-                <li *ngIf="isAdmin || isVendeur || isGestionnaire"><a [routerLink]="['/ventes/bordereaux']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Historique Bordereaux</a></li>
-                <li *ngIf="isAdmin || isGestionnaire"><a [routerLink]="['/ventes/historique']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Historique des ventes</a></li>
+                <li *ngIf="isVendeur || isAdmin || isAdmin1"><a [routerLink]="['/ventes/new']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Nouvelle vente</a></li>
+                <li *ngIf="isAdmin || isVendeur || isGestionnaire || isAdmin1"><a [routerLink]="['/ventes/bordereaux']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Historique Bordereaux</a></li>
+                <li *ngIf="isAdmin || isGestionnaire || isAdmin1"><a [routerLink]="['/ventes/historique']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Historique des ventes</a></li>
               </ul>
             </div>
           </li>
-          <li *ngIf="isAdmin || isGestionnaire">
+          <li *ngIf="isAdmin || isGestionnaire || isAdmin1">
             <a [routerLink]="['/clients/index']" routerLinkActive="bg-primary-50 text-primary-700 shadow-sm"
                class="flex items-center px-3 py-2.5 text-sm font-semibold rounded-xl text-secondary-650 hover:bg-secondary-100 hover:text-primary-600 transition-all">
               <i class="bi bi-people-fill mr-3"></i>
@@ -190,7 +190,7 @@
         </ul>
       </div>
 
-      <div *ngIf="isAdmin || isGestionnaire">
+      <div *ngIf="isAdmin || isGestionnaire || isAdmin1">
         <h3 class="px-3 text-[10px] font-bold text-secondary-400 uppercase tracking-widest mb-4">Administration</h3>
         <ul class="space-y-1">
           <li>
@@ -203,7 +203,7 @@
               </div>
               <ul class="mt-1 ml-4 border-l border-secondary-100 space-y-1 hidden" [ngClass]="{'!block': userOpen}">
                 <li><a [routerLink]="['/users/list']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Liste des comptes</a></li>
-                <li *ngIf="isAdmin || isGestionnaire"><a [routerLink]="['/users/new']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Nouveau personnel</a></li>
+                <li *ngIf="isAdmin || isGestionnaire || isAdmin1"><a [routerLink]="['/users/new']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Nouveau personnel</a></li>
               </ul>
             </div>
           </li>
@@ -223,7 +223,7 @@
         </ul>
       </div>
 
-      <div *ngIf="isAdmin || isComptable || isGestionnaire || isVendeur">
+      <div *ngIf="isAdmin || isComptable || isGestionnaire || isVendeur || isAdmin1">
         <h3 class="px-3 text-[10px] font-bold text-secondary-400 uppercase tracking-widest mb-4">Finance & Compta</h3>
         <ul class="space-y-1">
           <li>
@@ -235,12 +235,12 @@
                 <i class="bi bi-chevron-down ml-auto text-xs transition-transform duration-200" [ngClass]="{'rotate-180': comptaOpen}"></i>
               </div>
               <ul class="mt-1 ml-4 border-l border-secondary-100 space-y-1 hidden" [ngClass]="{'!block': comptaOpen}">
-                <li *ngIf="isAdmin"><a routerLink="comptabilite/compta-ca" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Chiffre d'Affaire</a></li>
-                <li *ngIf="isAdmin || isComptable || isGestionnaire || isVendeur"><a routerLink="comptabilite/compta-facture" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Facturation</a></li>
-                <li *ngIf="isAdmin || isGestionnaire"><a [routerLink]="['/expenses/dashboard']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Gestion des Dépenses</a></li>
-                <li *ngIf="isAdmin || isGestionnaire"><a routerLink="/credits/list" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Gestion des Crédits</a></li>
-                <li *ngIf="isAdmin || isGestionnaire"><a routerLink="/rapports" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Rapports Journaliers</a></li>
-                <li *ngIf="isAdmin"><a routerLink="comptabilite/compta-inventaire" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Inventaire Global</a></li>
+                <li *ngIf="isAdmin || isAdmin1 || isComptable"><a routerLink="comptabilite/compta-ca" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Chiffre d'Affaire</a></li>
+                <li *ngIf="isAdmin || isComptable || isGestionnaire || isVendeur || isAdmin1"><a routerLink="comptabilite/compta-facture" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Facturation</a></li>
+                <li *ngIf="isAdmin || isGestionnaire || isAdmin1"><a [routerLink]="['/expenses/dashboard']" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Gestion des Dépenses</a></li>
+                <li *ngIf="isAdmin || isGestionnaire || isAdmin1"><a routerLink="/credits/list" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Gestion des Crédits</a></li>
+                <li *ngIf="isAdmin || isGestionnaire || isAdmin1"><a routerLink="/rapports" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Rapports Journaliers</a></li>
+                <li *ngIf="isAdmin || isAdmin1 || isComptable"><a routerLink="comptabilite/compta-inventaire" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Inventaire Global</a></li>
                 <!-- <li *ngIf="isAdmin || isComptable || isGestionnaire"><a routerLink="comptabilite/rapport" routerLinkActive="bg-primary-50 text-primary-600 font-bold shadow-sm" class="block px-3 py-2 text-xs font-medium text-secondary-500 hover:bg-secondary-50 hover:text-primary-600 rounded-lg transition-all">Rapports</a></li> -->
               </ul>
             </div>
@@ -249,7 +249,7 @@
       </div>
 
       <!-- Configuration Section -->
-      <div *ngIf="isAdmin">
+      <div *ngIf="isAdmin || isAdmin1">
         <h3 class="px-3 text-[10px] font-bold text-secondary-400 uppercase tracking-widest mb-4">Configuration</h3>
         <ul class="space-y-1">
           <li>
@@ -272,7 +272,7 @@
     </div>
 
     <!-- Bottom Sidebar Section -->
-    <div class=" bottom-6 left-6 right-6" *ngIf="isAdmin || isGestionnaire">
+    <div class=" bottom-6 left-6 right-6" *ngIf="isAdmin || isGestionnaire || isAdmin1">
       <div class="p-4 bg-primary-50 rounded-2xl border border-primary-100">
         <div class="flex items-center mb-2">
           <div class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white mr-3">

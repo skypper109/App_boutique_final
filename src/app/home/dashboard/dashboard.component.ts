@@ -233,6 +233,10 @@ export class DashboardComponent implements OnInit {
     return this.userRole?.toLowerCase() === 'admin';
   }
 
+  get isAdmin1(): boolean {
+    return this.userRole?.toLowerCase() === 'admin1';
+  }
+
   get isVendeur(): boolean {
     return this.userRole?.toLowerCase() === 'vendeur';
   }

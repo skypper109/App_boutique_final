@@ -50,14 +50,25 @@ export class AccueilComponent {
   ) { }
 
   ngOnInit(): void {
+
     this.userRole = this.dataLog.getRole();
+    this.spinner.show();
     if (this.platformId && isPlatformBrowser(this.platformId)) {
       window.addEventListener('scroll', () => {
         this.isHeaderScrolled = window.scrollY > 20;
       });
       
-      this.boutiqueNom = localStorage.getItem('boutique_nom');
       const userId = localStorage.getItem('user_id');
+
+      this.data.getById(Env.BOUTIQUES, localStorage.getItem('boutique_id')).subscribe({
+        next: (data: any) => {
+          this.boutiqueNom = data.nom;
+          localStorage.setItem('boutique_nom', data.nom);
+        },
+        error: (err) => {
+          console.error('Erreur lors de la récupération des données boutique', err);
+        }
+      });
       
       if (userId) {
         this.data.getAll(Env.USER + '/' + userId).subscribe({
@@ -79,7 +90,9 @@ export class AccueilComponent {
       ).subscribe((event: NavigationEnd | any) => {
         this.updateMenuState(event.urlAfterRedirects || event.url);
       });
+      this.spinner.hide();
     }
+    this.spinner.hide();
   }
 
   async checkAppUpdate() {
@@ -113,6 +126,11 @@ export class AccueilComponent {
   get isAdmin(): boolean {
     return this.userRole?.toLowerCase() === 'admin';
   }
+
+  get isAdmin1(): boolean {
+    return this.userRole?.toLowerCase() === 'admin1';
+  }
+  
  
   get isVendeur(): boolean {
     return this.userRole?.toLowerCase() === 'vendeur';

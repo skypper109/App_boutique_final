@@ -44,12 +44,11 @@ export class ComptaCAComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.data.platformId)) {
-      this.spinne.show();
-      this.loadData();
-      this.spinne.hide();
+      this.loadData()
     }
   }
   loadData(){    
+      this.spinne.show();
       this.data.getAll(Env.CHIFFREDAFFAIRE).subscribe({
         next: (res: any) => {
           this.annees = res.par_annee || []; 
@@ -61,10 +60,12 @@ export class ComptaCAComponent implements OnInit, AfterViewInit {
             this.totalQtv = res.annual_stats.total_qtv;
             this.totalBenefice = res.annual_stats.total_benefice;
           }
+          this.spinne.hide();
           this.updateChart();
         },
         error: (err) => {
           console.error('Error loading CA data:', err);
+          this.spinne.hide();
         }
       });
   }
