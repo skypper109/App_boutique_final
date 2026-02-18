@@ -37,6 +37,16 @@ jobs:
       - name: Install dependencies
         run: npm install --force
 
+      - name: Check Signing Secret
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}" ]; then
+            echo "::error::TAURI_SIGNING_PRIVATE_KEY is missing from GitHub Secrets!"
+            exit 1
+          else
+            echo "TAURI_SIGNING_PRIVATE_KEY is present."
+          fi
+
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
