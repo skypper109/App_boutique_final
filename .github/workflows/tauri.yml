@@ -9,6 +9,7 @@ jobs:
   build:
     permissions:
       contents: write
+      releases: write
     strategy:
       fail-fast: false
       matrix:
@@ -36,7 +37,7 @@ jobs:
         run: npm install --force
 
       - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
