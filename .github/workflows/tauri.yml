@@ -38,38 +38,15 @@ jobs:
       - name: Install dependencies
         run: npm install --force
 
-      - name: Build Tauri App
+      - name: Build + Release + Updater
         uses: tauri-apps/tauri-action@v0.5.8
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          tagName: ""
-          releaseName: ""
+          tagName: ${{ github.ref_name }}
+          releaseName: "Ma_Boutique_v${{ github.ref_name }}"
           releaseDraft: false
           prerelease: false
-          includeUpdaterJson: false
-
-      # ---------- CREATE RELEASE ----------
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-        with:
-          tag_name: ${{ github.ref_name }}
-          release_name: "Ma_Boutique_v${{ github.ref_name }}"
-          draft: false
-          prerelease: false
-
-      # ---------- UPLOAD DMG ----------
-      - name: Upload DMG
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: src-tauri/target/release/bundle/dmg/Ma Boutique_${{ github.ref_name }}_aarch64.dmg
-          asset_name: Ma_Boutique_${{ github.ref_name }}.dmg
-          asset_content_type: application/octet-stream
+          includeUpdaterJson: true
