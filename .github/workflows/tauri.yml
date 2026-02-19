@@ -70,18 +70,19 @@ jobs:
           APP_NAME=$(basename "$APP")
           DMG=$(find "$DMG_DIR" -name "*.dmg" | head -1)
 
-          echo "APP → $APP"
-          echo "DMG → $DMG"
+          echo "Found APP: $APP"
+          echo "Found DMG: $DMG"
 
           # Create .tar.gz from .app (required for the updater)
           TAR="${BUNDLE_DIR}/${APP_NAME}.tar.gz"
           tar czf "$TAR" -C "$BUNDLE_DIR" "$APP_NAME"
-          echo "TAR → $TAR"
+          echo "Created TAR: $TAR"
 
-          # Sign the .tar.gz to produce .tar.gz.sig
-          npx @tauri-apps/cli signer sign -k "$TAURI_SIGNING_PRIVATE_KEY" "$TAR"
-          SIG="${TAR}.sig"
-          echo "SIG → $SIG"
+          # Sign the .tar.gz to produce signature
+          # For Tauri v2 CLI, use `tauri signer sign`
+          SIG_CONTENT=$(npx @tauri-apps/cli signer sign -k "$TAURI_SIGNING_PRIVATE_KEY" "$TAR")
+          echo "$SIG_CONTENT" > macos_sig.txt
+          echo "macos_sig.txt created"
 
           # Create release (ignore if already exists)
           gh release create "$TAG" --title "Ma Boutique v$VERSION" --notes "Version $VERSION" 2>/dev/null || true
@@ -90,7 +91,6 @@ jobs:
           gh release upload "$TAG" "$DMG" "$TAR" --clobber
 
           # Save artifacts for finalize job
-          cp "$SIG" macos_sig.txt
           basename "$TAR" > macos_tar_name.txt
 
       - name: Upload macOS sig artifacts
@@ -117,23 +117,24 @@ jobs:
           $NSIS = (Get-ChildItem -Recurse src-tauri/target/release/bundle/nsis -Filter "*-setup.exe" | Select-Object -First 1).FullName
           $MSI  = (Get-ChildItem -Recurse src-tauri/target/release/bundle/msi  -Filter "*.msi"       | Select-Object -First 1).FullName
 
-          Write-Output "NSIS → $NSIS"
-          Write-Output "MSI  → $MSI"
+          Write-Host "Found NSIS: $NSIS"
+          Write-Host "Found MSI:  $MSI"
 
-          # Sign the NSIS installer to produce .sig
-          npx @tauri-apps/cli signer sign -k $env:TAURI_SIGNING_PRIVATE_KEY $NSIS
-          $NSIS_SIG = "$NSIS.sig"
-          Write-Output "SIG  → $NSIS_SIG"
+          # Sign the NSIS installer to produce signature
+          # We wrap the command in parentheses to capture output and use --quotes for paths with spaces
+          $SIG_CONTENT = npx @tauri-apps/cli signer sign -k $env:TAURI_SIGNING_PRIVATE_KEY "$NSIS"
+          $SIG_CONTENT | Out-File -FilePath windows_sig.txt -Encoding utf8 -NoNewline
+          Write-Host "windows_sig.txt created"
 
           # Create release (ignore if already exists)
           gh release create $TAG --title "Ma Boutique v$VERSION" --notes "Version $VERSION" 2>$null
-          if ($LASTEXITCODE -ne 0) { Write-Output "Release already exists, continuing..."; $LASTEXITCODE = 0 }
+          if ($LASTEXITCODE -ne 0) { Write-Host "Release already exists, continuing..."; $LASTEXITCODE = 0 }
 
           # Upload binaries
-          gh release upload $TAG $NSIS $MSI --clobber
+          # Use quotes for paths with spaces
+          gh release upload $TAG "$NSIS" "$MSI" --clobber
 
           # Save artifacts for finalize job
-          Copy-Item $NSIS_SIG windows_sig.txt
           [System.IO.Path]::GetFileName($NSIS) | Out-File -FilePath windows_nsis_name.txt -Encoding utf8 -NoNewline
 
       - name: Upload Windows sig artifacts
