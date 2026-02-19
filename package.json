@@ -1,6 +1,6 @@
 {
   "name": "front-boutique",
-  "version": "2.1.9",
+  "version": "2.2.0",
   "description": "Application de gestion Ma Boutique",
   "author": "Skypper",
   "main": "electron/main.js",
