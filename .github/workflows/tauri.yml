@@ -12,7 +12,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest]
+        include:
+          - os: macos-latest
+            rust-target: aarch64-apple-darwin,x86_64-apple-darwin
+            tauri-args: --target universal-apple-darwin
+            platform: macos
+          - os: windows-latest
+            rust-target: ""
+            tauri-args: ""
+            platform: windows
 
     runs-on: ${{ matrix.os }}
 
@@ -27,36 +35,143 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+          targets: ${{ matrix.rust-target }}
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
           workspaces: "./src-tauri -> target"
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         run: npm install --force
 
-      - name: Check Signing Secret
-        shell: bash
-        run: |
-          if [ -z "${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}" ]; then
-            echo "::error::TAURI_SIGNING_PRIVATE_KEY is missing from GitHub Secrets!"
-            exit 1
-          else
-            echo "TAURI_SIGNING_PRIVATE_KEY is present."
-          fi
-
       - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
+        run: npm run tauri build -- ${{ matrix.tauri-args }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+
+      # ── macOS: upload DMG and save sig ──────────────────────────────
+      - name: Upload macOS release assets
+        if: matrix.platform == 'macos'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ github.ref_name }}"
+          VERSION="${TAG#v}"
+
+          DMG=$(find src-tauri/target -name "*.dmg" | head -1)
+          TAR=$(find src-tauri/target -name "*.app.tar.gz" | head -1)
+          SIG=$(find src-tauri/target -name "*.app.tar.gz.sig" | head -1)
+
+          echo "DMG  → $DMG"
+          echo "TAR  → $TAR"
+          echo "SIG  → $SIG"
+
+          # Create release (ignore error if it already exists)
+          gh release create "$TAG" --title "Ma Boutique v$VERSION" --notes "Version $VERSION" 2>/dev/null || true
+
+          gh release upload "$TAG" "$DMG" "$TAR" --clobber
+
+          # Save sig content and file name for the finalize job
+          cp "$SIG" macos_sig.txt
+          basename "$TAR" > macos_tar_name.txt
+
+      - name: Upload macOS artifacts for finalize job
+        if: matrix.platform == 'macos'
+        uses: actions/upload-artifact@v4
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: "Ma Boutique v${{ github.ref_name }}"
-          releaseDraft: false
-          prerelease: false
-          includeUpdaterJson: true
-          args: ${{ matrix.os == 'macos-latest' && '--target universal-apple-darwin' || '' }}
+          name: macos-sig
+          path: |
+            macos_sig.txt
+            macos_tar_name.txt
+
+      # ── Windows: upload EXE/MSI and save sig ────────────────────────
+      - name: Upload Windows release assets
+        if: matrix.platform == 'windows'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $TAG = "${{ github.ref_name }}"
+          $VERSION = $TAG.TrimStart('v')
+
+          $NSIS     = (Get-ChildItem -Recurse src-tauri/target -Filter "*-setup.exe" | Select-Object -First 1).FullName
+          $NSIS_SIG = "$NSIS.sig"
+          $MSI      = (Get-ChildItem -Recurse src-tauri/target -Filter "*.msi"       | Select-Object -First 1).FullName
+
+          Write-Output "EXE → $NSIS"
+          Write-Output "MSI → $MSI"
+
+          gh release create $TAG --title "Ma Boutique v$VERSION" --notes "Version $VERSION" 2>$null
+          gh release upload $TAG $NSIS $MSI --clobber
+
+          # Save sig content and file name for the finalize job
+          Copy-Item $NSIS_SIG windows_sig.txt
+          [System.IO.Path]::GetFileName($NSIS) | Out-File -FilePath windows_nsis_name.txt -Encoding utf8 -NoNewline
+
+      - name: Upload Windows artifacts for finalize job
+        if: matrix.platform == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-sig
+          path: |
+            windows_sig.txt
+            windows_nsis_name.txt
+
+  # ── Generate latest.json after all platforms are done ─────────────
+  finalize:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download macOS sig
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-sig
+
+      - name: Download Windows sig
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-sig
+
+      - name: Generate and upload latest.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ github.ref_name }}"
+          VERSION="${TAG#v}"
+          REPO="${{ github.repository }}"
+          BASE_URL="https://github.com/$REPO/releases/download/$TAG"
+          DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          MACOS_SIG=$(cat macos_sig.txt)
+          MACOS_TAR=$(cat macos_tar_name.txt | tr -d '\n')
+          WIN_SIG=$(cat windows_sig.txt)
+          WIN_EXE=$(cat windows_nsis_name.txt | tr -d '\n')
+
+          jq -n \
+            --arg version "$VERSION" \
+            --arg notes "Version $VERSION" \
+            --arg pub_date "$DATE" \
+            --arg macos_sig "$MACOS_SIG" \
+            --arg macos_url "$BASE_URL/$MACOS_TAR" \
+            --arg win_sig "$WIN_SIG" \
+            --arg win_url "$BASE_URL/$WIN_EXE" \
+            '{
+              version: $version,
+              notes: $notes,
+              pub_date: $pub_date,
+              platforms: {
+                "darwin-x86_64":  {signature: $macos_sig, url: $macos_url},
+                "darwin-aarch64": {signature: $macos_sig, url: $macos_url},
+                "windows-x86_64": {signature: $win_sig,   url: $win_url}
+              }
+            }' > latest.json
+
+          echo "=== latest.json preview ==="
+          cat latest.json
+
+          gh release upload "$TAG" latest.json --clobber
