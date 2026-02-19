@@ -11,26 +11,23 @@ permissions:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-
-    permissions:
-      contents: write
-      actions: write
-
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [macos-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install Rust toolchain
+      - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
       - name: Rust cache
@@ -41,15 +38,37 @@ jobs:
       - name: Install dependencies
         run: npm install --force
 
-      - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0.5.8
+      - name: Build Tauri App
+        uses: tauri-apps/tauri-action@v0.5
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: "Ma_Boutique_v${{ github.ref_name }}"
           releaseDraft: false
           prerelease: false
-          includeUpdaterJson: true
+          includeUpdaterJson: false
+
+      # ---------- CREATE RELEASE ----------
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: "Ma_Boutique_v${{ github.ref_name }}"
+          draft: false
+          prerelease: false
+
+      # ---------- UPLOAD DMG ----------
+      - name: Upload DMG
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: src-tauri/target/release/bundle/dmg/Ma Boutique_${{ github.ref_name }}_aarch64.dmg
+          asset_name: Ma_Boutique_${{ github.ref_name }}.dmg
+          asset_content_type: application/octet-stream
