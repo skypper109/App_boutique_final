@@ -3,7 +3,7 @@ name: Tauri Release
 on:
   push:
     tags:
-      - "*.*.*"
+      - "*.*.*" # Tout tag comme 2.2.3, 2.3.0 etc.
 
 permissions:
   contents: write
@@ -14,34 +14,52 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest]
+        os: [macos-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout repo
+      # ---------------------------
+      # 1. Checkout
+      # ---------------------------
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      # ---------------------------
+      # 2. Setup Node.js
+      # ---------------------------
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install Rust
+      # ---------------------------
+      # 3. Install Rust
+      # ---------------------------
+      - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      # ---------------------------
+      # 4. Rust cache
+      # ---------------------------
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
           workspaces: "./src-tauri -> target"
 
-      - name: Install dependencies
+      # ---------------------------
+      # 5. Install frontend dependencies
+      # ---------------------------
+      - name: Install npm dependencies
         run: npm install --force
 
-      - name: Build + Release + Updater
+      # ---------------------------
+      # 6. Build + Release + Updater
+      # ---------------------------
+      - name: Build Tauri App + Release + Updater
         uses: tauri-apps/tauri-action@v0.5.8
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }} # Token avec permissions repo
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
@@ -49,4 +67,4 @@ jobs:
           releaseName: "Ma_Boutique_v${{ github.ref_name }}"
           releaseDraft: false
           prerelease: false
-          includeUpdaterJson: true
+          includeUpdaterJson: true # IMPORTANT pour générer latest.json signé
