@@ -51,33 +51,49 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
-      # ── macOS: upload DMG and save sig ──────────────────────────────
-      - name: Upload macOS release assets
+      # ── macOS ────────────────────────────────────────────────────────
+      - name: Sign and upload macOS assets
         if: matrix.platform == 'macos'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           TAG="${{ github.ref_name }}"
           VERSION="${TAG#v}"
 
-          DMG=$(find src-tauri/target -name "*.dmg" | head -1)
-          TAR=$(find src-tauri/target -name "*.app.tar.gz" | head -1)
-          SIG=$(find src-tauri/target -name "*.app.tar.gz.sig" | head -1)
+          # Find bundle dirs
+          BUNDLE_DIR="src-tauri/target/universal-apple-darwin/release/bundle/macos"
+          DMG_DIR="src-tauri/target/universal-apple-darwin/release/bundle/dmg"
 
-          echo "DMG  → $DMG"
-          echo "TAR  → $TAR"
-          echo "SIG  → $SIG"
+          APP=$(find "$BUNDLE_DIR" -maxdepth 1 -name "*.app" -type d | head -1)
+          APP_NAME=$(basename "$APP")
+          DMG=$(find "$DMG_DIR" -name "*.dmg" | head -1)
 
-          # Create release (ignore error if it already exists)
+          echo "APP → $APP"
+          echo "DMG → $DMG"
+
+          # Create .tar.gz from .app (required for the updater)
+          TAR="${BUNDLE_DIR}/${APP_NAME}.tar.gz"
+          tar czf "$TAR" -C "$BUNDLE_DIR" "$APP_NAME"
+          echo "TAR → $TAR"
+
+          # Sign the .tar.gz to produce .tar.gz.sig
+          npx @tauri-apps/cli signer sign -k "$TAURI_SIGNING_PRIVATE_KEY" "$TAR"
+          SIG="${TAR}.sig"
+          echo "SIG → $SIG"
+
+          # Create release (ignore if already exists)
           gh release create "$TAG" --title "Ma Boutique v$VERSION" --notes "Version $VERSION" 2>/dev/null || true
 
+          # Upload binaries
           gh release upload "$TAG" "$DMG" "$TAR" --clobber
 
-          # Save sig content and file name for the finalize job
+          # Save artifacts for finalize job
           cp "$SIG" macos_sig.txt
           basename "$TAR" > macos_tar_name.txt
 
-      - name: Upload macOS artifacts for finalize job
+      - name: Upload macOS sig artifacts
         if: matrix.platform == 'macos'
         uses: actions/upload-artifact@v4
         with:
@@ -86,31 +102,41 @@ jobs:
             macos_sig.txt
             macos_tar_name.txt
 
-      # ── Windows: upload EXE/MSI and save sig ────────────────────────
-      - name: Upload Windows release assets
+      # ── Windows ──────────────────────────────────────────────────────
+      - name: Sign and upload Windows assets
         if: matrix.platform == 'windows'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         shell: pwsh
         run: |
-          $TAG = "${{ github.ref_name }}"
+          $TAG     = "${{ github.ref_name }}"
           $VERSION = $TAG.TrimStart('v')
 
-          $NSIS     = (Get-ChildItem -Recurse src-tauri/target -Filter "*-setup.exe" | Select-Object -First 1).FullName
+          $NSIS = (Get-ChildItem -Recurse src-tauri/target/release/bundle/nsis -Filter "*-setup.exe" | Select-Object -First 1).FullName
+          $MSI  = (Get-ChildItem -Recurse src-tauri/target/release/bundle/msi  -Filter "*.msi"       | Select-Object -First 1).FullName
+
+          Write-Output "NSIS → $NSIS"
+          Write-Output "MSI  → $MSI"
+
+          # Sign the NSIS installer to produce .sig
+          npx @tauri-apps/cli signer sign -k $env:TAURI_SIGNING_PRIVATE_KEY $NSIS
           $NSIS_SIG = "$NSIS.sig"
-          $MSI      = (Get-ChildItem -Recurse src-tauri/target -Filter "*.msi"       | Select-Object -First 1).FullName
+          Write-Output "SIG  → $NSIS_SIG"
 
-          Write-Output "EXE → $NSIS"
-          Write-Output "MSI → $MSI"
-
+          # Create release (ignore if already exists)
           gh release create $TAG --title "Ma Boutique v$VERSION" --notes "Version $VERSION" 2>$null
+          if ($LASTEXITCODE -ne 0) { Write-Output "Release already exists, continuing..."; $LASTEXITCODE = 0 }
+
+          # Upload binaries
           gh release upload $TAG $NSIS $MSI --clobber
 
-          # Save sig content and file name for the finalize job
+          # Save artifacts for finalize job
           Copy-Item $NSIS_SIG windows_sig.txt
           [System.IO.Path]::GetFileName($NSIS) | Out-File -FilePath windows_nsis_name.txt -Encoding utf8 -NoNewline
 
-      - name: Upload Windows artifacts for finalize job
+      - name: Upload Windows sig artifacts
         if: matrix.platform == 'windows'
         uses: actions/upload-artifact@v4
         with:
@@ -119,7 +145,7 @@ jobs:
             windows_sig.txt
             windows_nsis_name.txt
 
-  # ── Generate latest.json after all platforms are done ─────────────
+  # ── Generate latest.json ──────────────────────────────────────────
   finalize:
     needs: build
     runs-on: ubuntu-latest
@@ -152,6 +178,10 @@ jobs:
           WIN_SIG=$(cat windows_sig.txt)
           WIN_EXE=$(cat windows_nsis_name.txt | tr -d '\n')
 
+          echo "Building latest.json..."
+          echo "  macOS URL: $BASE_URL/$MACOS_TAR"
+          echo "  Windows URL: $BASE_URL/$WIN_EXE"
+
           jq -n \
             --arg version "$VERSION" \
             --arg notes "Version $VERSION" \
@@ -171,7 +201,8 @@ jobs:
               }
             }' > latest.json
 
-          echo "=== latest.json preview ==="
+          echo "=== latest.json ==="
           cat latest.json
 
           gh release upload "$TAG" latest.json --clobber
+          echo "latest.json uploaded successfully!"
