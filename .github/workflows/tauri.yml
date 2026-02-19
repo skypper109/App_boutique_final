@@ -7,17 +7,20 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   build:
+    runs-on: ${{ matrix.os }}
+
     permissions:
       contents: write
+      actions: write
+
     strategy:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest]
-
-    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -41,7 +44,7 @@ jobs:
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0.5.8
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
