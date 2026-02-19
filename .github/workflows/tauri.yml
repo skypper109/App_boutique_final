@@ -39,7 +39,7 @@ jobs:
         run: npm install --force
 
       - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v1.5.0
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
