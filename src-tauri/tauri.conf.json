@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Ma Boutique",
+  "productName": "Ma_Boutique",
   "version": "2.2.3",
   "identifier": "com.maboutique.desktop",
   "build": {
@@ -11,7 +11,7 @@
   "app": {
     "windows": [
       {
-        "title": "Ma Boutique",
+        "title": "MaBoutique",
         "width": 1280,
         "height": 800,
         "resizable": true,
