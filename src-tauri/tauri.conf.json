@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Ma_Boutique",
-  "version": "2.2.3",
+  "version": "2.2.5",
   "identifier": "com.maboutique.desktop",
   "build": {
     "frontendDist": "../dist/front-boutique/browser",
@@ -45,7 +45,7 @@
         "https://github.com/skypper109/App_boutique_final/releases/latest/download/latest.json"
       ],
       "dialog": true,
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDcwM0UwMjE3REU4RTJDQjMKUldTekxJN2VGd0krY0R5dDRicDFhYXh4NTBkeVEvekFSMkVQcC9aa0FLbmlnMGI4bEJOd2pxUkoK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEZCNTJFQjc2MUQ1OTQwMTIKUldRU1FGa2RkdXRTKy9aQWZaRkYwVTliakxkVUpmR05aT1FKQWFBU3lHZi9CeUY4SzFwVFlKZWoK"
     }
   }
 }
