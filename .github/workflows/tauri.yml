@@ -43,92 +43,16 @@ jobs:
       - name: Install dependencies
         run: npm install --force
 
-      # 6️⃣ Build Tauri App (release)
-      - name: Build Tauri App
+      # 6️⃣ Build Tauri App and Create Release
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0.5.8
         env:
-          TAURI_SIGNING_PRIVATE_KEY_PATH: src-tauri/updater.key
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-        run: |
-          # Build en release avec génération automatique du latest.json
-          npm run tauri build --release
-
-      # 7️⃣ Création de la release GitHub
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: "Ma_Boutique_v${{ github.ref_name }}"
-          draft: false
+          tagName: ${{ github.ref_name }}
+          releaseName: "Ma_Boutique_v${{ github.ref_name }}"
+          releaseDraft: false
           prerelease: false
-
-      # 8️⃣ Upload des assets macOS
-      - name: Upload DMG (macOS)
-        if: runner.os == 'macOS'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /Users/runner/work/App_boutique_final/App_boutique_final/src-tauri/target/release/bundle/dmg/Ma_Boutique_${{ github.ref_name }}_aarch64.dmg
-          asset_name: Ma_Boutique_${{ github.ref_name }}.dmg
-          asset_content_type: application/octet-stream
-
-      - name: Upload TAR.GZ (macOS)
-        if: runner.os == 'macOS'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /Users/runner/work/App_boutique_final/App_boutique_final/src-tauri/target/release/bundle/macos/Ma_Boutique.app.tar.gz
-          asset_name: Ma_Boutique_${{ github.ref_name }}.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload latest.json (macOS)
-        if: runner.os == 'macOS'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /Users/runner/work/App_boutique_final/App_boutique_final/src-tauri/target/release/bundle/latest.json
-          asset_name: latest.json
-          asset_content_type: application/json
-
-      # 9️⃣ Upload Windows assets
-      - name: Upload ZIP (Windows)
-        if: runner.os == 'Windows'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /Users/runner/work/App_boutique_final/App_boutique_final/src-tauri/target/release/bundle/msi/Ma_Boutique_${{ github.ref_name }}.zip
-          asset_name: Ma_Boutique_${{ github.ref_name }}.zip
-          asset_content_type: application/zip
-
-      - name: Upload MSI (Windows)
-        if: runner.os == 'Windows'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /Users/runner/work/App_boutique_final/App_boutique_final/src-tauri/target/release/bundle/msi/Ma_Boutique_${{ github.ref_name }}.msi
-          asset_name: Ma_Boutique_${{ github.ref_name }}.msi
-          asset_content_type: application/octet-stream
-
-      - name: Upload latest.json (Windows)
-        if: runner.os == 'Windows'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /Users/runner/work/App_boutique_final/App_boutique_final/src-tauri/target/release/bundle/latest.json
-          asset_name: latest.json
-          asset_content_type: application/json
+          includeUpdaterJson: true
