@@ -51,7 +51,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           # Build en release avec génération automatique du latest.json
-          npx tauri build -- --release
+          npm run tauri build -- --release
 
       # 7️⃣ Création de la release GitHub
       - name: Create GitHub Release
